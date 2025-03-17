@@ -16,16 +16,17 @@ export default function FooterTools() {
   };
 
   return (
-    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-background flex space-x-4 border w-[90%] flex flex-row justify-end h-[40px] items-center">
-      <div className="flex flex-row items-center justify-start space-x-2 p-2">
+    <div className=" bg-background flex space-x-4 w-[90%] flex flex-row justify-end h-[40px] items-center">
+      <div className="flex flex-row items-center justify-start space-x-1 p-2 px-4">
         <input
           type="text"
-          value={`${Math.round(zoom * 100)}%`}
-          className="border text-[14px] text-gray-600 w-[60px] outline-none text-center"
+          value={`${Math.round(zoom * 500)}%`}
+          className="border text-[14px] text-gray-600 w-[50px] outline-none text-center"
           readOnly
         />
-        <ZoomIn className="cursor-pointer" onClick={() => handleZoom(true)} />
-        <ZoomOut className="cursor-pointer" onClick={() => handleZoom(false)} />
+        <ZoomIn strokeWidth={1} className="cursor-pointer" onClick={() => handleZoom(true)} />
+            <span className="bg-gray-800 rounded-[30px] h-1 w-9"></span>
+        <ZoomOut strokeWidth={1} className="cursor-pointer" onClick={() => handleZoom(false)} />
       </div>
     </div>
   );

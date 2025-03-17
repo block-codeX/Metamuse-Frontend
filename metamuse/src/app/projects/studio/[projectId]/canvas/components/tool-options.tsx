@@ -62,7 +62,10 @@ export default function ToolOption({ tools }: { tools: Tool[] }) {
                           "flex items-center justify-center w-7 h-7 p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700",
                           tool.toolName === activeTool?.toolName && "bg-gray-300 dark:bg-gray-600"
                         )}
-                        onClick={() => handleToolClick(tool)}
+                        onClick={() => {
+                          setActiveTool(tool);
+                          handleToolClick(tool);
+                        }}
                       >
                         {tool.icon}
                       </Button>
@@ -80,3 +83,5 @@ export default function ToolOption({ tools }: { tools: Tool[] }) {
     </TooltipProvider>
   );
 }
+
+

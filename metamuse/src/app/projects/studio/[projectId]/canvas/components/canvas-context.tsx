@@ -11,7 +11,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!canvasRef.current) return;
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-      backgroundColor: "#f5f5f5",
+      backgroundColor: "#fff",
       selection: false,
     });
     fabricCanvas.setWidth(window.innerWidth);
