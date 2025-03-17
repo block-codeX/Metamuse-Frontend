@@ -20,6 +20,7 @@ import NewProject from "./components/new-project";
 
 const dummyProjects = [
   {
+    id: 1,
     title: "AI Art Generator",
     description:
       "A project that generates AI-powered artworks using deep learning models.",
@@ -31,6 +32,7 @@ const dummyProjects = [
     ],
   },
   {
+    id: 2,
     title: "AI Art Generator",
     description:
       "A project that generates AI-powered artworks using deep learning models.",
@@ -42,6 +44,19 @@ const dummyProjects = [
     ],
   },
   {
+    id: 3,
+    title: "AI Art Generator",
+    description:
+      "A project that generates AI-powered artworks using deep learning models.",
+    completed: true,
+    image: "https://source.unsplash.com/random/400x300",
+    collaborators: [
+      { name: "Alice", avatar: "https://i.pravatar.cc/40?img=1" },
+      { name: "Bob", avatar: "https://i.pravatar.cc/40?img=2" },
+    ],
+  },
+  { 
+    id: 4,
     title: "AI Art Generator",
     description:
       "A project that generates AI-powered artworks using deep learning models.",
@@ -53,17 +68,7 @@ const dummyProjects = [
     ],
   },
   {
-    title: "AI Art Generator",
-    description:
-      "A project that generates AI-powered artworks using deep learning models.",
-    completed: true,
-    image: "https://source.unsplash.com/random/400x300",
-    collaborators: [
-      { name: "Alice", avatar: "https://i.pravatar.cc/40?img=1" },
-      { name: "Bob", avatar: "https://i.pravatar.cc/40?img=2" },
-    ],
-  },
-  {
+    id: 5,
     title: "E-Commerce Platform",
     description:
       "Building a scalable marketplace with modern UI components and real-time updates.",
@@ -74,6 +79,7 @@ const dummyProjects = [
     ],
   },
   {
+    id: 6,
     title: "Collaborative Whiteboard",
     description:
       "A real-time whiteboard for teams to brainstorm together seamlessly.",

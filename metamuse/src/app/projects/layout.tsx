@@ -3,7 +3,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Brush, CircleUser, Ghost, Search, User } from "lucide-react";
+import {
+  Brush,
+  CircleUser,
+  Ghost,
+  MessageSquare,
+  Search,
+  User,
+} from "lucide-react";
+import ConversationBlock from "./components/chat";
 
 export default function AuthLayout({
   children,
@@ -13,7 +21,8 @@ export default function AuthLayout({
   // State for dropdown visibility
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBrushDropdown, setShowBrushDropdown] = useState(false);
-  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [showConversationDropdown, setShowConversationDropdown] =
+    useState(false);
   const [isMarketplace, setIsMarketplace] = useState(false);
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -31,7 +40,7 @@ export default function AuthLayout({
   // Refs for handling clicks outside dropdowns
   const userDropdownRef = useRef<HTMLDivElement>(null);
   const brushDropdownRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const conversationRef = useRef<HTMLDivElement>(null);
 
   // Click outside handler to close dropdowns
   useEffect(() => {
@@ -49,11 +58,11 @@ export default function AuthLayout({
         setShowBrushDropdown(false);
       }
       if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node) &&
-        !showSearchInput
+        conversationRef.current &&
+        !conversationRef.current.contains(event.target as Node) &&
+        !showConversationDropdown
       ) {
-        setShowSearchInput(false);
+        setShowConversationDropdown(false);
       }
     }
 
@@ -61,7 +70,7 @@ export default function AuthLayout({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [showSearchInput]);
+  }, [showConversationDropdown]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background">
@@ -106,7 +115,25 @@ export default function AuthLayout({
           </Button> */}
         </div>
 
-        <div className="flex flex-row space-x-4 justify-end items-center">
+        <div
+          className="flex flex-row space-x-4 justify-end items-center"
+          ref={conversationRef}
+        >
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="cursor-pointer"
+              onClick={() =>
+                setShowConversationDropdown(!showConversationDropdown)
+              }
+            >
+              <MessageSquare size={36} />
+            </Button>
+            {showConversationDropdown && (
+              <ConversationBlock/>
+            )}
+          </div>
           <div className="relative" ref={userDropdownRef}>
             <Button
               variant="ghost"
