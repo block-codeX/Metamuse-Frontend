@@ -13,6 +13,9 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import { api } from "@/lib/utils";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // Define validation schema using Zod
 const newProjectSchema = z.object({
@@ -40,7 +43,7 @@ export default function NewProject() {
   const { handleSubmit, register, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(newProjectSchema),
   });
-
+  const router = useRouter();
   // Handle selecting a tag
   const handleTagSelect = (tag: string) => {
     if (!selectedTags.includes(tag)) {
@@ -56,10 +59,24 @@ export default function NewProject() {
     setSelectedTags(newTags);
     setValue("tags", newTags);
   };
-
+  const newProject = async (data: any) => {
+    data.isForked = false;
+    try {
+      const response = await api(true).post("/project/new", data)
+      if (response.status === 201) {
+        toast("Project created successfully");
+        router.push("studio/" + response.data._id);
+        return true;
+      }
+    } catch (error: any) {
+      toast(error?.response?.data?.message?.message || "Something went wrong!");
+      return false;
+    }
+  }
   // Handle form submission
-  const handleFormSubmit = (data: any) => {
+  const handleFormSubmit = async (data: any) => {
     console.log(data); // Print collected values to the console
+    await newProject(data);
   };
 
   return (

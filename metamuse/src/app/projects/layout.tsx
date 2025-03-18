@@ -2,13 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Brush,
   CircleUser,
   Ghost,
   MessageSquare,
-  Search,
   User,
 } from "lucide-react";
 import ConversationBlock from "./components/chat";
