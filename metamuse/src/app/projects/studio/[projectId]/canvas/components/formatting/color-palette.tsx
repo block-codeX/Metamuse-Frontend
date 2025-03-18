@@ -2,12 +2,12 @@ import { Droplet, Palette } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 export default function ColorPalette({ onSelectFore, onSelectBack }) {
-  const [selectedColor, setSelectedColor] = useState("#ff0000");
+  const [selectedColor, setSelectedColor] = useState("#000000");
   const [colors, setColors] = useState<string[]>([]);
   const [activeDroplet, setActiveDroplet] = useState<
     "foreground" | "background"
   >("foreground");
-  const [foregroundColor, setForegroundColor] = useState("#ff0000");
+  const [foregroundColor, setForegroundColor] = useState("#000000");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const containerRef = useRef<HTMLDivElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);

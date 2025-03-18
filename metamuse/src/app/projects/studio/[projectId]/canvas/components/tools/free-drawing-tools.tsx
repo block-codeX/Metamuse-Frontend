@@ -3,7 +3,7 @@ import * as fabric from "fabric";
 import { useCanvas } from "../canvas-context";
 
 export function useFreeDrawingTools() {
-  const { canvas } = useCanvas();
+  const { canvas, backgroundColor, pencilWidth, eraserWidth, foregroundColor } = useCanvas();
 
   // Cleanup previous event listeners to avoid duplicates
   const cleanupEventListeners = () => {
@@ -19,8 +19,8 @@ export function useFreeDrawingTools() {
     cleanupEventListeners();
     canvas.isDrawingMode = true;
     canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-    canvas.freeDrawingBrush.color = "black";
-    canvas.freeDrawingBrush.width = 2;
+    canvas.freeDrawingBrush.color = foregroundColor;
+    canvas.freeDrawingBrush.width = pencilWidth;
   };
 
   // Brush Tool - Correcting the `_render` method issue
@@ -30,8 +30,8 @@ export function useFreeDrawingTools() {
     canvas.isDrawingMode = true;
 
     const brush = new fabric.PencilBrush(canvas);
-    brush.color = "black";
-    brush.width = 5;
+    brush.color = foregroundColor;
+    brush.width = pencilWidth * 2;
     brush.strokeLineCap = "round";
     brush.strokeLineJoin = "round";
 
@@ -73,9 +73,11 @@ export function useFreeDrawingTools() {
     if (!canvas) return;
     cleanupEventListeners();
     canvas.isDrawingMode = true;
+    
     const eraser = new fabric.PencilBrush(canvas);
-    eraser.color = canvas.backgroundColor || "white";
-    eraser.width = 10;
+    eraser.color = backgroundColor; // Use context background color
+    eraser.width = eraserWidth //eraserWidth;
+    
     canvas.freeDrawingBrush = eraser;
   };
 
@@ -111,8 +113,8 @@ export function useFreeDrawingTools() {
   
         path = new fabric.Path(`M ${pointer.x} ${pointer.y}`, {
           fill: "",
-          stroke: "black",
-          strokeWidth: 2,
+          stroke: foregroundColor,
+          strokeWidth: pencilWidth,
           strokeLineCap: "round",
           strokeLineJoin: "round",
           objectCaching: false,
@@ -175,8 +177,8 @@ export function useFreeDrawingTools() {
   
         activePath = new fabric.Path(`M ${pointer.x} ${pointer.y}`, {
           fill: "",
-          stroke: "black",
-          strokeWidth: 2,
+          stroke: foregroundColor,
+          strokeWidth: pencilWidth,
           strokeLineCap: "round",
           strokeLineJoin: "round",
           objectCaching: false,
