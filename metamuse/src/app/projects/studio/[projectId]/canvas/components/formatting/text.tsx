@@ -43,7 +43,7 @@ export default function TextFormatting() {
           value={fontStyle}
           onValueChange={(value) => setFontStyle(value)}
         >
-          <SelectTrigger className="p-1 rounded-none w-full">
+          <SelectTrigger className="p-1 rounded-none w-full shadow-none">
             <SelectValue placeholder="Select font" />
           </SelectTrigger>
           <SelectContent>
@@ -58,7 +58,7 @@ export default function TextFormatting() {
 
       {/* Font Size */}
       <Input
-        className="rounded-none px-1 w-16 text-center focus:outline-none"
+        className="rounded-none px-1 w-16 text-center focus:outline-none shadow-none"
         type="number"
         min="10"
         max="100"

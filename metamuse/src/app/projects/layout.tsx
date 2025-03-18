@@ -12,6 +12,7 @@ import {
   User,
 } from "lucide-react";
 import ConversationBlock from "./components/chat";
+import { useUserStore } from "@/lib/stores/user-store";
 
 export default function AuthLayout({
   children,
@@ -24,6 +25,8 @@ export default function AuthLayout({
   const [showConversationDropdown, setShowConversationDropdown] =
     useState(false);
   const [isMarketplace, setIsMarketplace] = useState(false);
+
+  const { user } = useUserStore();
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsMarketplace(
@@ -130,9 +133,7 @@ export default function AuthLayout({
             >
               <MessageSquare size={36} />
             </Button>
-            {showConversationDropdown && (
-              <ConversationBlock/>
-            )}
+            {showConversationDropdown && <ConversationBlock />}
           </div>
           <div className="relative" ref={userDropdownRef}>
             <Button
@@ -148,11 +149,16 @@ export default function AuthLayout({
             {showUserDropdown && (
               <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-md shadow-lg p-4 border border-gray-200 dark:border-gray-700">
                 <div className="flex items-center space-x-3 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">
-                  <CircleUser className="h-10 w-10" />
-                  <div>
-                    <h3 className="font-medium">User Name</h3>
+                  <CircleUser className="h-10 w-10" strokeWidth={1} />
+                  <div className="flex flex-col items-start justify-center">
+                    {user?.status !== "active" && (
+                      <p className=" self-end w-auto px-1 py-[3px] w-fit rounded-md text-[12px] bg-red-300 text-red-800 dark:text-red-400">
+                        {user?.status}
+                      </p>
+                    )}
+                    <h3 className="font-medium">{`${user?.firstName} ${user?.lastName}`}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      user@example.com
+                      {user?.email}
                     </p>
                   </div>
                 </div>

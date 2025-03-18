@@ -11,7 +11,7 @@ export default function LeftSideTools() {
  const fillTools = useFillTools();
  const clipTools = useClipTools();
   return (
-    <div className=" flex flex-col bg-background shadow-md space-y-2 border h-full mb-2 mx-2 rounded-md ">
+    <div className=" flex flex-col bg-background  space-y-2 border h-full mb-2 border-t-0 ">
       <ToolOption tools={navigateTools} />
       <ToolOption tools={freeDrawingTools} />
       <ToolOption tools={shapeTools} />

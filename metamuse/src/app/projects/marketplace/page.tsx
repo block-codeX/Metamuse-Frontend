@@ -33,9 +33,6 @@ export default function MarketPlace() {
   const clearSearch = () => {
     setSearchQuery("");
   };
-  const goToStudio = () => {
-    window.location.href = "/projects/studio";
-  }
 
   return (
     <>

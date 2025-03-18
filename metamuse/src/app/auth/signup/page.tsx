@@ -1,11 +1,11 @@
 "use client";
-import { late, z } from "zod";
+import { z } from "zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useRouter } from "next/navigation";
 import {
   Form,
   FormControl,
@@ -16,19 +16,24 @@ import {
 } from "@/components/ui/form";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
-
+import { api } from "@/lib/utils";
+import { toast } from "sonner";
+import { useUserStore } from "@/lib/stores/user-store";
 export default function SignupPage() {
-  const [submitStatus, setSubmitStatus] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showWalletAddr, setWalletAddr] = useState(false);
-
+  const router = useRouter();
+  const { setUserId } = useUserStore();
+  
   // Define the form schema with Zod
   const signupSchema = z.object({
     firstName: z.string().nonempty("Please enter your first name"),
     lastName: z.string().nonempty("Please enter your last name"),
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    walletAddress: z.string().min(42, "Wallet address must be at least 42 characters"),
+    walletAddress: z
+      .string()
+      .min(42, "Wallet address must be at least 42 characters"),
   });
 
   // Define the form type based on the schema
@@ -43,31 +48,52 @@ export default function SignupPage() {
     },
   });
 
+  const signup = async (data: any) => {
+    try {
+      const apiInstance = api(true);
+      console.log("API URL:", apiInstance.defaults.baseURL);
+      const response = await api(true).post("/auth/signup", data);
+      if (response.status === 201) {
+        setUserId(response.data.userId);
+        toast("Signup Successful");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      toast(error?.response?.data?.message?.message || "Something went wrong!");
+      return false;
+    }
+  };
+  const requestOtp = async (email: string) => {
+    try {
+      await api(true).post("/auth/otp/request", {
+        email,
+        otpType: "EMAIL",
+        multiUse: false,
+      });
+      toast("Check your email for the OTP and very your account from there");
+    } catch (error) {}
+  };
   // Handle form submission
-  function onSubmit(values: SignupFormValues) {
+  async function onSubmit(values: SignupFormValues) {
     console.log("Form submission successful:", values);
-    setSubmitStatus("success");
-
-    // In a real app, you would send this data to your backend
-    // await signIn(values.email, values.password);
+    const { walletAddress, ...rest } = values;
+    const success = await signup(rest);
+    if (success) {
+      await requestOtp(values.email);
+      // Navigate to otp page
+      router.push("/projects/marketplace");
+    }
   }
 
   return (
-    <Card className="w-full min-h-[500px] p-4 m-4 bg-foreground dark:bg-foreground text-text-alt dark:text-text-alt">
+    <Card className="w-full min-h-[500px] p-4 m-4 bg-background dark:bg-background text-text-pri dark:text-text-alt">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl my-3 font-bold text-center">
           Signup
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {submitStatus === "success" && (
-          <Alert className="mb-4 bg-green-50 text-green-800">
-            <AlertDescription>
-              Login successful! Check the console for form data.
-            </AlertDescription>
-          </Alert>
-        )}
-
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -190,12 +216,12 @@ export default function SignupPage() {
         <div className="text-center mt-4">
           <div>
             Already have an account?{" "}
-            <a
-              href="/auth/login"
-              className="text-btn-primary dark:text-btn-primary font-bold cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-300"
+            <span
+              onClick={() => router.push("/auth/login")}
+              className="text-btn-primary dark:text-btn-primary font-bold cursor-pointer hover:scale-105 active:scale-95 transition-ease-300"
             >
               Log in
-            </a>
+            </span>
           </div>
         </div>
       </CardContent>

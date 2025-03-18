@@ -1,0 +1,1 @@
+export const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_BASE_URL as string || "http://localhost:8000/api/v1";

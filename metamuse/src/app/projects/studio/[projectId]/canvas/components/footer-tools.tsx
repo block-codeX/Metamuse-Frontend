@@ -20,7 +20,7 @@ export default function FooterTools() {
       <div className="flex flex-row items-center justify-start space-x-1 p-2 px-4">
         <input
           type="text"
-          value={`${Math.round(zoom * 500)}%`}
+          value={`${Math.round(zoom * 100)}%`}
           className="border text-[14px] text-gray-600 w-[50px] outline-none text-center"
           readOnly
         />

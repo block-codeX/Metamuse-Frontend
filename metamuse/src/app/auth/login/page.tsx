@@ -16,11 +16,18 @@ import {
 } from "@/components/ui/form";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { api } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useUserStore } from "@/lib/stores/user-store";
+import { useAuthStore } from "@/lib/stores/auth.store";
 
 export default function LoginPage() {
   const [submitStatus, setSubmitStatus] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-
+  const router = useRouter();
+  const { setUserId } = useUserStore();
+  const { setAll } = useAuthStore();
   // Define the form schema with Zod
   const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -39,17 +46,35 @@ export default function LoginPage() {
     },
   });
 
+  async function login(data: any) {
+    try {
+      const response = await api().post("/auth/login", data);
+      if (response.status === 200) {
+        const { userId, refresh_exp: refreshExpiry, access_exp: accessExpiry, accessToken } = response.data
+        setUserId(userId);
+        setAll({ refreshExpiry, accessExpiry, accessToken });
+        toast("Login successful");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      toast(error?.response?.data?.message?.message || "Something went wrong!");
+      return false;
+    }
+  }
   // Handle form submission
-  function onSubmit(values: LoginFormValues) {
+  async function onSubmit(values: LoginFormValues) {
     console.log("Form submission successful:", values);
-    setSubmitStatus("success");
-
+    const success = await login(values);
+    if (success) {
+      router.push("/projects/marketplace");
+    }
     // In a real app, you would send this data to your backend
     // await signIn(values.email, values.password);
   }
 
   return (
-    <Card className="w-full h-[500px] p-4 m-4 bg-foreground dark:bg-foreground text-text-alt dark:text-text-alt">
+    <Card className="w-full h-[500px] p-4 m-4 bg-background dark:bg-background text-text-pri dark:text-text-pri">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl my-8 font-bold text-center">
           Login to your Account
@@ -132,12 +157,12 @@ export default function LoginPage() {
           </a>
           <div>
             New to the platform?{" "}
-            <a
-              href="/auth/signup"
+            <span
+              onClick={() => router.push("/auth/signup")}
               className="text-btn-primary dark:text-btn-primary font-bold cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-300"
             >
               Sign up
-            </a>
+            </span>
           </div>
         </div>
       </CardContent>

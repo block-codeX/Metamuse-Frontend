@@ -3,13 +3,13 @@ import { useCanvas } from "../canvas-context";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Brush, Eraser, ChevronDown } from "lucide-react";
 
-const WIDTH_OPTIONS = [2, 4, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72];
+const WIDTH_OPTIONS = [1, 2, 4, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64, 72];
 
 export default function Strokes() {
   const { pencilWidth, setPencilWidth, eraserWidth, setEraserWidth  } = useCanvas();
 
   return (
-    <div className="flex space-x-1 grid grid-cols-2 w-full pr-1">
+    <div className="flex gap-2 grid grid-cols-2 w-full pr-1">
       {/* Pencil Popover */}
       <Popover>
         <PopoverTrigger className="p-2 h-7 rounded-none border border-gray-300 flex items-center space-x-2">

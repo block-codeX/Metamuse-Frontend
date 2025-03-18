@@ -7,9 +7,21 @@ export function useNavigateTools() {
 
   const handleSelect = () => {
     if (!canvas) return;
+  
+    // Disable drawing mode to allow selection
     canvas.isDrawingMode = false;
     canvas.defaultCursor = "default";
+    canvas.selection = true; // Enable selection box
+  
+    // Ensure objects are selectable
+    canvas.forEachObject((obj) => {
+      obj.selectable = true;
+      obj.evented = true; // Enable interactivity
+    });
+  
+    canvas.renderAll();
   };
+  
 
   const handlePan = () => {
     if (!canvas) return;
