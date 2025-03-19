@@ -1,6 +1,6 @@
 "use client";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Brush, Search, X } from "lucide-react";
 import ProjectItem from "./components/projectItem";
 import NewProject from "./components/new-project";
+import { api } from "@/lib/utils";
+import { toast } from "sonner";
+import { useUserStore } from "@/lib/stores/user-store";
 
 const dummyProjects = [
   {
@@ -109,7 +112,8 @@ const artCategories = [
 export default function MarketPlace() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [projects, setProjects] = useState([]);
+  const { user } = useUserStore()
   const handleCategorySelect = (category: string) => {
     setSelectedCategories((prev) =>
       prev.includes(category)
@@ -117,7 +121,22 @@ export default function MarketPlace() {
         : [...prev, category]
     );
   };
-
+  const fetchProjects = async () => {
+    let url = `/project/all?collaborator=${"67d983c3caaba5ffe5b72cc8"}`;
+    if (selectedCategories.length) url += `&categories=${selectedCategories.join(",")}`;
+    if (searchQuery) url += `&title=${searchQuery}`;
+    try {
+      const response = await api(true).get(url);
+      if (response.status === 200) {
+        setProjects(response.data.docs);
+      }
+    } catch (error: any) {
+      toast(error?.response?.data?.message?.message || "Something went wrong loading the pages");
+    }
+  }
+  useEffect(() => {
+    fetchProjects();
+  }, [selectedCategories, user]);
   const clearSearch = () => {
     setSearchQuery("");
   };
