@@ -9,6 +9,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getInitials, getRandomComplementaryColors } from "@/lib/utils";
 
 // Types
 interface Collaborator {
@@ -38,9 +39,6 @@ interface Project {
 }
 
 // Helper to get initials from name
-const getInitials = (firstName: string, lastName: string): string => {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`;
-};
 
 // Message component
 const MessageItem = ({
@@ -50,10 +48,17 @@ const MessageItem = ({
   message: Message;
   sender: Collaborator;
 }) => {
+  const colors = getRandomComplementaryColors();
   return (
     <div className="flex items-start space-x-3 mb-4">
       <Avatar className="h-8 w-8">
-        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+        <AvatarFallback
+          className="bg-primary text-primary-foreground text-xs"
+          style={{
+            backgroundColor: colors[0].background,
+            color: colors[0].text,
+          }}
+        >
           {getInitials(sender.firstName, sender.lastName)}
         </AvatarFallback>
       </Avatar>
@@ -217,46 +222,44 @@ export default function ProjectView({ project }: { project: Project }) {
               <p className="text-muted-foreground">{project.description}</p>
             </CardContent>
           </Card>
-
-  
         </div>
         {/* Conversations */}
         <div className="self-stretch max-w-[300px] w-full h-auto ">
-            <Card className="px-2">
-              <CardHeader>
-                <h2 className="text-xl font-semibold">Conversations</h2>
-              </CardHeader>
-              <CardContent className="h-90 p-0 ">
-                <div className="space-y-4  overflow-y-auto h-95 p-1">
-                  {project.messages.map((message) => {
-                    const sender =
-                      project.collaborators.find(
-                        (c) => c.id === message.senderId
-                      ) || project.creator;
-                    return (
-                      <MessageItem
-                        key={message.id}
-                        message={message}
-                        sender={sender}
-                      />
-                    );
-                  })}
-                </div>
-              </CardContent>
-              <CardFooter className="border-t p-4">
-                <div className="flex w-full items-center space-x-2">
-                  <input
-                    type="text"
-                    placeholder="Type your message..."
-                    className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                  />
-                  <button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
-                    Send
-                  </button>
-                </div>
-              </CardFooter>
-            </Card>
-          </div>
+          <Card className="px-2">
+            <CardHeader>
+              <h2 className="text-xl font-semibold">Conversations</h2>
+            </CardHeader>
+            <CardContent className="h-90 p-0 ">
+              <div className="space-y-4  overflow-y-auto h-95 p-1">
+                {project.messages.map((message) => {
+                  const sender =
+                    project.collaborators.find(
+                      (c) => c.id === message.senderId
+                    ) || project.creator;
+                  return (
+                    <MessageItem
+                      key={message.id}
+                      message={message}
+                      sender={sender}
+                    />
+                  );
+                })}
+              </div>
+            </CardContent>
+            <CardFooter className="border-t p-4">
+              <div className="flex w-full items-center space-x-2">
+                <input
+                  type="text"
+                  placeholder="Type your message..."
+                  className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                />
+                <button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
+                  Send
+                </button>
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
         {/* Sidebar */}
       </div>
     </div>

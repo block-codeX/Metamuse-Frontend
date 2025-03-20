@@ -12,9 +12,9 @@ const useCanvasSync = (projectId: string) => {
   const canvasMapRef = useRef<Y.Map<any> | null>(null);
   const isLocal = useRef(false);
   const [initialized, setInitialized] = useState(false);
-  const LOCAL_ORIGIN = Symbol("local");
+  const LOCAL_ORIGIN = "local";
 
-  useEffect(() => {
+  useEffect(() => { 
     console.log(isInitialized, "nene")
     if (!yDoc.current || !canvas || !isInitialized || initialized) return;
 

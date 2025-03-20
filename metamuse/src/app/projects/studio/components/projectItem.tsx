@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MoreVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ProjectDropDown from "./project-open";
+import { getInitials, getRandomComplementaryColors } from "@/lib/utils";
 
 export default function ProjectItem({ project }: { project: any }) {
   const [showMenu, setShowMenu] = useState(false);
@@ -49,11 +50,21 @@ export default function ProjectItem({ project }: { project: any }) {
 
         {/* Collaborators */}
         <div className="flex items-center mt-3 space-x-2">
-          {project.collaborators.map((collab: any, index: number) => (
+          {project.collaborators.map((collab: any, index: number) =>{ 
+            const colors = getRandomComplementaryColors();
+            return (
             <Avatar key={index}>
-              <AvatarImage src={collab.avatar} alt={collab.name} />
+              <AvatarFallback
+                className="bg-primary text-primary-foreground text-xs"
+                style={{
+                  backgroundColor: colors[index % 2].background,
+                  color: colors[index % 2].text,
+                }}
+              >
+                {getInitials(collab.firstName, collab.lastName)}
+              </AvatarFallback>{" "}
             </Avatar>
-          ))}
+          )})}
         </div>
 
         {/* Status & Actions */}

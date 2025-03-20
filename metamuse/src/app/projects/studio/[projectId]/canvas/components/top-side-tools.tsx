@@ -3,7 +3,8 @@ import { useState } from "react";
 import ColorPalette from "./formatting/color-palette";
 import Strokes from "./formatting/strokes";
 import TextFormatting from "./formatting/text";
-import ImageEditor from "./formatting/pictures";
+import OutlineFilters from "./formatting/pictures";
+import Commands from "./commands/command";
 
 export default function TopSideTools() {
   const {
@@ -60,9 +61,9 @@ export default function TopSideTools() {
       </div>
 
       {/* Pictures */}
-      <div className="flex flex-col items-center justify-center space-y-2 p-2">
-        <ImageEditor/>
-      </div>
+        <OutlineFilters/>
+      {/* Commands */}
+      <Commands/>
     </div>
   );
 }

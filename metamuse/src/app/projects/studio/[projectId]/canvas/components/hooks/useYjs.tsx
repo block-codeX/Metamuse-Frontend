@@ -8,7 +8,7 @@ import { useAuthStore } from "@/lib/stores/auth.store";
 const useYjs = (projectId: string) => {
   const [project, setProject] = useState<any>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const providerRef = useRef<SocketIOProvider | null>(null);
+  const providerRef = useRef<WebsocketProvider | null>(null);
   const yDocRef = useRef<Y.Doc | null>(null); // Add this ref to track the current yDoc
   const { getAccessToken } = useAuthStore();
   const isApplyingRemoteRef = useRef(false);
@@ -26,33 +26,36 @@ const useYjs = (projectId: string) => {
       // Create a new Yjs document first
       yDocRef.current = new Y.Doc(); // Store in ref for immediate access
       providerRef.current = new WebsocketProvider(
-        "ws://localhost:8001", // Test with localhost first
-        projectId,
+        YJS_URL,
+        "",
         yDocRef.current,
         {
-          connect: true,
+          params: { token: jwtToken as string, projectId },
+          connect: true
         }
       );
 
       // Add event listeners
-      providerRef.current.on("status", (event: any) => {
-        console.log("Connection status:", event.status); // Should show "connecting" -> "connected"
+      providerRef.current.on('status', (event) => {
+        console.log('WebSocket status:', event.status);
+        if (event.status === 'connected') {
+          console.log('Reconnected, waiting for sync...');
+        }
       });
-
       providerRef.current.on("sync", (synced: boolean) => {
         console.log("Sync status:", synced);
+        console.log("Yjs initialized", yDocRef.current?.getMap('objects').size);
+        setIsInitialized(true);
       });
+
+      providerRef.current.on("connection-error", (event: any) => {
+        console.error("Connection failed", event)
+      })
 
       providerRef.current.on("connection-close", (event: any) => {
         console.error("Connection closed:", event);
       });
-
-      // Manually initiate connection
-
-      // providerRef.current.connect();
-
       console.log("Yjs initialized", providerRef.current);
-      setIsInitialized(true);
     };
 
     initializeYjs();
@@ -72,7 +75,7 @@ const useYjs = (projectId: string) => {
     provider: providerRef,
     project,
     isInitialized,
-    isApplyingRemoteRef
+    isApplyingRemoteRef,
   };
 };
 

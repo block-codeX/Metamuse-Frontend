@@ -25,13 +25,13 @@ export default function ProjectDropDown({ project }: { project: any }) {
               : "hover:bg-gray-100 dark:hover:bg-gray-800"
           }`}
           disabled={project.completed}
-          onClick={() => !project.completed && navigateTo(`/projects/studio/${project.id}/canvas`)}
+          onClick={() => !project.completed && navigateTo(`/projects/studio/${project._id}/canvas`)}
         >
           Join Canvas
         </button>
         <button
           className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
-          onClick={() => navigateTo(`/projects/studio/${project.id}`)}
+          onClick={() => navigateTo(`/projects/studio/${project._id}`)}
         >
           View Details
         </button>

@@ -1,6 +1,6 @@
 "use client";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,6 +113,8 @@ export default function MarketPlace() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [projects, setProjects] = useState([]);
+  const [nextPage, setNextPage] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const { user } = useUserStore()
   const handleCategorySelect = (category: string) => {
     setSelectedCategories((prev) =>
@@ -121,22 +123,29 @@ export default function MarketPlace() {
         : [...prev, category]
     );
   };
-  const fetchProjects = async () => {
-    let url = `/projects/all?collaborator=${"67d983c3caaba5ffe5b72cc8"}`;
-    if (selectedCategories.length) url += `&categories=${selectedCategories.join(",")}`;
+  const fetchProjects = async (val = 1) => {
+    let url = `/projects/all?full=true&page=${val}`;
+    if (selectedCategories.length) url += `&tags=${selectedCategories.join(",")}`;
     if (searchQuery) url += `&title=${searchQuery}`;
     try {
       const response = await api(true).get(url);
       if (response.status === 200) {
-        setProjects(response.data.docs);
-      }
+        const { docs, next, page, totalDocs } = response.data;
+        console.log(docs)
+        setProjects(docs);
+        setNextPage(next);
+        }
     } catch (error: any) {
       toast(error?.response?.data?.message?.message || "Something went wrong loading the pages");
     }
   }
   useEffect(() => {
+    fetchProjects(currentPage);
+  }, [currentPage])
+  useEffect(() => {
     fetchProjects();
-  }, [selectedCategories, user]);
+  }, [selectedCategories, searchQuery]);
+
   const clearSearch = () => {
     setSearchQuery("");
   };
@@ -197,7 +206,7 @@ export default function MarketPlace() {
 
       <div className="mx-6 w-[calc(100%-3rem)] mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-6">
-          {dummyProjects.map((project, index) => (
+          {projects.map((project, index) => (
             <ProjectItem key={index} project={project} />
           ))}
         </div>
