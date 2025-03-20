@@ -1,4 +1,4 @@
-import { useCanvas } from "./canvas-context";
+import { useCanvas } from "./contexts/canvas-context";
 import {
   ContextMenu,
   ContextMenuContent,

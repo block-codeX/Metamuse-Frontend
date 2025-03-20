@@ -1,4 +1,4 @@
-import { useCanvas } from "./canvas-context";
+import { useCanvas } from "./contexts/canvas-context";
 import { useState } from "react";
 import ColorPalette from "./formatting/color-palette";
 import Strokes from "./formatting/strokes";

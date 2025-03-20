@@ -1,6 +1,6 @@
 import { Pencil, Brush, Eraser, PenTool, Tangent } from "lucide-react";
 import * as fabric from "fabric";
-import { useCanvas } from "../canvas-context";
+import { useCanvas } from "../contexts/canvas-context";
 
 export function useFreeDrawingTools() {
   const { canvas, backgroundColor, pencilWidth, eraserWidth, foregroundColor } = useCanvas();

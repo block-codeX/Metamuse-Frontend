@@ -1,5 +1,5 @@
 import { Bold, Italic, Underline } from "lucide-react";
-import { useCanvas } from "../canvas-context";
+import { useCanvas } from "../contexts/canvas-context";
 import {
   Select,
   SelectContent,

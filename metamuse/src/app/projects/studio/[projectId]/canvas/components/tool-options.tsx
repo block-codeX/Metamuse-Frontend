@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useCanvas } from "./canvas-context";
+import { useCanvas } from "./contexts/canvas-context";
 
 interface Tool {
   icon: React.ReactNode;
@@ -11,8 +11,14 @@ interface Tool {
   function: (...args: any[]) => void;
   function_args: any[];
 }
+interface IToolOption {
+  tools: Tool[];
+  group: string;
+  current: string;
+  use: (val: string) => void;
+}
 
-export default function ToolOption({ tools }: { tools: Tool[] }) {
+export default function ToolOption({ tools, group, current, use }: IToolOption) {
   const [activeTool, setActiveTool] = useState<Tool | null>(tools[0]);
   const { canvas } = useCanvas();
 
@@ -31,6 +37,7 @@ export default function ToolOption({ tools }: { tools: Tool[] }) {
   const handleToolClick = (tool: Tool) => {
     clearCanvasEvents();  // Ensure previous tool doesn't interfere
     tool.function(...tool.function_args);
+    use(group);
   };
 
   return (
@@ -43,7 +50,7 @@ export default function ToolOption({ tools }: { tools: Tool[] }) {
                 variant="ghost"
                 className="relative flex items-center justify-center h-10 p-2 rounded-md"
               >
-                <span className="p-2 rounded-md cursor-pointer bg-background shadow-md">
+                <span className={`p-2 rounded-md cursor-pointer bg-background shadow-md ${group === current ? "bg-btn-primary dark:bg-btn-primary text-white" : ""}`}>
                   {activeTool?.icon}
                 </span>
               </Button>

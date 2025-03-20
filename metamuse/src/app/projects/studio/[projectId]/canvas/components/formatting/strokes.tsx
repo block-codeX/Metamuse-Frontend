@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCanvas } from "../canvas-context";
+import { useCanvas } from "../contexts/canvas-context";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Brush, Eraser, ChevronDown } from "lucide-react";
 

@@ -25,8 +25,11 @@ export const useAuthStore = create(
       setRefreshToken: (token) => set({ refreshToken: token }),
       getAccessToken: async () => {
         let token = get().accessToken;
-        if (token && get().accessExpiry && get().accessExpiry! > new Date())
+        return token;
+        if (token && get().accessExpiry && get().accessExpiry! > new Date()) {
+          console.log("Access token is valid");
           return token;
+        }
         const url = `${BACKEND_BASE_URL}/auth/refresh`;
         try {
           const response = await axios.post(url, {}, { withCredentials: true });
@@ -34,7 +37,7 @@ export const useAuthStore = create(
           if (response.data.refreshToken) {
             set({ accessToken: accessToken });
             set({
-              refreshToken: response.data.refreshToken,
+              // refreshToken: response.data.refreshToken,
               accessExpiry: new Date(access_exp),
               refreshExpiry: new Date(refresh_exp),
             });

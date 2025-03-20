@@ -1,5 +1,5 @@
 "use client";
-import { useCanvas } from "./canvas-context";
+import { useCanvas } from "./contexts/canvas-context";
 import CanvasContextMenu from "./right-click-menu";
 import { useDeleteTool } from "./tools/delete-tool";
 

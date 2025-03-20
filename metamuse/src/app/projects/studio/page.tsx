@@ -122,7 +122,7 @@ export default function MarketPlace() {
     );
   };
   const fetchProjects = async () => {
-    let url = `/project/all?collaborator=${"67d983c3caaba5ffe5b72cc8"}`;
+    let url = `/projects/all?collaborator=${"67d983c3caaba5ffe5b72cc8"}`;
     if (selectedCategories.length) url += `&categories=${selectedCategories.join(",")}`;
     if (searchQuery) url += `&title=${searchQuery}`;
     try {

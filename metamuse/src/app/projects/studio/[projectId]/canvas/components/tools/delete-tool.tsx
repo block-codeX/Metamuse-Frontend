@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useCanvas } from "../canvas-context";
+import { useCanvas } from "../contexts/canvas-context";
 
 export function useDeleteTool() {
   const { canvas } = useCanvas();

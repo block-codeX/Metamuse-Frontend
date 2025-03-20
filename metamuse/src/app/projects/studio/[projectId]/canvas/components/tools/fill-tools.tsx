@@ -1,5 +1,5 @@
 import * as fabric from "fabric";
-import { useCanvas } from "../canvas-context";
+import { useCanvas } from "../contexts/canvas-context";
 import { PaintBucket, SquareRoundCorner, Paintbrush, PaintbrushVertical, Image } from "lucide-react";
 export function useFillTools () {
   const { canvas } = useCanvas();

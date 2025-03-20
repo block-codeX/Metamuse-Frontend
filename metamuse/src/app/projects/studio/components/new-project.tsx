@@ -62,7 +62,7 @@ export default function NewProject() {
   const newProject = async (data: any) => {
     data.isForked = false;
     try {
-      const response = await api(true).post("/project/new", data)
+      const response = await api(true).post("/projects/new", data)
       if (response.status === 201) {
         toast("Project created successfully");
         router.push("studio/" + response.data._id);

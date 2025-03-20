@@ -1,6 +1,6 @@
 import { Scissors, Crop, Layers } from "lucide-react";
 import * as fabric from "fabric";
-import { useCanvas } from "../canvas-context";
+import { useCanvas } from "../contexts/canvas-context";
 
 export function useClipTools() {
   const { canvas } = useCanvas();

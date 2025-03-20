@@ -1,6 +1,6 @@
 import { Square, Circle, Slash, Triangle, Star, Image as ImageIcon, Type } from "lucide-react";
 import * as fabric from "fabric";
-import { useCanvas } from "../canvas-context";
+import { useCanvas } from "../contexts/canvas-context";
 
 export function useShapeTools() {
   const { canvas } = useCanvas();

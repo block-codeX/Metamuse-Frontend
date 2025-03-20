@@ -1,5 +1,5 @@
 import { ZoomIn, ZoomOut } from "lucide-react";
-import { useCanvas } from "./canvas-context";
+import { useCanvas } from "./contexts/canvas-context";
 import { useState } from "react";
 
 export default function FooterTools() {

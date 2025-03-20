@@ -1,6 +1,6 @@
 import { MousePointer, Hand } from "lucide-react";
 import * as fabric from "fabric";
-import { useCanvas } from "../canvas-context";
+import { useCanvas } from "../contexts/canvas-context";
 
 export function useNavigateTools() {
   const { canvas } = useCanvas();
