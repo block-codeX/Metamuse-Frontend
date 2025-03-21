@@ -10,9 +10,9 @@ export default function Project({
 
   return (
     <>
-      <div className="min-h-screen border-red-500 bg-muted/30">
-    {children}
-    </div>
+      <div className="border-red-500 bg-muted/30">
+        {children}
+      </div>
     </>
   );
 }

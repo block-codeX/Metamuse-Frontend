@@ -30,6 +30,7 @@ const useYjs = (projectId: string) => {
         '',
         yDocRef.current,
         {
+          resyncInterval: 100,
           params: { token: jwtToken as string, projectId },
           connect: true
         }
@@ -40,22 +41,21 @@ const useYjs = (projectId: string) => {
         console.log('WebSocket status:', event.status);
         if (event.status === 'connected') {
           console.log('Reconnected, waiting for sync...');
+          setIsInitialized(true);
         }
       });
       providerRef.current.on("sync", (synced: boolean) => {
         console.log("Sync status:", synced);
         console.log("Yjs initialized", yDocRef.current?.getMap('objects').size);
-        setIsInitialized(true);
       });
 
       providerRef.current.on("connection-error", (event: any) => {
         console.error("Connection failed", event)
       })
 
-      // providerRef.current.on("connection-close", (event: any) => {
-      //   console.error("Connection closed:", event);
-      // });
-      console.log("Yjs initialized", providerRef.current);
+      providerRef.current.on("connection-close", (event: any) => {
+        console.error("Connection closed:", event);
+      });
     };
 
     initializeYjs();

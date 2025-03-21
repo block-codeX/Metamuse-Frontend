@@ -245,7 +245,7 @@ export default function ProjectView() {
   }, [project, isConnected]);
 
   return (
-    <div className="mx-auto py-6 h-[calc(100vh-60px)] fixed bottom-0 w-screen">
+    <div className="mx-auto py-6 h-full fixed bottom-0 w-screen">
       <div className="flex flex-row h-full flex-wrap gap-6 px-5">
         {/* Project Main Content */}
         <div className="max-w-[calc(100%-350px)] w-full">
