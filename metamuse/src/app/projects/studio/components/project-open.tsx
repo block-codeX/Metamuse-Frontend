@@ -25,7 +25,7 @@ export default function ProjectDropDown({ project }: { project: any }) {
               : "hover:bg-gray-100 dark:hover:bg-gray-800"
           }`}
           disabled={project.completed}
-          onClick={() => !project.completed && navigateTo(`/projects/studio/${project._id}/canvas`)}
+          onClick={() => navigateTo(`/projects/studio/${project._id}/canvas`)}
         >
           Join Canvas
         </button>

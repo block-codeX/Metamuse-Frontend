@@ -42,10 +42,10 @@ const useCanvasSync = (projectId: string) => {
         const loadPromises = Object.values(initialObjects).map(
           async (obj: any) => {
             return new Promise<void>((resolve) => {
-              if (!obj?.type) {
-                console.warn("⚠️ Invalid object format:", obj);
-                return resolve();
-              }
+              // if (!obj?.type) {
+              //   console.warn("⚠️ Invalid object format:", obj);
+              //   return resolve();
+              // }
               fabric.util
                 .enlivenObjects([obj])
                 .then((objects) => {

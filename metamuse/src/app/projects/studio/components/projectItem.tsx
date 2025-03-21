@@ -6,10 +6,15 @@ import { Button } from "@/components/ui/button";
 import { MoreVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ProjectDropDown from "./project-open";
-import { getInitials, getRandomComplementaryColors } from "@/lib/utils";
-
+import {
+  getInitials,
+  getRandomComplementaryColors,
+  reconstructImg,
+} from "@/lib/utils";
+import * as fabric from "fabric";
 export default function ProjectItem({ project }: { project: any }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [imgUrl, setImgUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -26,6 +31,39 @@ export default function ProjectItem({ project }: { project: any }) {
     };
   }, []);
 
+  useEffect(() => {
+    const canvasEl = document.createElement("canvas");
+    document.body.appendChild(canvasEl);
+
+    // Initialize Fabric.js on your canvas element
+    const fabricCanvas = new fabric.Canvas(canvasEl, {
+      width: window.innerWidth - 100,
+      height: window.innerHeight,
+      backgroundColor: "#ffffff",
+    });
+    // fabricCanvas.loadFromJSON
+    const getImg = async () => {
+      // Create a temporary canvas element
+      try {
+        const url = await reconstructImg(
+          fabricCanvas,
+          project._id,
+        );
+        setImgUrl(url);
+        console.log("New url", url);
+      } catch (error) {
+        console.error("Error generating image:", error);
+      } finally {
+        // Remove the temporary canvas element if it's still attached
+        if (canvasEl.parentNode) {
+          canvasEl.parentNode.removeChild(canvasEl);
+        }
+      }
+    };
+
+    getImg();
+  }, [project.title]);
+
   // Navigate to a specific route
   const navigateTo = (path: string) => {
     router.push(path);
@@ -37,7 +75,7 @@ export default function ProjectItem({ project }: { project: any }) {
       {/* Project Image */}
       <div className="w-full h-40 bg-gray-300 rounded-lg overflow-hidden">
         <img
-          src={project.image}
+          src={imgUrl}
           alt={project.title}
           className="w-full h-full object-cover"
         />
@@ -50,21 +88,22 @@ export default function ProjectItem({ project }: { project: any }) {
 
         {/* Collaborators */}
         <div className="flex items-center mt-3 space-x-2">
-          {project.collaborators.map((collab: any, index: number) =>{ 
+          {project.collaborators.map((collab: any, index: number) => {
             const colors = getRandomComplementaryColors();
             return (
-            <Avatar key={index}>
-              <AvatarFallback
-                className="bg-primary text-primary-foreground text-xs"
-                style={{
-                  backgroundColor: colors[index % 2].background,
-                  color: colors[index % 2].text,
-                }}
-              >
-                {getInitials(collab.firstName, collab.lastName)}
-              </AvatarFallback>{" "}
-            </Avatar>
-          )})}
+              <Avatar key={index}>
+                <AvatarFallback
+                  className="bg-primary text-primary-foreground text-xs"
+                  style={{
+                    backgroundColor: colors[index % 2].background,
+                    color: colors[index % 2].text,
+                  }}
+                >
+                  {getInitials(collab.firstName, collab.lastName)}
+                </AvatarFallback>{" "}
+              </Avatar>
+            );
+          })}
         </div>
 
         {/* Status & Actions */}

@@ -27,7 +27,7 @@ const useYjs = (projectId: string) => {
       yDocRef.current = new Y.Doc(); // Store in ref for immediate access
       providerRef.current = new WebsocketProvider(
         YJS_URL,
-        "",
+        '',
         yDocRef.current,
         {
           params: { token: jwtToken as string, projectId },
@@ -52,9 +52,9 @@ const useYjs = (projectId: string) => {
         console.error("Connection failed", event)
       })
 
-      providerRef.current.on("connection-close", (event: any) => {
-        console.error("Connection closed:", event);
-      });
+      // providerRef.current.on("connection-close", (event: any) => {
+      //   console.error("Connection closed:", event);
+      // });
       console.log("Yjs initialized", providerRef.current);
     };
 

@@ -20,6 +20,9 @@ import NewProject from "./components/new-project";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import { useUserStore } from "@/lib/stores/user-store";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { set } from "lodash";
 
 const dummyProjects = [
   {
@@ -58,7 +61,7 @@ const dummyProjects = [
       { name: "Bob", avatar: "https://i.pravatar.cc/40?img=2" },
     ],
   },
-  { 
+  {
     id: 4,
     title: "AI Art Generator",
     description:
@@ -113,35 +116,43 @@ export default function MarketPlace() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [nextPage, setNextPage] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const { user } = useUserStore()
+  const { user } = useUserStore();
   const handleCategorySelect = (category: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(category)
+      prev.includes(category) 
         ? prev.filter((c) => c !== category)
         : [...prev, category]
     );
   };
   const fetchProjects = async (val = 1) => {
+    setLoading(true);
     let url = `/projects/all?full=true&page=${val}`;
-    if (selectedCategories.length) url += `&tags=${selectedCategories.join(",")}`;
+    if (selectedCategories.length)
+      url += `&tags=${selectedCategories.join(",")}`;
     if (searchQuery) url += `&title=${searchQuery}`;
     try {
       const response = await api(true).get(url);
       if (response.status === 200) {
         const { docs, next, page, totalDocs } = response.data;
-        console.log(docs)
+        console.log(docs);
         setProjects(docs);
         setNextPage(next);
-        }
+      }
+      setLoading(false);
     } catch (error: any) {
-      toast(error?.response?.data?.message?.message || "Something went wrong loading the pages");
+      toast(
+        error?.response?.data?.message?.message ||
+          "Something went wrong loading the pages"
+      );
+      setLoading(false);
     }
-  }
+  };
   useEffect(() => {
     fetchProjects(currentPage);
-  }, [currentPage])
+  }, [currentPage]);
   useEffect(() => {
     fetchProjects();
   }, [selectedCategories, searchQuery]);
@@ -206,9 +217,20 @@ export default function MarketPlace() {
 
       <div className="mx-6 w-[calc(100%-3rem)] mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-6">
-          {projects.map((project, index) => (
-            <ProjectItem key={index} project={project} />
-          ))}
+          {loading
+            ? // Loading skeletons
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card key={`skeleton-${index}`} className="overflow-hidden">
+                  <Skeleton className="h-64 w-full" />
+                  <div className="p-4">
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                </Card>
+              ))
+            : projects.map((project, index) => (
+                <ProjectItem key={index} project={project} />
+              ))}
         </div>
       </div>
       <div className="fixed bottom-20 right-20 p-4">

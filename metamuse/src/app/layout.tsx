@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "./auth/context/user-context";
+import { ChatProvider } from "./auth/context/chat-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +29,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <UserProvider>{children}</UserProvider>
+        <UserProvider>
+          <ChatProvider>
+          {children}
+          </ChatProvider>
+        </UserProvider>
       </body>
     </html>
   );
