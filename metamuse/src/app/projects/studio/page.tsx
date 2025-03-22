@@ -128,8 +128,9 @@ export default function MarketPlace() {
     );
   };
   const fetchProjects = async (val = 1) => {
+    if (!user) return;
     setLoading(true);
-    let url = `/projects/all?full=true&page=${val}`;
+    let url = `/projects/all?full=true&page=${val}&collaborator=${user._id}`;
     if (selectedCategories.length)
       url += `&tags=${selectedCategories.join(",")}`;
     if (searchQuery) url += `&title=${searchQuery}`;
@@ -152,10 +153,10 @@ export default function MarketPlace() {
   };
   useEffect(() => {
     fetchProjects(currentPage);
-  }, [currentPage]);
+  }, [currentPage, user]);
   useEffect(() => {
     fetchProjects();
-  }, [selectedCategories, searchQuery]);
+  }, [selectedCategories, searchQuery, user]);
 
   const clearSearch = () => {
     setSearchQuery("");

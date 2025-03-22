@@ -12,16 +12,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { X } from "lucide-react";
+import { Loader, X } from "lucide-react";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Toaster } from "@/components/ui/sonner";
 
 // Define validation schema using Zod
 const newProjectSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   description: z.string().min(1, { message: "Description is required" }),
   tags: z.array(z.string()).nonempty({ message: "At least one tag must be selected" }),
+});
+
+// Schema for join project
+const joinProjectSchema = z.object({
+  token: z.string().min(1, { message: "Token is required" })
 });
 
 // Art categories for selection
@@ -40,14 +46,29 @@ const artCategories = [
 
 export default function NewProject() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const { handleSubmit, register, setValue, formState: { errors } } = useForm({
+  const [token, setToken] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  
+  // Create project form
+  const { 
+    handleSubmit, 
+    register, 
+    setValue, 
+    formState: { errors } 
+  } = useForm({
     resolver: zodResolver(newProjectSchema),
   });
-  const router = useRouter();
+  
+  // Join project form
+  const joinForm = useForm({
+    resolver: zodResolver(joinProjectSchema),
+  });
+
   // Handle selecting a tag
   const handleTagSelect = (tag: string) => {
     if (!selectedTags.includes(tag)) {
-      const newTags: any = [...selectedTags, tag];
+      const newTags = [...selectedTags, tag];
       setSelectedTags(newTags);
       setValue("tags", newTags);
     }
@@ -55,14 +76,17 @@ export default function NewProject() {
 
   // Handle removing a tag
   const handleTagRemove = (tag: string) => {
-    const newTags: any = selectedTags.filter((t) => t !== tag);
+    const newTags = selectedTags.filter((t) => t !== tag);
     setSelectedTags(newTags);
     setValue("tags", newTags);
   };
+
+  // Create new project
   const newProject = async (data: any) => {
+    setIsLoading(true);
     data.isForked = false;
     try {
-      const response = await api(true).post("/projects/new", data)
+      const response = await api(true).post("/projects/new", data);
       if (response.status === 201) {
         toast("Project created successfully");
         router.push("studio/" + response.data._id);
@@ -71,11 +95,33 @@ export default function NewProject() {
     } catch (error: any) {
       toast(error?.response?.data?.message?.message || "Something went wrong!");
       return false;
+    } finally {
+      setIsLoading(false);
     }
-  }
-  // Handle form submission
+  };
+
+  // Join existing project
+  const handleJoinProject = async (data: any) => {
+    setIsLoading(true);
+    try {
+      const response = await api(true).post(`/projects/${data.token}/join`);
+      if (response.status === 201) {
+        toast("You have joined the project successfully");
+        router.push("studio/" + response.data._id);
+        return true;
+      }
+    } catch (error: any) {
+      let msg = error?.response?.data?.message?.message || "Something went wrong!"
+      if (msg.startsWith("input must be")) msg = "Invalid token";
+      toast(msg);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle form submission for create project
   const handleFormSubmit = async (data: any) => {
-    console.log(data); // Print collected values to the console
     await newProject(data);
   };
 
@@ -94,19 +140,28 @@ export default function NewProject() {
           <CardContent className="space-y-2">
             <div className="space-y-1">
               <Label htmlFor="title">Title</Label>
-              <Input id="title" {...register("title")} />
+              <Input id="title" {...register("title")} disabled={isLoading} />
               {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" {...register("description")} className="resize-none h-32" />
+              <Textarea 
+                id="description" 
+                {...register("description")} 
+                className="resize-none h-32" 
+                disabled={isLoading}
+              />
               {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="tags">Tags</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    disabled={isLoading}
+                  >
                     Select Tags
                   </Button>
                 </PopoverTrigger>
@@ -118,6 +173,7 @@ export default function NewProject() {
                         variant="ghost"
                         onClick={() => handleTagSelect(category)}
                         className="justify-start"
+                        disabled={isLoading}
                       >
                         {category}
                       </Button>
@@ -137,6 +193,7 @@ export default function NewProject() {
                     <button
                       onClick={() => handleTagRemove(tag)}
                       className="ml-1"
+                      disabled={isLoading}
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -147,8 +204,19 @@ export default function NewProject() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button onClick={handleSubmit(handleFormSubmit)} className="bg-btn-primary dark:bg-btn-primary">
-              Create
+            <Button 
+              onClick={handleSubmit(handleFormSubmit)} 
+              className="bg-btn-primary dark:bg-btn-primary"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create"
+              )}
             </Button>
           </CardFooter>
         </Card>
@@ -159,17 +227,41 @@ export default function NewProject() {
             <CardTitle>Join Project</CardTitle>
             <CardDescription>Join an existing project by entering the access token</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="space-y-1">
-              <Label htmlFor="token">Token</Label>
-              <Input id="token" type="password" />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button className="bg-btn-primary dark:bg-btn-primary">Join</Button>
-          </CardFooter>
+          <form onSubmit={joinForm.handleSubmit(handleJoinProject)}>
+            <CardContent className="space-y-2">
+              <div className="space-y-1">
+                <Label htmlFor="token">Token</Label>
+                <Input 
+                  id="token" 
+                  type="text"
+                  {...joinForm.register("token")}
+                  disabled={isLoading}
+                />
+                {joinForm.formState.errors.token && (
+                  <p className="text-sm text-red-500">{joinForm.formState.errors.token.message}</p>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                type="submit"
+                className="bg-btn-primary dark:bg-btn-primary mt-3"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    Joining...
+                  </>
+                ) : (
+                  "Join"
+                )}
+              </Button>
+            </CardFooter>
+          </form>
         </Card>
       </TabsContent>
+      <Toaster/>
     </Tabs>
   );
-}
+} 

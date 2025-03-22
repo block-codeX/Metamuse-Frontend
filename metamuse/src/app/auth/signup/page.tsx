@@ -32,8 +32,8 @@ export default function SignupPage() {
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     walletAddress: z
-      .string()
-      .min(42, "Wallet address must be at least 42 characters"),
+      .string().optional()
+      // .min(10, "Wallet address must be at least 42 characters"),
   });
 
   // Define the form type based on the schema
@@ -80,9 +80,9 @@ export default function SignupPage() {
     const { walletAddress, ...rest } = values;
     const success = await signup(rest);
     if (success) {
-      await requestOtp(values.email);
+      // await requestOtp(values.email);
       // Navigate to otp page
-      router.push("/projects/marketplace");
+      router.push("/auth/login");
     }
   }
 
