@@ -67,11 +67,6 @@ export default function ProjectView() {
       }
     }
   };
-  useEffect(() => {
-    if (!project) return;
-    loadImg();
-  }, [project]);
-
   return (
     <div className=" max-w-[calc(100%-350px)] w-[90%] h-full">
       <Card className="w-full h-full  space-y-2 gap-1">

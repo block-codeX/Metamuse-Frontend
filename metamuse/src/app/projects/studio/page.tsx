@@ -23,6 +23,7 @@ import { useUserStore } from "@/lib/stores/user-store";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { set } from "lodash";
+import EmptyProjectsCard from "@/app/components/no-projects";
 
 const dummyProjects = [
   {
@@ -122,7 +123,7 @@ export default function MarketPlace() {
   const { user } = useUserStore();
   const handleCategorySelect = (category: string) => {
     setSelectedCategories((prev) =>
-      prev.includes(category) 
+      prev.includes(category)
         ? prev.filter((c) => c !== category)
         : [...prev, category]
     );
@@ -138,7 +139,6 @@ export default function MarketPlace() {
       const response = await api(true).get(url);
       if (response.status === 200) {
         const { docs, next, page, totalDocs } = response.data;
-        console.log(docs);
         setProjects(docs);
         setNextPage(next);
       }
@@ -218,20 +218,26 @@ export default function MarketPlace() {
 
       <div className="mx-6 w-[calc(100%-3rem)] mt-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-6">
-          {loading
-            ? // Loading skeletons
-              Array.from({ length: 3 }).map((_, index) => (
-                <Card key={`skeleton-${index}`} className="overflow-hidden">
-                  <Skeleton className="h-64 w-full" />
-                  <div className="p-4">
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </div>
-                </Card>
-              ))
-            : projects.map((project, index) => (
-                <ProjectItem key={index} project={project} />
-              ))}
+          {loading ? (
+            // Loading skeletons
+            Array.from({ length: 3 }).map((_, index) => (
+              <Card key={`skeleton-${index}`} className="overflow-hidden">
+                <Skeleton className="h-64 w-full" />
+                <div className="p-4">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </Card>
+            ))
+          ) : projects.length > 0 ? (
+            projects.map((project, index) => (
+              <ProjectItem key={index} project={project} />
+            ))
+          ) : (
+            <div className="w-full sm:col-span-2 md:col-span-3 justify-center">
+              <EmptyProjectsCard />
+              </div>
+          )}
         </div>
       </div>
       <div className="fixed bottom-20 right-20 p-4">

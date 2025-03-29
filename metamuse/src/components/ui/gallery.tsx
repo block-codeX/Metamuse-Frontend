@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Eye, Heart, Share2 } from "lucide-react";
 import { Button } from "./button";
+import EmptyMarketplaceCard from "@/app/components/empty-list";
 
 export default function StaggeredGallery({
   projects,
@@ -21,8 +22,6 @@ export default function StaggeredGallery({
   isModal: any;
 }) {
   const [columns, setColumns] = useState(3);
-  // const [buying, setBuying] = useState("");
-  // const [isModal, setModal] = useState(false);
   const [liked, setLiked] = useState<Record<number, boolean>>({});
 
   // Determine number of columns based on screen width
@@ -42,16 +41,9 @@ export default function StaggeredGallery({
 
     // Add event listener
     window.addEventListener("resize", handleResize);
-
-    // // Simulate loading
-    // const timer = setTimeout(() => {
-    //   setLoading(false);
-    // }, 1000);
-
     // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
-      clearTimeout(timer);
     };
   }, []);
 
@@ -90,8 +82,9 @@ export default function StaggeredGallery({
                 </div>
               </Card>
             ))
-          : // Actual gallery with staggered layout
-            getColumnItems().map((columnItems, colIndex) => (
+          : // Actual gallery with staggered layout {
+          projects.length > 0
+          ? getColumnItems().map((columnItems, colIndex) => (
               <div key={`column-${colIndex}`} className="flex flex-col gap-4">
                 {columnItems.map((item) => (
                   <Card key={item._id} className="overflow-hidden group">
@@ -153,7 +146,10 @@ export default function StaggeredGallery({
                   </Card>
                 ))}
               </div>
-            ))}
+            ))
+          : <div className="w-full sm:col-span-2 lg:col-span-3 flex justify-center">
+            <EmptyMarketplaceCard/>
+            </div>}
       </div>
     </div>
   );

@@ -180,8 +180,7 @@ export default function AuthLayout({
           </div>
         </div>
       </header>
-
-      <div className=" fixed bottom-0  flex flex-col justify-start items-start h-[calc(100vh-60px)] bg-background w-[100vw]  overflow-scroll">
+      <div className=" fixed bottom-0  flex flex-col justify-start items-start h-[calc(100vh-60px)] bg-background w-[100vw] overflow-scroll">
         {children}
       </div>
     </div>

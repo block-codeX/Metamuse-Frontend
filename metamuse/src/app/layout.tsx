@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "./auth/context/user-context";
 import { ChatProvider } from "./auth/context/chat-context";
+import MinimumWidthGuard from "./components/minimum-width";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,11 +30,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <UserProvider>
-          <ChatProvider>
-          {children}
-          </ChatProvider>
-        </UserProvider>
+        <MinimumWidthGuard minWidth={768}>
+          <UserProvider>
+            <ChatProvider>{children}</ChatProvider>
+          </UserProvider>
+        </MinimumWidthGuard>
       </body>
     </html>
   );

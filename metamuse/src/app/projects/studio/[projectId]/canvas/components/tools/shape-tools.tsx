@@ -3,7 +3,7 @@ import * as fabric from "fabric";
 import { useCanvas } from "../contexts/canvas-context";
 
 export function useShapeTools() {
-  const { canvas } = useCanvas();
+  const { canvas, backgroundColor, pencilWidth, eraserWidth, foregroundColor } = useCanvas();
 
   // Helper function to create generic shapes
   const addShape = (shape) => {
@@ -18,11 +18,12 @@ export function useShapeTools() {
     const rect = new fabric.Rect({
       left: 100,
       top: 100,
-      fill: "transparent",
-      stroke: "black",
-      strokeWidth: 2,
+      fill:backgroundColor,
+      stroke: foregroundColor,
+      strokeWidth: pencilWidth,
       width: 100,
       height: 60,
+      strokeUniform: true,
     });
     addShape(rect);
   };
@@ -32,11 +33,12 @@ export function useShapeTools() {
     const ellipse = new fabric.Ellipse({
       left: 120,
       top: 120,
-      fill: "transparent",
-      stroke: "black",
-      strokeWidth: 2,
+      fill: backgroundColor,
+      stroke: foregroundColor,
+      strokeWidth: pencilWidth,
       rx: 50,
       ry: 30,
+      strokeUniform: true,
     });
     addShape(ellipse);
   };
@@ -44,8 +46,8 @@ export function useShapeTools() {
   // Line Tool
   const activateLine = () => {
     const line = new fabric.Line([50, 50, 200, 200], {
-      stroke: "black",
-      strokeWidth: 2,
+      stroke: foregroundColor,
+      strokeWidth: pencilWidth,
     });
     addShape(line);
   };
@@ -64,9 +66,10 @@ export function useShapeTools() {
       if (!isDrawing) {
         isDrawing = true;
         poly = new fabric.Polygon(points, {
-          fill: "transparent",
-          stroke: "black",
+          fill: backgroundColor,
+          stroke: foregroundColor,
           strokeWidth: 2,
+          strokeUniform: true,
         });
         canvas.add(poly);
       } else {
@@ -98,9 +101,10 @@ export function useShapeTools() {
       {
         left: 100,
         top: 100,
-        fill: "transparent",
-        stroke: "black",
-        strokeWidth: 2,
+        fill: backgroundColor,
+        stroke: foregroundColor,
+        strokeWidth: pencilWidth,
+        strokeUniform: true,
       }
     );
     addShape(star);

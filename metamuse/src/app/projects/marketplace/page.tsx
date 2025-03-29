@@ -8,6 +8,7 @@ import { Search, X } from "lucide-react";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import EmptyMarketplaceCard from "@/app/components/empty-list";
 
 // Art categories/tags for filtering
 const artCategories = [

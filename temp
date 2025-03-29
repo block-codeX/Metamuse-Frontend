@@ -1,7 +1,0 @@
-const debouncedSendUpdate = debounce(() => {
-  if (yDoc.current) {
-    const update = Y.encodeStateAsUpdate(yDoc.current);
-    // socket.emit("yjs-update", { update: Array.from(update) });
-    console.log("Sending yjs update to server");
-  }
-}, 100);

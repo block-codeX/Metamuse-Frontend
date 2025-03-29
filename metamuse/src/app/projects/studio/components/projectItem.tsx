@@ -14,7 +14,6 @@ import {
 import * as fabric from "fabric";
 export default function ProjectItem({ project }: { project: any }) {
   const [showMenu, setShowMenu] = useState(false);
-  const [imgUrl, setImgUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -31,38 +30,6 @@ export default function ProjectItem({ project }: { project: any }) {
     };
   }, []);
 
-  useEffect(() => {
-    const canvasEl = document.createElement("canvas");
-    document.body.appendChild(canvasEl);
-
-    // Initialize Fabric.js on your canvas element
-    const fabricCanvas = new fabric.Canvas(canvasEl, {
-      width: window.innerWidth - 100,
-      height: window.innerHeight,
-      backgroundColor: "#ffffff",
-    });
-    // fabricCanvas.loadFromJSON
-    const getImg = async () => {
-      // Create a temporary canvas element
-      try {
-        const url = await reconstructImg(
-          fabricCanvas,
-          project._id,
-        );
-        setImgUrl(url);
-        console.log("New url", url);
-      } catch (error) {
-        console.error("Error generating image:", error);
-      } finally {
-        // Remove the temporary canvas element if it's still attached
-        if (canvasEl.parentNode) {
-          canvasEl.parentNode.removeChild(canvasEl);
-        }
-      }
-    };
-
-    getImg();
-  }, [project.title]);
 
   // Navigate to a specific route
   const navigateTo = (path: string) => {
@@ -72,13 +39,8 @@ export default function ProjectItem({ project }: { project: any }) {
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col relative">
-      {/* Project Image */}
+      {/* Project fancy */}
       <div className="w-full h-40 bg-gray-300 rounded-lg overflow-hidden">
-        <img
-          src={imgUrl}
-          alt={project.title}
-          className="w-full h-full object-cover"
-        />
       </div>
 
       {/* Project Details */}

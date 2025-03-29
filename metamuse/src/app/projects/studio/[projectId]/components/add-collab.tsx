@@ -26,7 +26,7 @@ const useUserStore = create<UserStore>((set) => ({
 const fetchUsers = async (projectId: string, query = "") => {
   try {
     let url = '/users/all'
-    if (query.trim()) url +=`?name${query}`
+    if (query.trim()) url +=`?name=${query}`
     const response = await api().get(url);
     if (response.status === 200) {
       const { docs } = response.data;
