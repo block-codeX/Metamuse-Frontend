@@ -5,17 +5,17 @@ import useCanvasSync from "../canvas-sync-component";
 
 const CanvasSyncProvider = ({ children, projectId }: { children: React.ReactNode; projectId: string }) => {
   const { canvas } = useCanvas();
-  const { yDoc, provider } = useCanvasSync(projectId);
+  const { yDoc } = useCanvasSync(projectId);
 
   useEffect(() => {
-    if (!canvas || !yDoc || !provider) return;
+    if (!canvas || !yDoc) return;
 
     // Additional setup if needed
 
     return () => {
       // Cleanup if needed
     };
-  }, [canvas, yDoc, provider]);
+  }, [canvas, yDoc]);
 
   return <>{children}</>;
 };

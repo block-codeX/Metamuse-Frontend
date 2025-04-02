@@ -5,6 +5,7 @@ import Strokes from "./formatting/strokes";
 import TextFormatting from "./formatting/text";
 import OutlineFilters from "./formatting/pictures";
 import Commands from "./commands/command";
+import { CanvasOrientationSwitcher } from "./orientation/tools/switcher";
 
 export default function TopSideTools() {
   const {
@@ -64,6 +65,7 @@ export default function TopSideTools() {
         <OutlineFilters/>
       {/* Commands */}
       <Commands/>
+      <CanvasOrientationSwitcher/>
     </div>
   );
 }

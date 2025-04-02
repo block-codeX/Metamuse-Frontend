@@ -23,23 +23,23 @@ export default function Home() {
           {/* Middle Section with Side Tools and Canvas */}
           <div className="flex flex-1 w-full overflow-hidden">
             {/* Left Side Tools */}
-            <div className="w-16 h-full">
+            <div className="w-10 h-full">
               <LeftSideTools />
             </div>
 
             {/* Canvas Area - Central and Largest */}
-            <div className="flex-1 p-4 overflow-hidden bg-background ">
+            <div className="flex-1 p-4 bg-gray-300 overflow-auto flex flex-col items-center justify-center">
               <CanvasComponent />
             </div>
 
             {/* Right Side Tools */}
-            <div className="w-16 h-full ">{/* <RightSideTools /> */}</div>
+            <div className="w-10 h-full ">{/* <RightSideTools /> */}</div>
           </div>
 
           {/* Bottom Footer Tools */}
-          <div className="w-full h-16 flex flex-row justify-end items-center">
+          {/* <div className="w-full h-16 flex flex-row justify-end items-center">
             <FooterTools />
-          </div>
+          </div> */}
         </div>
       </CanvasSyncProvider>
     </CanvasProvider>

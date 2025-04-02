@@ -18,7 +18,7 @@ export function useShapeTools() {
     const rect = new fabric.Rect({
       left: 100,
       top: 100,
-      fill:backgroundColor,
+      fill:"transparent",
       stroke: foregroundColor,
       strokeWidth: pencilWidth,
       width: 100,
@@ -33,7 +33,7 @@ export function useShapeTools() {
     const ellipse = new fabric.Ellipse({
       left: 120,
       top: 120,
-      fill: backgroundColor,
+      fill: "transparent",
       stroke: foregroundColor,
       strokeWidth: pencilWidth,
       rx: 50,
@@ -66,7 +66,7 @@ export function useShapeTools() {
       if (!isDrawing) {
         isDrawing = true;
         poly = new fabric.Polygon(points, {
-          fill: backgroundColor,
+          fill: "transparent",
           stroke: foregroundColor,
           strokeWidth: 2,
           strokeUniform: true,
@@ -101,7 +101,7 @@ export function useShapeTools() {
       {
         left: 100,
         top: 100,
-        fill: backgroundColor,
+        fill: "transparent",
         stroke: foregroundColor,
         strokeWidth: pencilWidth,
         strokeUniform: true,

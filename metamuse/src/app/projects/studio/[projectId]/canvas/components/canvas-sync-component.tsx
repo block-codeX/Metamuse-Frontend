@@ -96,10 +96,10 @@ const useCanvasSync = (projectId: string) => {
 
   // Canvas handlers
   useEffect(() => {
-    if (!initialized || !yDoc.current) return;
+    if (!initialized || !yDoc.current || !canvas) return;
 
-    const handleAction = (e: fabric.TEvent, action: string) => {
-      if (isLocal.current) {
+    const handleAction = (e: fabric.TEvent| any, action: string) => {
+      if (isLocal.current || !yDoc.current) {
         console.log("Skipping remote update in handler");
         return;
       }
@@ -156,10 +156,10 @@ const useCanvasSync = (projectId: string) => {
       removed: (e: fabric.TEvent) => handleAction(e, 'remove'),
       pathCreated: (e: fabric.TEvent) => handleAction(e as fabric.TEvent, 'add'),
     };
-    canvas.on("object:added", handlers.added);
-    canvas.on("object:modified", handlers.modified);
-    canvas.on("object:removed", handlers.removed);
-    canvas.on("path:created", handlers.pathCreated);
+    canvas.on("object:added", handlers.added as any);
+    canvas.on("object:modified", handlers.modified as any);
+    canvas.on("object:removed", handlers.removed as any);
+    canvas.on("path:created", handlers.pathCreated as any);
         return () => {
       canvas.off("object:added", handlers.added);
       canvas.off("object:modified", handlers.modified);
@@ -169,7 +169,7 @@ const useCanvasSync = (projectId: string) => {
   }, [initialized]);
 
   useEffect(() => {
-    if (!initialized) return;
+    if (!initialized || !canvas) return;
 
     const objectObserver = (event: Y.YMapEvent<any>) => {
       console.log("Transaction origin:", event.transaction.origin);  
@@ -190,7 +190,7 @@ const useCanvasSync = (projectId: string) => {
         }
         const obj = objectsMapRef.current?.get(id);
         fabric.util.enlivenObjects([obj]).then((objects) => {
-          const fabricObj = objects?.[0];
+          const fabricObj = objects?.[0] as any;
           console.log(id, fabricObj)
           if (fabricObj) {
             fabricObj.set({ id, left: obj.left || 0, top: obj.top || 0, visible: obj.visible ?? true });

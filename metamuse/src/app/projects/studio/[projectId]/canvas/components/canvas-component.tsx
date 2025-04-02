@@ -5,7 +5,7 @@ import { useKeyBindingTools } from "./tools/delete-tool";
 import { useEffect } from "react";
 
 export default function CanvasComponent() {
-  const { canvasRef } = useCanvas();
+  const { canvasRef,  } = useCanvas();
   useKeyBindingTools();
 
   useEffect(() => {
