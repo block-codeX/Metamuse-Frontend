@@ -62,7 +62,7 @@ export default function CanvasComponent() {
     // Pan with middle mouse button (button === 1) or when holding space key with left mouse button
     // or when zoomed in beyond 1.0 and using left mouse button directly
     if (e.button === 1 || 
-        (e.button === 0 && (e.ctrlKey))) {
+        (e.button === 0 && (e.ctrlKey || e.metaKey))) {
       setIsPanning(true);
       setStartPan({ x: e.clientX - position.x, y: e.clientY - position.y });
       
