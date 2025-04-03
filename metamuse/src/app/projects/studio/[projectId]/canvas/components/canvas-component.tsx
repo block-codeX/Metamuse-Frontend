@@ -161,17 +161,13 @@ export default function CanvasComponent() {
   }, [canvasRef]);
   
   return (
-    <div className="relative w-full h-full overflow-hidden" 
+    <div className="relative w-full h-full overflow-hidden cursor-grab touch-none" 
          ref={containerRef}
          onWheel={handleWheel}
          onMouseDown={handleMouseDown}
          onMouseMove={handleMouseMove}
          onMouseUp={handleMouseUp}
-         onMouseLeave={handleMouseUp}
-         style={{ 
-           cursor: scale > 1.0 ? 'grab' : 'default',
-           touchAction: 'none' // Prevents default touch actions for better control
-         }}>
+         onMouseLeave={handleMouseUp}>
       
       {/* Canvas wrapper with transform */}
       <div
@@ -181,10 +177,12 @@ export default function CanvasComponent() {
           transformOrigin: '0 0',
         }}
       >
+        <CanvasContextMenu>
         <canvas
           ref={canvasRef}
           className="border border-gray-300 shadow-md"
         />
+        </CanvasContextMenu>
       </div>
       
       {/* Zoom controls */}
