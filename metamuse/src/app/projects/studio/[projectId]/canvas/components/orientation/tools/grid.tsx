@@ -1,111 +1,96 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCanvas } from "../../contexts/canvas-context";
 
-const GRID_SIZE_OPTIONS = [10, 20, 50, 100]; // Grid size options in pixels
-
-export default function GridLines({ visible = true, gridSize = 20, color = "#e0e0e0" }) {
+export default function CanvasGrid({ 
+  enabled = false, 
+  gridSize = 20,
+  majorGridLine = 5, // How many grid lines before a major line
+  gridColor = "rgba(200, 200, 200, 0.2)",
+  majorGridColor = "rgba(180, 180, 180, 0.3)"
+}) {
   const gridCanvasRef = useRef(null);
-  const { dimensions, canvasRef } = useCanvas();
+  const { 
+    dimensions, 
+    canvasRef, 
+    scale = 1, 
+    position = { x: 0, y: 0 }
+  } = useCanvas();
   
+  // Draw the grid
+  const drawGrid = () => {
+    if (!gridCanvasRef.current || !dimensions || !enabled) return;
+    
+    const canvas = gridCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const { width, height } = dimensions;
+    
+    // Set canvas dimensions
+    canvas.width = width;
+    canvas.height = height;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Adjust grid size based on scale
+    const scaledGridSize = gridSize * scale;
+    
+    // If the grid would be too dense, skip drawing
+    if (scaledGridSize < 5) return;
+    
+    // Calculate the offset for the grid based on canvas position
+    const offsetX = position.x % scaledGridSize;
+    const offsetY = position.y % scaledGridSize;
+    
+    // Calculate visible range
+    const startX = -Math.floor(width / scaledGridSize) * scaledGridSize;
+    const startY = -Math.floor(height / scaledGridSize) * scaledGridSize;
+    const endX = width * 2;
+    const endY = height * 2;
+    
+    // Draw vertical grid lines
+    for (let x = startX; x <= endX; x += scaledGridSize) {
+      const pixelX = x + offsetX;
+      
+      // Determine if this is a major grid line
+      const isMajor = Math.round((x / scaledGridSize) % majorGridLine) === 0;
+      
+      ctx.beginPath();
+      ctx.moveTo(pixelX, 0);
+      ctx.lineTo(pixelX, height);
+      ctx.strokeStyle = isMajor ? majorGridColor : gridColor;
+      ctx.lineWidth = isMajor ? 1 : 0.5;
+      ctx.stroke();
+    }
+    
+    // Draw horizontal grid lines
+    for (let y = startY; y <= endY; y += scaledGridSize) {
+      const pixelY = y + offsetY;
+      
+      // Determine if this is a major grid line
+      const isMajor = Math.round((y / scaledGridSize) % majorGridLine) === 0;
+      
+      ctx.beginPath();
+      ctx.moveTo(0, pixelY);
+      ctx.lineTo(width, pixelY);
+      ctx.strokeStyle = isMajor ? majorGridColor : gridColor;
+      ctx.lineWidth = isMajor ? 1 : 0.5;
+      ctx.stroke();
+    }
+  };
+  
+  // Redraw grid when dimensions, scale, or position changes
   useEffect(() => {
-    if (!gridCanvasRef.current || !visible || !dimensions) return;
-    
-    const gridCanvas = gridCanvasRef.current;
-    const ctx = gridCanvas.getContext("2d");
-    
-    // Set canvas size to match the main canvas
-    gridCanvas.width = dimensions.width;
-    gridCanvas.height = dimensions.height;
-    
-    // Clear previous grid
-    ctx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
-    
-    // Draw grid
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 0.5;
-    
-    // Draw vertical lines
-    for (let x = 0; x <= gridCanvas.width; x += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, gridCanvas.height);
-      
-      // Make every 5th line slightly darker
-      if (x % (gridSize * 5) === 0) {
-        ctx.strokeStyle = "#c0c0c0";
-        ctx.lineWidth = 0.8;
-      } else {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 0.5;
-      }
-      
-      ctx.stroke();
-    }
-    
-    // Draw horizontal lines
-    for (let y = 0; y <= gridCanvas.height; y += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(gridCanvas.width, y);
-      
-      // Make every 5th line slightly darker
-      if (y % (gridSize * 5) === 0) {
-        ctx.strokeStyle = "#c0c0c0";
-        ctx.lineWidth = 0.8;
-      } else {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 0.5;
-      }
-      
-      ctx.stroke();
-    }
-  }, [dimensions, visible, gridSize, color]);
+    drawGrid();
+  }, [dimensions, scale, position, enabled, gridSize, majorGridLine]);
   
-  // Position grid canvas behind the main canvas
+  if (!enabled) return null;
+  
   return (
     <canvas
       ref={gridCanvasRef}
       className="absolute top-0 left-0 pointer-events-none"
-      style={{ 
-        visibility: visible ? "visible" : "hidden",
-        zIndex: -1
-      }}
+      style={{ zIndex: 5 }}
     />
   );
-}
-
-// Custom hook for grid snap functionality
-export function useGridSnap(gridSize = 20, enabled = false) {
-  const { canvasRef } = useCanvas();
-  
-  useEffect(() => {
-    if (!canvasRef.current || !enabled) return;
-    
-    const canvas = canvasRef.current;
-    
-    // Get Fabric.js canvas instance
-    const fabricCanvas = canvas.fabric;
-    if (!fabricCanvas) return;
-    
-    // Enable snapping to grid
-    fabricCanvas.on('object:moving', function(options) {
-      const target = options.target;
-      
-      // Snap to grid when moving
-      if (target) {
-        target.set({
-          left: Math.round(target.left / gridSize) * gridSize,
-          top: Math.round(target.top / gridSize) * gridSize
-        });
-      }
-    });
-    
-    // Clean up event listener
-    return () => {
-      fabricCanvas.off('object:moving');
-    };
-  }, [canvasRef, gridSize, enabled]);
-  
-  return { gridSize, GRID_SIZE_OPTIONS };
 }

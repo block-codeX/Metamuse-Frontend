@@ -2,214 +2,221 @@
 import { useEffect, useRef, useState } from "react";
 import { useCanvas } from "../../contexts/canvas-context";
 
-export default function SnapLines({ enabled = true, snapThreshold = 10, lineColor = "#2196f3" }) {
+export default function SnapLines({ 
+  enabled = true, 
+  snapThreshold = 10, 
+  lineColor = "#2196f3" 
+}) {
   const snapLinesCanvasRef = useRef(null);
-  const { dimensions, canvasRef } = useCanvas();
-  const [snapLines, setSnapLines] = useState({ horizontal: [], vertical: [] });
+  const { 
+    dimensions, 
+    canvasRef, 
+    scale = 1, 
+    position = { x: 0, y: 0 },
+    activeObject, 
+    allObjects,
+    guides = { horizontal: [], vertical: [] } 
+  } = useCanvas();
   
-  useEffect(() => {
-    if (!canvasRef.current || !enabled) return;
+  const [activeSnapLines, setActiveSnapLines] = useState({ 
+    horizontal: [], 
+    vertical: [] 
+  });
+  
+  // Calculate snap points for an object
+  const getObjectSnapPoints = (obj) => {
+    if (!obj) return { centers: [], edges: [] };
     
-    const canvas = canvasRef.current;
+    const { left, top, width, height } = obj;
+    const right = left + width;
+    const bottom = top + height;
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
     
-    // Get Fabric.js canvas instance
-    const fabricCanvas = canvas.fabric;
-    if (!fabricCanvas) return;
+    return {
+      centers: [
+        { type: 'horizontal', position: centerY, description: 'center' },
+        { type: 'vertical', position: centerX, description: 'center' }
+      ],
+      edges: [
+        { type: 'horizontal', position: top, description: 'top' },
+        { type: 'horizontal', position: bottom, description: 'bottom' },
+        { type: 'vertical', position: left, description: 'left' },
+        { type: 'vertical', position: right, description: 'right' }
+      ]
+    };
+  };
+  
+  // Check for snap alignments
+  const findSnapAlignments = () => {
+    if (!activeObject || !enabled) {
+      setActiveSnapLines({ horizontal: [], vertical: [] });
+      return;
+    }
     
-    // Function to calculate snap lines
-    const calculateSnapLines = (activeObject) => {
-      if (!activeObject) return { horizontal: [], vertical: [] };
+    const activePoints = getObjectSnapPoints(activeObject);
+    const horizontalSnaps = [];
+    const verticalSnaps = [];
+    
+    // A function to check if a point is close to another point
+    const isNearby = (a, b) => Math.abs(a - b) <= snapThreshold;
+    
+    // Check against each other object
+    allObjects.forEach(obj => {
+      if (obj === activeObject) return;
       
-      const objects = fabricCanvas.getObjects().filter(obj => obj !== activeObject);
-      const objectBounds = {
-        left: activeObject.left,
-        top: activeObject.top,
-        centerX: activeObject.left + activeObject.width * activeObject.scaleX / 2,
-        centerY: activeObject.top + activeObject.height * activeObject.scaleY / 2,
-        right: activeObject.left + activeObject.width * activeObject.scaleX,
-        bottom: activeObject.top + activeObject.height * activeObject.scaleY
-      };
+      const objPoints = getObjectSnapPoints(obj);
       
-      const horizontalLines = [];
-      const verticalLines = [];
-      
-      // Check each object for possible snap points
-      objects.forEach(obj => {
-        const objBounds = {
-          left: obj.left,
-          top: obj.top,
-          centerX: obj.left + obj.width * obj.scaleX / 2,
-          centerY: obj.top + obj.height * obj.scaleY / 2,
-          right: obj.left + obj.width * obj.scaleX,
-          bottom: obj.top + obj.height * obj.scaleY
-        };
-        
-        // Check horizontal alignments (top, center, bottom)
-        [
-          { value: objectBounds.top, objValue: objBounds.top, type: 'top' },
-          { value: objectBounds.centerY, objValue: objBounds.centerY, type: 'center' },
-          { value: objectBounds.bottom, objValue: objBounds.bottom, type: 'bottom' }
-        ].forEach(({ value, objValue, type }) => {
-          if (Math.abs(value - objValue) < snapThreshold) {
-            horizontalLines.push({ y: objValue, type });
-            
-            // Snap the object
-            if (enabled) {
-              if (type === 'top') activeObject.set('top', objValue);
-              else if (type === 'center') activeObject.set('top', objValue - activeObject.height * activeObject.scaleY / 2);
-              else if (type === 'bottom') activeObject.set('top', objValue - activeObject.height * activeObject.scaleY);
+      // Check active centers against object edges and centers
+      activePoints.centers.forEach(activePoint => {
+        [...objPoints.centers, ...objPoints.edges].forEach(objPoint => {
+          if (activePoint.type === objPoint.type && isNearby(activePoint.position, objPoint.position)) {
+            if (activePoint.type === 'horizontal') {
+              horizontalSnaps.push({
+                position: objPoint.position,
+                description: `${activePoint.description} to ${objPoint.description}`
+              });
+            } else {
+              verticalSnaps.push({
+                position: objPoint.position,
+                description: `${activePoint.description} to ${objPoint.description}`
+              });
             }
           }
         });
-        
-        // Check vertical alignments (left, center, right)
-        [
-          { value: objectBounds.left, objValue: objBounds.left, type: 'left' },
-          { value: objectBounds.centerX, objValue: objBounds.centerX, type: 'center' },
-          { value: objectBounds.right, objValue: objBounds.right, type: 'right' }
-        ].forEach(({ value, objValue, type }) => {
-          if (Math.abs(value - objValue) < snapThreshold) {
-            verticalLines.push({ x: objValue, type });
-            
-            // Snap the object
-            if (enabled) {
-              if (type === 'left') activeObject.set('left', objValue);
-              else if (type === 'center') activeObject.set('left', objValue - activeObject.width * activeObject.scaleX / 2);
-              else if (type === 'right') activeObject.set('left', objValue - activeObject.width * activeObject.scaleX);
+      });
+      
+      // Check active edges against object edges and centers
+      activePoints.edges.forEach(activePoint => {
+        [...objPoints.centers, ...objPoints.edges].forEach(objPoint => {
+          if (activePoint.type === objPoint.type && isNearby(activePoint.position, objPoint.position)) {
+            if (activePoint.type === 'horizontal') {
+              horizontalSnaps.push({
+                position: objPoint.position,
+                description: `${activePoint.description} to ${objPoint.description}`
+              });
+            } else {
+              verticalSnaps.push({
+                position: objPoint.position,
+                description: `${activePoint.description} to ${objPoint.description}`
+              });
             }
           }
         });
       });
-      
-      // Canvas edges (0, width, height)
-      [
-        { value: objectBounds.top, objValue: 0, type: 'top' },
-        { value: objectBounds.bottom, objValue: dimensions.height, type: 'bottom' }
-      ].forEach(({ value, objValue, type }) => {
-        if (Math.abs(value - objValue) < snapThreshold) {
-          horizontalLines.push({ y: objValue, type });
-          
-          // Snap to canvas edge
-          if (enabled) {
-            if (type === 'top') activeObject.set('top', objValue);
-            else if (type === 'bottom') activeObject.set('top', objValue - activeObject.height * activeObject.scaleY);
-          }
-        }
-      });
-      
-      [
-        { value: objectBounds.left, objValue: 0, type: 'left' },
-        { value: objectBounds.right, objValue: dimensions.width, type: 'right' }
-      ].forEach(({ value, objValue, type }) => {
-        if (Math.abs(value - objValue) < snapThreshold) {
-          verticalLines.push({ x: objValue, type });
-          
-          // Snap to canvas edge
-          if (enabled) {
-            if (type === 'left') activeObject.set('left', objValue);
-            else if (type === 'right') activeObject.set('left', objValue - activeObject.width * activeObject.scaleX);
-          }
-        }
-      });
-      
-      // Center of canvas
-      const canvasCenterX = dimensions.width / 2;
-      const canvasCenterY = dimensions.height / 2;
-      
-      if (Math.abs(objectBounds.centerX - canvasCenterX) < snapThreshold) {
-        verticalLines.push({ x: canvasCenterX, type: 'center' });
-        if (enabled) {
-          activeObject.set('left', canvasCenterX - activeObject.width * activeObject.scaleX / 2);
-        }
-      }
-      
-      if (Math.abs(objectBounds.centerY - canvasCenterY) < snapThreshold) {
-        horizontalLines.push({ y: canvasCenterY, type: 'center' });
-        if (enabled) {
-          activeObject.set('top', canvasCenterY - activeObject.height * activeObject.scaleY / 2);
-        }
-      }
-      
-      return { horizontal: horizontalLines, vertical: verticalLines };
-    };
-    
-    // Add event listeners for fabric canvas
-    fabricCanvas.on('object:moving', function(options) {
-      const activeObject = options.target;
-      const lines = calculateSnapLines(activeObject);
-      setSnapLines(lines);
-      fabricCanvas.requestRenderAll();
     });
     
-    fabricCanvas.on('mouse:up', function() {
-      // Clear snap lines when done moving
-      setSnapLines({ horizontal: [], vertical: [] });
+    // Also check against guides
+    guides.horizontal.forEach(guidePos => {
+      [...activePoints.centers, ...activePoints.edges]
+        .filter(point => point.type === 'horizontal')
+        .forEach(point => {
+          if (isNearby(point.position, guidePos)) {
+            horizontalSnaps.push({
+              position: guidePos,
+              description: `${point.description} to guide`,
+              isGuide: true
+            });
+          }
+        });
     });
     
-    // Clean up
-    return () => {
-      fabricCanvas.off('object:moving');
-      fabricCanvas.off('mouse:up');
-    };
-  }, [canvasRef, snapThreshold, enabled, dimensions]);
+    guides.vertical.forEach(guidePos => {
+      [...activePoints.centers, ...activePoints.edges]
+        .filter(point => point.type === 'vertical')
+        .forEach(point => {
+          if (isNearby(point.position, guidePos)) {
+            verticalSnaps.push({
+              position: guidePos,
+              description: `${point.description} to guide`,
+              isGuide: true
+            });
+          }
+        });
+    });
+    
+    // Update the active snap lines
+    setActiveSnapLines({
+      horizontal: horizontalSnaps,
+      vertical: verticalSnaps
+    });
+  };
   
-  // Draw snap lines when they change
-  useEffect(() => {
+  // Draw the snap lines
+  const drawSnapLines = () => {
     if (!snapLinesCanvasRef.current || !dimensions) return;
     
-    const snapCanvas = snapLinesCanvasRef.current;
-    const ctx = snapCanvas.getContext("2d");
+    const canvas = snapLinesCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const { width, height } = dimensions;
     
-    // Set canvas size to match the main canvas
-    snapCanvas.width = dimensions.width;
-    snapCanvas.height = dimensions.height;
+    // Set canvas dimensions
+    canvas.width = width;
+    canvas.height = height;
     
-    // Clear previous lines
-    ctx.clearRect(0, 0, snapCanvas.width, snapCanvas.height);
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
     
-    // Draw lines
+    // Set line style
     ctx.strokeStyle = lineColor;
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 3]); // Dashed line
     
     // Draw horizontal snap lines
-    snapLines.horizontal.forEach(line => {
+    activeSnapLines.horizontal.forEach(line => {
+      const y = (line.position * scale) + position.y;
       ctx.beginPath();
-      ctx.moveTo(0, line.y);
-      ctx.lineTo(snapCanvas.width, line.y);
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
       ctx.stroke();
+      
+      // Draw small label if needed
+      if (line.description && !line.isGuide) {
+        ctx.fillStyle = 'rgba(33, 150, 243, 0.8)';
+        ctx.fillRect(5, y - 10, ctx.measureText(line.description).width + 6, 16);
+        ctx.fillStyle = 'white';
+        ctx.fillText(line.description, 8, y);
+      }
     });
     
     // Draw vertical snap lines
-    snapLines.vertical.forEach(line => {
+    activeSnapLines.vertical.forEach(line => {
+      const x = (line.position * scale) + position.x;
       ctx.beginPath();
-      ctx.moveTo(line.x, 0);
-      ctx.lineTo(line.x, snapCanvas.height);
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
       ctx.stroke();
+      
+      // Draw small label if needed
+      if (line.description && !line.isGuide) {
+        ctx.fillStyle = 'rgba(33, 150, 243, 0.8)';
+        ctx.fillRect(x + 2, 5, ctx.measureText(line.description).width + 6, 16);
+        ctx.fillStyle = 'white';
+        ctx.fillText(line.description, x + 5, 18);
+      }
     });
     
-    ctx.setLineDash([]); // Reset dash
-  }, [snapLines, dimensions, lineColor]);
+    // Reset line dash
+    ctx.setLineDash([]);
+  };
   
-  // Position snap lines canvas above the main canvas
+  // Find snap alignments when active object changes
+  useEffect(() => {
+    findSnapAlignments();
+  }, [activeObject, allObjects, enabled, guides]);
+  
+  // Draw snap lines when they change
+  useEffect(() => {
+    drawSnapLines();
+  }, [activeSnapLines, dimensions, scale, position]);
+  
+  if (!enabled) return null;
+  
   return (
     <canvas
       ref={snapLinesCanvasRef}
       className="absolute top-0 left-0 pointer-events-none"
-      style={{ zIndex: 10 }}
+      style={{ zIndex: 15 }}
     />
   );
-}
-
-// Custom hook for snap functionality
-export function useSnapLines(options = { enabled: true, threshold: 10 }) {
-  const [snapEnabled, setSnapEnabled] = useState(options.enabled);
-  const [snapThreshold, setSnapThreshold] = useState(options.threshold);
-  
-  return {
-    snapEnabled,
-    setSnapEnabled,
-    snapThreshold,
-    setSnapThreshold
-  };
 }

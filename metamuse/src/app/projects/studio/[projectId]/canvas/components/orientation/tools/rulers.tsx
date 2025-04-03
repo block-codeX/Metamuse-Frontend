@@ -1,243 +1,287 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import { useCanvas } from "../../contexts/canvas-context";
+"use client"
+import React, { useRef, useEffect, useCallback } from 'react';
+import { useCanvas } from '../../contexts/canvas-context'; // Adjust path if needed
 
-// Constants
-const RULER_SIZE = 20; // Width/height of rulers in pixels
-const TICK_INTERVALS = [5, 10, 25, 50, 100, 200, 500]; // Possible tick intervals
-const MAJOR_INTERVAL_FACTOR = 10; // Major tick every X minor ticks
+interface RulersProps {
+  containerRef: React.RefObject<HTMLDivElement>;
+  scale: number;
+  position: { x: number; y: number };
+  onAddGuideline: (orientation: 'horizontal' | 'vertical', position: number) => void;
+}
 
-export default function Rulers({ 
-  visible = true, 
-  color = "#333333", 
-  backgroundColor = "#f5f5f5",
-  scale = 1, 
-  offset = { x: 0, y: 0 } 
-}) {
-  const horizontalRulerRef = useRef(null);
-  const verticalRulerRef = useRef(null);
-  const cornerBoxRef = useRef(null);
-  const { dimensions, canvasRef } = useCanvas();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
-  // Calculate appropriate tick interval based on scale
-  const getTickInterval = (scale) => {
-    // Find the first interval that gives enough space between ticks when scaled
-    const minPixelsBetweenTicks = 10;
-    return TICK_INTERVALS.find(interval => interval * scale > minPixelsBetweenTicks) || TICK_INTERVALS[TICK_INTERVALS.length - 1];
+const RULER_SIZE = 30; // Width/Height of the ruler in pixels
+const MARKING_COLOR = '#888';
+const TEXT_COLOR = '#333';
+const CANVAS_AREA_COLOR = 'rgba(0, 0, 0, 0.05)'; // Subtle background for canvas area on ruler
+
+const Rulers: React.FC<RulersProps> = ({ containerRef, scale, position, onAddGuideline }) => {
+  const horizontalRulerRef = useRef<HTMLCanvasElement>(null);
+  const verticalRulerRef = useRef<HTMLCanvasElement>(null);
+  const { dimensions, canvasRef } = useCanvas(); // Get canvas dimensions
+
+  const draggingGuideline = useRef<{ orientation: 'horizontal' | 'vertical'; element: HTMLDivElement | null }>({ orientation: 'horizontal', element: null });
+
+  // --- Drawing Logic ---
+  const drawRulers = useCallback(() => {
+    if (!containerRef.current || !horizontalRulerRef.current || !verticalRulerRef.current || !canvasRef.current) return;
+
+    const containerWidth = containerRef.current.clientWidth;
+    const containerHeight = containerRef.current.clientHeight;
+
+    const hCtx = horizontalRulerRef.current.getContext('2d');
+    const vCtx = verticalRulerRef.current.getContext('2d');
+
+    if (!hCtx || !vCtx) return;
+
+    // --- Clear Rulers ---
+    horizontalRulerRef.current.width = containerWidth;
+    horizontalRulerRef.current.height = RULER_SIZE;
+    verticalRulerRef.current.width = RULER_SIZE;
+    verticalRulerRef.current.height = containerHeight;
+
+    hCtx.clearRect(0, 0, containerWidth, RULER_SIZE);
+    vCtx.clearRect(0, 0, RULER_SIZE, containerHeight);
+
+    hCtx.fillStyle = '#f0f0f0'; // Ruler background
+    vCtx.fillStyle = '#f0f0f0';
+    hCtx.fillRect(0, 0, containerWidth, RULER_SIZE);
+    vCtx.fillRect(0, 0, RULER_SIZE, containerHeight);
+
+    // --- Calculate Visible Canvas Range ---
+    // Top-left corner of the viewport in canvas coordinates
+    const viewX = -position.x / scale;
+    const viewY = -position.y / scale;
+    // Bottom-right corner of the viewport in canvas coordinates
+    // const viewXEnd = viewX + containerWidth / scale;
+    // const viewYEnd = viewY + containerHeight / scale;
+
+    // --- Highlight Canvas Area on Rulers ---
+     hCtx.fillStyle = CANVAS_AREA_COLOR;
+     vCtx.fillStyle = CANVAS_AREA_COLOR;
+
+     // Horizontal Ruler Canvas Area
+     const canvasStartXOnRuler = position.x - RULER_SIZE;
+     const canvasWidthOnRuler = dimensions.width * scale;
+     hCtx.fillRect(canvasStartXOnRuler, 0, canvasWidthOnRuler, RULER_SIZE);
+ 
+     // Vertical Ruler Canvas Area:
+     // Start position on the ruler's canvas = canvas visual start Y - ruler visual start Y
+     const canvasStartYOnRuler = position.y - RULER_SIZE;
+     const canvasHeightOnRuler = dimensions.height * scale;
+     vCtx.fillRect(0, canvasStartYOnRuler, RULER_SIZE, canvasHeightOnRuler);
+
+
+    // --- Draw Markings ---
+    hCtx.strokeStyle = MARKING_COLOR;
+    vCtx.strokeStyle = MARKING_COLOR;
+    hCtx.fillStyle = TEXT_COLOR;
+    vCtx.fillStyle = TEXT_COLOR;
+    hCtx.font = '10px Arial';
+    vCtx.font = '10px Arial';
+    hCtx.textAlign = 'center';
+    vCtx.textAlign = 'center'; // Adjust as needed
+
+    // Determine interval based on zoom
+    let interval = 100;
+    if (scale > 2) interval = 50;
+    if (scale > 5) interval = 10;
+    if (scale > 10) interval = 5;
+     if (scale < 0.5) interval = 200;
+     if (scale < 0.2) interval = 500;
+
+
+    // --- Horizontal Markings ---
+    hCtx.beginPath();
+    const startX = Math.floor(viewX / interval) * interval;
+    for (let x = startX; x * scale < containerWidth - position.x ; x += interval) {
+      const screenX = position.x + x * scale + RULER_SIZE; // Adjust for vertical ruler offset
+        if (screenX < RULER_SIZE) continue; // Skip markings hidden behind vertical ruler
+
+      hCtx.moveTo(screenX, RULER_SIZE);
+      hCtx.lineTo(screenX, RULER_SIZE - (x % (interval * 5) === 0 ? 10 : 5)); // Longer lines every 5 intervals
+      hCtx.fillText(String(x), screenX, 12);
+    }
+    hCtx.stroke();
+
+    // --- Vertical Markings ---
+    vCtx.beginPath();
+    const startY = Math.floor(viewY / interval) * interval;
+     for (let y = startY; y * scale < containerHeight - position.y; y += interval) {
+      const screenY = position.y + y * scale + RULER_SIZE; // Adjust for horizontal ruler offset
+        if (screenY < RULER_SIZE) continue; // Skip markings hidden behind horizontal ruler
+
+      vCtx.moveTo(RULER_SIZE, screenY);
+      vCtx.lineTo(RULER_SIZE - (y % (interval * 5) === 0 ? 10 : 5), screenY); // Longer lines
+
+       // Draw text rotated (optional, can be complex) or beside the line
+       vCtx.save();
+       vCtx.translate(12, screenY);
+       vCtx.rotate(-Math.PI / 2); // Rotate text
+       vCtx.fillText(String(y), 0, 3);
+       vCtx.restore();
+
+      // Alternative: Text next to ruler
+      // vCtx.fillText(String(y), 10, screenY + 3);
+    }
+    vCtx.stroke();
+
+    // Draw border lines
+    hCtx.beginPath();
+    hCtx.moveTo(RULER_SIZE, RULER_SIZE - 0.5);
+    hCtx.lineTo(containerWidth, RULER_SIZE - 0.5);
+    hCtx.strokeStyle = '#aaa';
+    hCtx.stroke();
+
+    vCtx.beginPath();
+    vCtx.moveTo(RULER_SIZE - 0.5, RULER_SIZE);
+    vCtx.lineTo(RULER_SIZE - 0.5, containerHeight);
+    vCtx.strokeStyle = '#aaa';
+    vCtx.stroke();
+
+
+  }, [scale, position, dimensions, containerRef, canvasRef]);
+
+  useEffect(() => {
+    drawRulers();
+  }, [drawRulers]); // Redraw when scale, position, or dimensions change
+
+  // --- Guideline Dragging Logic ---
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>, orientation: 'horizontal' | 'vertical') => {
+    if (!containerRef.current) return;
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    // Prevent interfering with panning
+    if (e.button !== 0 || e.ctrlKey || e.metaKey) return;
+
+    draggingGuideline.current.orientation = orientation;
+
+    // Create visual feedback element
+    const dragIndicator = document.createElement('div');
+    dragIndicator.style.position = 'absolute';
+    dragIndicator.style.pointerEvents = 'none'; // Don't let it interfere with mouse events
+    dragIndicator.style.zIndex = '1000'; // Ensure it's visible
+
+    if (orientation === 'horizontal') {
+        dragIndicator.style.left = '0';
+        dragIndicator.style.width = '100%';
+        dragIndicator.style.height = '1px';
+        dragIndicator.style.backgroundColor = 'dodgerblue';
+        dragIndicator.style.top = `${e.clientY - containerRect.top}px`;
+    } else { // Vertical
+        dragIndicator.style.top = '0';
+        dragIndicator.style.height = '100%';
+        dragIndicator.style.width = '1px';
+        dragIndicator.style.backgroundColor = 'dodgerblue';
+        dragIndicator.style.left = `${e.clientX - containerRect.left}px`;
+    }
+
+    containerRef.current.appendChild(dragIndicator);
+    draggingGuideline.current.element = dragIndicator;
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
-  
-  // Draw the rulers
-  useEffect(() => {
-    if (!horizontalRulerRef.current || !verticalRulerRef.current || !dimensions || !visible) return;
-    
-    const hRuler = horizontalRulerRef.current;
-    const vRuler = verticalRulerRef.current;
-    const hCtx = hRuler.getContext("2d");
-    const vCtx = vRuler.getContext("2d");
-    
-    // Set canvas sizes
-    hRuler.width = dimensions.width;
-    hRuler.height = RULER_SIZE;
-    vRuler.width = RULER_SIZE;
-    vRuler.height = dimensions.height;
-    
-    // Clear previous drawings
-    hCtx.fillStyle = backgroundColor;
-    hCtx.fillRect(0, 0, hRuler.width, hRuler.height);
-    vCtx.fillStyle = backgroundColor;
-    vCtx.fillRect(0, 0, vRuler.width, vRuler.height);
-    
-    // Set text and line styles
-    hCtx.fillStyle = color;
-    hCtx.strokeStyle = color;
-    hCtx.font = "10px Arial";
-    hCtx.textAlign = "center";
-    vCtx.fillStyle = color;
-    vCtx.strokeStyle = color;
-    vCtx.font = "10px Arial";
-    vCtx.textBaseline = "middle";
-    
-    // Calculate tick interval based on scale
-    const tickInterval = getTickInterval(scale);
-    const majorTickInterval = tickInterval * MAJOR_INTERVAL_FACTOR;
-    
-    // Draw horizontal ruler ticks and numbers
-    const startX = Math.floor(-offset.x / scale / tickInterval) * tickInterval;
-    const endX = Math.ceil((dimensions.width / scale - offset.x) / tickInterval) * tickInterval;
-    
-    for (let x = startX; x <= endX; x += tickInterval) {
-      const pixelX = (x + offset.x) * scale;
-      
-      // Skip if outside visible area
-      if (pixelX < 0 || pixelX > dimensions.width) continue;
-      
-      const isMajorTick = x % majorTickInterval === 0;
-      const tickHeight = isMajorTick ? 12 : 6;
-      
-      // Draw tick
-      hCtx.beginPath();
-      hCtx.moveTo(pixelX, RULER_SIZE);
-      hCtx.lineTo(pixelX, RULER_SIZE - tickHeight);
-      hCtx.stroke();
-      
-      // Draw number at major ticks
-      if (isMajorTick) {
-        hCtx.fillText(x.toString(), pixelX, 10);
+
+   const handleMouseMove = (e: MouseEvent) => {
+      if (!draggingGuideline.current.element || !containerRef.current) return;
+
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const indicator = draggingGuideline.current.element;
+
+      if (draggingGuideline.current.orientation === 'horizontal') {
+          indicator.style.top = `${e.clientY - containerRect.top}px`;
+      } else { // Vertical
+          indicator.style.left = `${e.clientX - containerRect.left}px`;
       }
-    }
-    
-    // Draw vertical ruler ticks and numbers
-    const startY = Math.floor(-offset.y / scale / tickInterval) * tickInterval;
-    const endY = Math.ceil((dimensions.height / scale - offset.y) / tickInterval) * tickInterval;
-    
-    for (let y = startY; y <= endY; y += tickInterval) {
-      const pixelY = (y + offset.y) * scale;
-      
-      // Skip if outside visible area
-      if (pixelY < 0 || pixelY > dimensions.height) continue;
-      
-      const isMajorTick = y % majorTickInterval === 0;
-      const tickWidth = isMajorTick ? 12 : 6;
-      
-      // Draw tick
-      vCtx.beginPath();
-      vCtx.moveTo(RULER_SIZE, pixelY);
-      vCtx.lineTo(RULER_SIZE - tickWidth, pixelY);
-      vCtx.stroke();
-      
-      // Draw number at major ticks
-      if (isMajorTick) {
-        vCtx.save();
-        vCtx.translate(10, pixelY);
-        vCtx.fillText(y.toString(), 0, 0);
-        vCtx.restore();
-      }
-    }
-    
-    // Draw mouse position indicators if mouse is over canvas
-    if (mousePosition.x > RULER_SIZE && mousePosition.y > RULER_SIZE) {
-      // Horizontal indicator
-      hCtx.fillStyle = "rgba(255, 0, 0, 0.6)";
-      hCtx.fillRect(mousePosition.x - 0.5, 0, 1, RULER_SIZE);
-      
-      // Vertical indicator
-      vCtx.fillStyle = "rgba(255, 0, 0, 0.6)";
-      vCtx.fillRect(0, mousePosition.y - 0.5, RULER_SIZE, 1);
-    }
-  }, [dimensions, scale, offset, visible, backgroundColor, color, mousePosition]);
-  
-  // Handle mouse movement to show position indicators
-  useEffect(() => {
-    if (!canvasRef.current || !visible) return;
-    
-    const container = canvasRef.current.parentElement;
-    if (!container) return;
-    
-    const handleMouseMove = (e) => {
-      // Get mouse position relative to container
-      const rect = container.getBoundingClientRect();
-      setMousePosition({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
-    };
-    
-    const handleMouseLeave = () => {
-      setMousePosition({ x: 0, y: 0 });
-    };
-    
-    container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('mouseleave', handleMouseLeave);
-    
-    return () => {
-      container.removeEventListener('mousemove', handleMouseMove);
-      container.removeEventListener('mouseleave', handleMouseLeave);
-    };
-  }, [canvasRef, visible]);
-  
-  // Handle the corner box
-  useEffect(() => {
-    if (!cornerBoxRef.current || !visible) return;
-    
-    const corner = cornerBoxRef.current;
-    const ctx = corner.getContext("2d");
-    
-    // Set corner box size
-    corner.width = RULER_SIZE;
-    corner.height = RULER_SIZE;
-    
-    // Fill with background color
-    ctx.fillStyle = backgroundColor;
-    ctx.fillRect(0, 0, RULER_SIZE, RULER_SIZE);
-    
-    // Draw a grid icon or origin marker
-    ctx.strokeStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(5, RULER_SIZE / 2);
-    ctx.lineTo(RULER_SIZE - 5, RULER_SIZE / 2);
-    ctx.moveTo(RULER_SIZE / 2, 5);
-    ctx.lineTo(RULER_SIZE / 2, RULER_SIZE - 5);
-    ctx.stroke();
-    
-  }, [visible, backgroundColor, color]);
-  
-  if (!visible) return null;
-  
+   };
+
+   const handleMouseUp = (e: MouseEvent) => {
+     if (draggingGuideline.current.element && containerRef.current) {
+        containerRef.current.removeChild(draggingGuideline.current.element); // Remove visual feedback
+     }
+
+     document.removeEventListener('mousemove', handleMouseMove);
+     document.removeEventListener('mouseup', handleMouseUp);
+
+     // --- Calculate canvas position and add guideline ---
+     if (!containerRef.current || !canvasRef.current) return;
+
+     const containerRect = containerRef.current.getBoundingClientRect();
+     const targetX = e.clientX - containerRect.left;
+     const targetY = e.clientY - containerRect.top;
+
+     // Check if mouse is released over the main canvas area (not rulers)
+     const isOverCanvasArea = targetX >= RULER_SIZE && targetY >= RULER_SIZE;
+
+     if (isOverCanvasArea) {
+         if (draggingGuideline.current.orientation === 'horizontal') {
+            // Calculate Y position in canvas coordinates
+            const canvasY = (targetY - RULER_SIZE - position.y) / scale;
+            onAddGuideline('horizontal', canvasY);
+            console.log("Adding H guideline at", canvasY);
+         } else { // Vertical
+             // Calculate X position in canvas coordinates
+            const canvasX = (targetX - RULER_SIZE - position.x) / scale;
+            onAddGuideline('vertical', canvasX);
+            console.log("Adding V guideline at", canvasX);
+         }
+     }
+
+
+     draggingGuideline.current.element = null;
+   };
+
   return (
     <>
-      {/* Corner box (top-left) */}
-      <div 
-        className="absolute top-0 left-0 z-20"
-        style={{ width: RULER_SIZE, height: RULER_SIZE }}
-      >
-        <canvas ref={cornerBoxRef} />
-      </div>
-      
-      {/* Horizontal ruler (top) */}
-      <div 
-        className="absolute top-0 left-0 z-10"
-        style={{ marginLeft: RULER_SIZE, height: RULER_SIZE }}
+      {/* Corner Box */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: `${RULER_SIZE}px`,
+          height: `${RULER_SIZE}px`,
+          backgroundColor: '#ddd', // A slightly different color for the corner
+           borderRight: '1px solid #aaa',
+           borderBottom: '1px solid #aaa',
+          zIndex: 11, // Above rulers
+        }}
+      />
+      {/* Horizontal Ruler */}
+      <div
+        style={{
+          position: 'absolute',
+          left: `${RULER_SIZE}px`, // Offset by vertical ruler width
+          top: 0,
+          height: `${RULER_SIZE}px`,
+          width: `calc(100% - ${RULER_SIZE}px)`, // Fill remaining width
+          overflow: 'hidden',
+          cursor: 'ns-resize', // Indicate vertical dragging possibility
+           zIndex: 10,
+        }}
+         onMouseDown={(e) => handleMouseDown(e, 'horizontal')}
       >
         <canvas ref={horizontalRulerRef} />
       </div>
-      
-      {/* Vertical ruler (left) */}
-      <div 
-        className="absolute top-0 left-0 z-10"
-        style={{ marginTop: RULER_SIZE, width: RULER_SIZE }}
+      {/* Vertical Ruler */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: `${RULER_SIZE}px`, // Offset by horizontal ruler height
+          width: `${RULER_SIZE}px`,
+          height: `calc(100% - ${RULER_SIZE}px)`, // Fill remaining height
+          overflow: 'hidden',
+           cursor: 'ew-resize', // Indicate horizontal dragging possibility
+           zIndex: 10,
+        }}
+        onMouseDown={(e) => handleMouseDown(e, 'vertical')}
       >
         <canvas ref={verticalRulerRef} />
       </div>
     </>
   );
-}
+};
 
-// Custom hook for ruler functionality
-export function useRulers(initialVisible = true) {
-  const [rulersVisible, setRulersVisible] = useState(initialVisible);
-  const { canvasRef } = useCanvas();
-  
-  // Get world coordinates based on screen coordinates
-  const getWorldCoordinates = (screenX, screenY, scale, offset) => {
-    return {
-      x: (screenX / scale) - offset.x,
-      y: (screenY / scale) - offset.y
-    };
-  };
-  
-  // Get screen coordinates based on world coordinates
-  const getScreenCoordinates = (worldX, worldY, scale, offset) => {
-    return {
-      x: (worldX + offset.x) * scale,
-      y: (worldY + offset.y) * scale
-    };
-  };
-  
-  return {
-    rulersVisible,
-    setRulersVisible,
-    getWorldCoordinates,
-    getScreenCoordinates
-  };
-}
+export default Rulers;
