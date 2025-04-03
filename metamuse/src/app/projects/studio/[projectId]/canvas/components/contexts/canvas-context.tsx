@@ -116,7 +116,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useCanvas(): CanvasContextType {
+export function   useCanvas(): CanvasContextType {
   const context = useContext(CanvasContext);
   if (!context) {
     throw new Error("useCanvas must be used within a CanvasProvider");

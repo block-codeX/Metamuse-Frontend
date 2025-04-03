@@ -6,6 +6,8 @@ import TextFormatting from "./formatting/text";
 import OutlineFilters from "./formatting/pictures";
 import Commands from "./commands/command";
 import { CanvasOrientationSwitcher } from "./orientation/tools/switcher";
+import { Button } from "@/components/ui/button";
+import { useZoomPan } from "./orientation/tools/zoom";
 
 export default function TopSideTools() {
   const {
@@ -20,7 +22,7 @@ export default function TopSideTools() {
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
-
+  const {resetToFit} = useZoomPan()
   // Update Brush Width
   const updateBrushWidth = (width, type) => {
     if (!canvas) return;
@@ -66,6 +68,12 @@ export default function TopSideTools() {
       {/* Commands */}
       <Commands/>
       <CanvasOrientationSwitcher/>
+      <div className="flex items-center gap-4 p-2 border-b">
+      <Button onClick={resetToFit} variant="outline">
+        Fit to Screen
+      </Button>
+      {/* Other tools... */}
+    </div>
     </div>
   );
 }

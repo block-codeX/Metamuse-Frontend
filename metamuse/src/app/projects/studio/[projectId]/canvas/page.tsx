@@ -7,12 +7,15 @@ import LeftSideTools from "./components/left-side-tools";
 import TopSideTools from "./components/top-side-tools";
 import CanvasSyncProvider from "./components/contexts/canvas-sync-context";
 import { useParams } from "next/navigation";
+import { useZoomPan } from "./components/orientation/tools/zoom";
+import { useCanvasOrientation } from "./components/orientation/hooks/orientation";
 // import RightSideTools from "./components/right-side-tools"; // You'll need to create this
 
 export default function Home() {
   const { projectId } = useParams();
+  
   return (
-    <CanvasProvider>
+    <CanvasProvider >
       <CanvasSyncProvider projectId={projectId?.toString() as string}>
         <div className="w-full h-[calc(100vh-60px)] fixed flex flex-col border border-red">
           {/* Top Toolbar */}
@@ -28,7 +31,7 @@ export default function Home() {
             </div>
 
             {/* Canvas Area - Central and Largest */}
-            <div className="flex-1 p-4 bg-gray-300 overflow-auto flex flex-col items-center justify-center">
+            <div className="flex-1 bg-gray-300 overflow-auto   flex flex-row items-center justify-center relative">
               <CanvasComponent />
             </div>
 

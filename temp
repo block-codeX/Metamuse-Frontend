@@ -34,9 +34,20 @@ export default function CanvasComponent() {
     return Math.min(widthRatio, heightRatio);
   }, [canvasRef]);
   
+  // Determine if canvas is larger than viewport when zoomed
+  const isCanvasLargerThanViewport = () => {
+    if (!canvasRef.current || !containerRef.current) return false;
+    
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    
+    return (canvas.width * scale > container.clientWidth) || 
+           (canvas.height * scale > container.clientHeight);
+  };
 
   // Handle zoom with mouse wheel
   const handleWheel = (e) => {
+    if (e.ctrlKey || e.metaKey) {
       // Zoom if control/command key is pressed
       e.preventDefault();
       
@@ -54,7 +65,25 @@ export default function CanvasComponent() {
       
       setScale(newScale);
       setPosition({ x: newX, y: newY });
-  
+    } else if (isCanvasLargerThanViewport()) {
+      // Allow native scrolling when zoomed in and canvas is larger than viewport
+      // Handle horizontal scroll with shift key
+      if (e.shiftKey) {
+        e.preventDefault();
+        setPosition(prev => ({
+          x: prev.x - e.deltaY,
+          y: prev.y
+        }));
+      } else {
+        // For vertical scrolling without shift, we need to handle it ourselves
+        // to prevent unwanted page scrolling
+        e.preventDefault();
+        setPosition(prev => ({
+          x: prev.x,
+          y: prev.y - e.deltaY
+        }));
+      }
+    }
   };
   
   // Pan handling
@@ -62,7 +91,8 @@ export default function CanvasComponent() {
     // Pan with middle mouse button (button === 1) or when holding space key with left mouse button
     // or when zoomed in beyond 1.0 and using left mouse button directly
     if (e.button === 1 || 
-        (e.button === 0 && (e.ctrlKey))) {
+        (e.button === 0 && e.getModifierState("Space")) || 
+        (e.button === 0 && scale > 1.0)) {
       setIsPanning(true);
       setStartPan({ x: e.clientX - position.x, y: e.clientY - position.y });
       
@@ -73,7 +103,7 @@ export default function CanvasComponent() {
     }
   };
   
-  const handleMouseMove = (e) => {  
+  const handleMouseMove = (e) => {
     if (isPanning) {
       setPosition({
         x: e.clientX - startPan.x,
@@ -195,7 +225,7 @@ export default function CanvasComponent() {
             setScale(newScale);
             
             // If we're not already panned, keep canvas centered during zoom
-            if (!isPanning) {
+            if (!isPanning && !isCanvasLargerThanViewport()) {
               centerCanvas(newScale);
             }
           }}
@@ -210,7 +240,7 @@ export default function CanvasComponent() {
             setScale(newScale);
             
             // If we're not already panned, keep canvas centered during zoom
-            if (!isPanning  ) {
+            if (!isPanning && !isCanvasLargerThanViewport()) {
               centerCanvas(newScale);
             }
           }}
@@ -232,14 +262,16 @@ export default function CanvasComponent() {
       </div>
       
       {/* Panning info overlay - shows only when zoomed in */}
+      {scale > 1 && (
         <div className="absolute top-4 left-4 bg-white bg-opacity-75 p-2 rounded-md shadow-md text-sm">
           <p>Click and drag to pan</p>
-          <p className="text-xs text-gray-600 mt-1">Mousewheel to zoom</p>
-          <p className="text-xs text-gray-600">Ctrl + hold and drag to pan</p>
+          <p className="text-xs text-gray-600 mt-1">Mousewheel to scroll</p>
+          <p className="text-xs text-gray-600">Shift+wheel for horizontal scroll</p>
         </div>
+      )}
       
       {/* Context menu */}
-      {/* <CanvasContextMenu /> */}
+      <CanvasContextMenu />
     </div>
   );
 }
