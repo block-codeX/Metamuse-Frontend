@@ -4,7 +4,7 @@ import { PaintBucket, SquarePen, Waves, Palette, Image as ImageIcon, Copy } from
 import { useRef } from "react";
 
 export function useFillTools() {
-    const { canvas, foregroundColor, backgroundColor, pencilWidth } = useCanvas(); // Get required context values
+    const { canvas, foregroundColor, backgroundColor, pencilWidth, setFloating } = useCanvas(); // Get required context values
 
     // Ref to prevent attaching multiple 'click-to-fill' listeners
     const isClickModeActive = useRef(false);
@@ -17,6 +17,7 @@ export function useFillTools() {
         canvas.selection = true; // Ensure selection is enabled
         canvas.forEachObject(o => o.selectable = true);
         isClickModeActive.current = false; // Reset flag
+        setFloating("gradient")
         console.log("Fill tool listeners cleaned up.");
         // No need to renderAll here usually, action would have triggered render
     };
@@ -77,6 +78,7 @@ export function useFillTools() {
     // Applies gradient fill to selected object or activates click-to-fill/background
     const applyGradientAction = (gradientType: 'linear' | 'radial') => {
         if (!canvas) return;
+        setFloating("gradient"); // Set floating state for UI feedback
         const activeObject = canvas.getActiveObject();
         const colors = [foregroundColor, backgroundColor]; // Use current fore/back colors for gradient
 
@@ -131,6 +133,8 @@ export function useFillTools() {
     // Applies pattern fill - Mode 1 ONLY (selected object)
     const applyPatternFillAction = (imageUrl: string) => {
         if (!canvas) return;
+        setFloating("pattern"); // Set floating state for UI feedback
+
         const activeObject = canvas.getActiveObject();
 
         if (!activeObject) {
