@@ -35,7 +35,6 @@ export default function TopSideTools() {
       {/* Pencil & Eraser Width Controls */}
       <div className="p-1 flexflex-col space-y-2 space-x-2 w-65 border-r ">
         <Strokes />
-        <TextFormatting />
       </div>
 
       {/* Pictures */}

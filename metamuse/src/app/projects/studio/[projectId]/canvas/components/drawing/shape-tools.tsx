@@ -6,7 +6,7 @@ import { useRef } from "react";
 export function useShapeTools() {
     // Get canvas instance and styling properties from context
     // These values from context will always be the latest when used inside event handlers
-    const { canvas, foregroundColor, pencilWidth, backgroundColor } = useCanvas();
+    const { canvas, foregroundColor, pencilWidth, backgroundColor, setFloating, fontSize, fontStyle, isBold, isItalic, isStrikethrough, isUnderline, isSubscript, isSuperscript } = useCanvas();
 
     // Refs for temporary drawing state
     const isDrawing = useRef(false);
@@ -24,6 +24,7 @@ export function useShapeTools() {
         canvas.off("mouse:move");
         canvas.off("mouse:up");
         canvas.off("mouse:dblclick");
+        setFloating('')
 
         isDrawing.current = false;
         startPoint.current = null;
@@ -434,39 +435,12 @@ export function useShapeTools() {
          canvas!.on("mouse:up", handleMouseUp);
     };
 
-    // Image Tool (Continuous Placement)
-    const activateImage = (imageUrl = 'https://via.placeholder.com/150/CCCCCC/FFFFFF?text=Click%20to%20place') => {
-         if (!initializeDrawingTool('copy')) return;
 
-         const handleMouseUp = (opt: fabric.IEvent<MouseEvent>) => {
-             const pointer = canvas!.getPointer(opt.e);
-
-             // Add image on mouse:up (represents the click action)
-             fabric.Image.fromURL(imageUrl, (img) => {
-                 if (!img) { console.error("Failed to load image"); return; } // Don't reset state if load fails
-                 img.set({
-                     left: pointer.x, top: pointer.y, originX: 'center', originY: 'center',
-                     selectable: false, // Will be set true in resetDrawingState
-                     objectCaching: false,
-                     // crossOrigin: 'anonymous'
-                 });
-                 canvas!.add(img);
-                 currentShape.current = img; // Assign to currentShape before reset
-                 console.log("Image placed");
-
-                 // Reset state for next placement, keep tool active
-                 resetDrawingState();
-
-             }, { crossOrigin: 'anonymous' });
-         };
-
-         // Use mouse:up for placement
-         canvas!.on("mouse:up", handleMouseUp);
-    };
 
     // Text Tool (Continuous Placement)
     const activateTextTool = () => {
          if (!initializeDrawingTool('text')) return;
+         setFloating("text")
 
          const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
               // Place text on mousedown
@@ -474,8 +448,8 @@ export function useShapeTools() {
 
              const textbox = new fabric.Textbox("Enter text", {
                  left: pointer.x, top: pointer.y, originX: 'left', originY: 'top',
-                 width: 150, fontSize: 24, // TODO: Use context values
-                 fill: foregroundColor, fontFamily: "Arial", // TODO: Use context values
+                 width: 150, fontSize: fontSize, // TODO: Use context values
+                 fill: foregroundColor, fontFamily: fontStyle, // TODO: Use context values
                  selectable: true, // Make selectable immediately
                  hasControls: true, editable: true, objectCaching: true, // Cache immediately
                  strokeUniform: true,

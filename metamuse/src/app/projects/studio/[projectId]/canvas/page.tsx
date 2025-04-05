@@ -9,7 +9,8 @@ import CanvasSyncProvider from "./components/contexts/canvas-sync-context";
 import { useParams } from "next/navigation";
 import { useZoomPan } from "./components/orientation/tools/zoom";
 import { useCanvasOrientation } from "./components/orientation/hooks/orientation";
-import RightSideTools from "./components/major-tool-bars/right-sde-tools";
+import RightSideTools from "./components/major-tool-bars/right-side-tools";
+import FloatingTools from "./components/major-tool-bars/floating-tools";
 // import RightSideTools from "./components/right-side-tools"; // You'll need to create this
 
 export default function Home() {
@@ -37,9 +38,11 @@ export default function Home() {
             </div>
 
             {/* Right Side Tools */}
+            <FloatingTools/>
             <div className="w-20 h-full ">
               <RightSideTools/>
             </div>
+            {/* Popover tools that expand functionality*/}
           </div>
 
           {/* Bottom Footer Tools */}

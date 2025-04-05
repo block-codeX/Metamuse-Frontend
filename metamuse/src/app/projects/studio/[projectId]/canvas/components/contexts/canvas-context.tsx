@@ -33,10 +33,27 @@ export interface CanvasContextType {
   setIsItalic: Dispatch<SetStateAction<boolean>>;
   isUnderline: boolean;
   setIsUnderline: Dispatch<SetStateAction<boolean>>;
+  isStrikethrough: boolean;
+  setIsStrikethrough: Dispatch<SetStateAction<boolean>>;
+  isSubscript: boolean;
+  setIsSubscript: Dispatch<SetStateAction<boolean>>;
+  isSuperscript: boolean;
+  setIsSuperscript: Dispatch<SetStateAction<boolean>>;
+
   setDimensions: Dispatch<SetStateAction<{ width: number; height: number }>>
   dimensions: { width: number; height: number };
   isEraser: boolean,
   setEraser: Dispatch<SetStateAction<boolean>>,
+  floating: string,
+  setFloating: Dispatch<SetStateAction<string>>,
+  gradientType: string,
+  setGradientType: Dispatch<SetStateAction<string>>,
+  angle: number,
+  setAngle: Dispatch<SetStateAction<number>>,
+  fromColor: string,
+  setFromColor: Dispatch<SetStateAction<string>>,
+  toColor: string,
+  setToColor: Dispatch<SetStateAction<string>>,
 }
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
@@ -53,6 +70,14 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [isItalic, setIsItalic] = useState(false);
   const [isEraser, setEraser] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
+  const [floating, setFloating] = useState(true);
+  const [isStrikethrough, setIsStrikethrough] = useState(false);
+  const [isSubscript, setIsSubscript] = useState(false);
+  const [isSuperscript, setIsSuperscript] = useState(false);
+  const [gradientType, setGradientType] = useState("linear");
+  const [angle, setAngle] = useState(0);
+  const [fromColor, setFromColor] = useState("#000000");
+  const [toColor, setToColor] = useState("#FFFFFF");
   const [dimensions, setDimensions] = useState({
     width: 375,
     height: 667,
@@ -114,6 +139,22 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         setDimensions,
         isEraser,
         setEraser,
+        floating,
+        setFloating,
+        isStrikethrough,
+        setIsStrikethrough,
+        isSubscript,
+        setIsSubscript,
+        isSuperscript,
+        setIsSuperscript,
+        gradientType,
+        setGradientType,
+        angle,
+        setAngle,
+        fromColor,
+        setFromColor,
+        toColor,
+        setToColor,
       }}
     >
       {children}
