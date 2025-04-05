@@ -2,7 +2,7 @@
 "use client";
 import { useCanvas } from "./contexts/canvas-context";
 import CanvasContextMenu from "./right-click-menu";
-import { useKeyBindingTools } from "./tools/delete-tool";
+import { useKeyBindingTools } from "./tools/key-binding-tools";
 import { useEffect, useState, useRef, useCallback } from "react";
 import * as fabric from 'fabric'; // Import fabric
 import Rulers from './orientation/tools/rulers'; // Import the Rulers component
@@ -340,7 +340,7 @@ export default function CanvasComponent() {
 
       {/* Canvas Wrapper - Adjust position based on rulers */}
       <div
-        className="absolute" // Removed transform-gpu for simplicity now
+        className="absolute bg-white" // Removed transform-gpu for simplicity now
         style={{
            // Apply transform relative to the container div
           transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
@@ -408,16 +408,6 @@ export default function CanvasComponent() {
                  {Math.round(scale * 100)}%
              </span>
         </div>
-
-
-      {/* Panning/Zoom info overlay - Adjust positioning */}
-       <div className="absolute bottom-4 left-4 bg-white bg-opacity-75 p-2 rounded-md shadow-md text-sm z-20">
-             <p className="text-xs">Wheel: Zoom, Ctrl+Drag: Pan</p>
-             {/* <p className="text-xs text-gray-600 mt-1">Mousewheel to zoom</p>
-             <p className="text-xs text-gray-600">Ctrl + hold and drag to pan</p> */}
-         </div>
-
-      {/* Context menu is already wrapping the canvas */}
     </div>
   );
 }

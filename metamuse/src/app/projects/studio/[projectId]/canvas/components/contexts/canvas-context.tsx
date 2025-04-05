@@ -35,6 +35,8 @@ export interface CanvasContextType {
   setIsUnderline: Dispatch<SetStateAction<boolean>>;
   setDimensions: Dispatch<SetStateAction<{ width: number; height: number }>>
   dimensions: { width: number; height: number };
+  isEraser: boolean,
+  setEraser: Dispatch<SetStateAction<boolean>>,
 }
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
@@ -42,13 +44,14 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [foregroundColor, setForegroundColor] = useState("#000000");
-  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+  const [backgroundColor, setBackgroundColor] = useState("transparent");
   const [pencilWidth, setPencilWidth] = useState(2);
   const [eraserWidth, setEraserWidth] = useState(10);
   const [fontStyle, setFontStyle] = useState("Arial");
   const [fontSize, setFontSize] = useState(24);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
+  const [isEraser, setEraser] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
   const [dimensions, setDimensions] = useState({
     width: 375,
@@ -108,7 +111,9 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         isUnderline,
         setIsUnderline,
         dimensions,
-        setDimensions
+        setDimensions,
+        isEraser,
+        setEraser,
       }}
     >
       {children}

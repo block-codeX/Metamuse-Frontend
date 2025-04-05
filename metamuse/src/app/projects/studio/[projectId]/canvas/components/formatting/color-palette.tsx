@@ -1,8 +1,17 @@
-import { Droplet, Palette } from "lucide-react";
+import { ColorPicker } from "@/components/ui/color-picker";
+import { Droplet, Palette, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
-export default function ColorPalette({ onSelectFore, onSelectBack }) {
+interface ColorPaletteProps {
+  onSelectFore: (color: string) => void;
+  onSelectBack: (color: string) => void;
+}
+const ColorPalette: React.FC<ColorPaletteProps> = ({
+  onSelectFore,
+  onSelectBack,
+}) => {
   const [selectedColor, setSelectedColor] = useState("#000000");
+  const [cls, setCls] = useState("#000000");
   const [colors, setColors] = useState<string[]>([]);
   const [activeDroplet, setActiveDroplet] = useState<
     "foreground" | "background"
@@ -54,56 +63,63 @@ export default function ColorPalette({ onSelectFore, onSelectBack }) {
   return (
     <div
       ref={containerRef}
-      className="mx-2 flex flex-row items-center justify-start space-x-2 h-full border-r border-gray-400"
+      className="flex flex-col items-center justify-start space-y-2 h-full"
     >
-      <div className="flex flex-col items-center justify-center space-y-2">
-        <Droplet
-          className={` flex items-center justify-center border rounded-full cursor-pointer ${
-            activeDroplet === "foreground" ? "ring-1 ring-gray-400" : ""
-          }`}
-          size={activeDroplet === "foreground" ? 32 : 24}
-          fill={foregroundColor}
-          strokeWidth={0.5}
-          onClick={() => setActiveDroplet("foreground")}
+      <div className="flex flex-row items-center gap-1 justify-between py-2 border-b">
+        <ColorPicker
+          onChange={(v) => {
+            setSelectedColor(v);
+            setForegroundColor(v);
+            setCls(v);
+            onSelectFore(v);
+          }}
+          value={cls}
         />
-        <Droplet
-          className={`flex items-center justify-center border rounded-full cursor-pointer ${
-            activeDroplet === "background" ? "ring-1 ring-gray-400" : ""
-          }`}
-          size={activeDroplet === "background" ? 32 : 24}
-          fill={backgroundColor}
-          strokeWidth={0.5}
-          onClick={() => setActiveDroplet("background")}
-        />
+        <div className="flex flex-col items-center justify-center space-y-2">
+          <Droplet
+            className={` flex items-center justify-center border rounded-full cursor-pointer ${
+              activeDroplet === "foreground" ? "ring-1 ring-gray-400" : ""
+            }`}
+            size={activeDroplet === "foreground" ? 32 : 24}
+            fill={foregroundColor}
+            strokeWidth={0.5}
+            onClick={() => setActiveDroplet("foreground")}
+          />
+          <Droplet
+            className={`flex items-center justify-center border rounded-full cursor-pointer ${
+              activeDroplet === "background" ? "ring-1 ring-gray-400" : ""
+            }`}
+            size={activeDroplet === "background" ? 32 : 24}
+            fill={backgroundColor}
+            strokeWidth={0.5}
+            onClick={() => setActiveDroplet("background")}
+          />
+        </div>
       </div>
+
       {/* Generated Colors */}
-      <div className="grid grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 flex-wrap items-center justify-center gap-2">
         {colors.map((color) => (
           <div
             key={color}
-            className={`w-4 h-4 border border-gray-600 cursor-pointer rounded-full ${
-              selectedColor === color ? "ring-2 ring-gray-600" : ""
+            className={`w-6 h-6 border border-gray-600 rounded-md cursor-pointer ${
+              selectedColor === color ? "ring-2 ring-gray-500" : ""
             }`}
             style={{ backgroundColor: color }}
             onClick={() => handleColorChange(color)}
           />
         ))}
+        <div
+          className={`w-6 h-6 border border-gray-600 p-0 flex items-center justify-center rounded-md cursor-pointer ${
+            selectedColor === "transparent" ? "ring-2 ring-gray-500" : ""
+          }`}
+          style={{ backgroundColor: "transparent" }}
+          onClick={() => handleColorChange("transparent")}
+        >
+          <X strokeWidth={1} size={28}/>
+        </div>
       </div>
-      {/* Custom Color Picker */}
-      <button
-        className="w-8 h-14 flex items-center justify-center border rounded-md shadow-md cursor-pointer"
-        onClick={() => colorInputRef.current?.click()}
-        style={{
-            background: "linear-gradient(to right, red, orange, green, indigo, violet)",
-        }}
-      ></button>
-      <input
-        type="color"
-        ref={colorInputRef}
-        className="hidden"
-        value={selectedColor}
-        onChange={(e) => handleColorChange(e.target.value)}
-      />
     </div>
   );
-}
+};
+export default ColorPalette;

@@ -1,9 +1,9 @@
 import ToolOption from "./tool-options";
-import { useNavigateTools } from "./tools/navigate-tools";
-import { useFreeDrawingTools } from "./tools/free-drawing-tools";
-import { useShapeTools } from "./tools/shape-tools";
-import { useFillTools } from "./tools/fill-tools";
-import { useClipTools } from "./tools/clip-tools";
+import { useNavigateTools } from "../drawing/navigate-tools";
+import { useFreeDrawingTools } from "../drawing/free-drawing-tools";
+import { useShapeTools } from "../drawing/shape-tools";
+import { useFillTools } from "../drawing/fill-tools";
+import { useClipTools } from "../drawing/clip-tools";
 import { useState } from "react";
 export default function LeftSideTools() {
   const navigateTools = useNavigateTools();

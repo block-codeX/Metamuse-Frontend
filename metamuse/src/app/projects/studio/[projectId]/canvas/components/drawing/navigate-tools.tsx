@@ -1,4 +1,4 @@
-import { MousePointer, Hand } from "lucide-react";
+import { MousePointer2, Hand } from "lucide-react";
 import * as fabric from "fabric";
 import { useCanvas } from "../contexts/canvas-context";
 
@@ -36,7 +36,7 @@ export function useNavigateTools() {
   };
 
   return [
-    { icon: <MousePointer />, toolName: "Select", function: handleSelect, function_args: [] },
+    { icon: <MousePointer2 />, toolName: "Select", function: handleSelect, function_args: [] },
     { icon: <Hand />, toolName: "Pan", function: handlePan, function_args: [] },
   ];
 }

@@ -106,7 +106,7 @@ export default function ChatComponent() {
     return (
       <Button
         onClick={toggleChat}
-        className="fixed right-4 bottom-4 rounded-full w-12 h-12 flex items-center justify-center shadow-lg bg-primary text-primary-foreground"
+        className="fixed right-16 bottom-16 rounded-full w-12 h-12 flex items-center justify-center shadow-lg bg-primary text-primary-foreground"
         aria-label="Open chat"
       >
         <MessageSquare size={24} />

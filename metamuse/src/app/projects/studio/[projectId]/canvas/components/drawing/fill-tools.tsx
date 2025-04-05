@@ -2,7 +2,7 @@ import * as fabric from "fabric";
 import { useCanvas } from "../contexts/canvas-context";
 import { PaintBucket, SquareRoundCorner, Paintbrush, PaintbrushVertical, Image } from "lucide-react";
 export function useFillTools () {
-  const { canvas } = useCanvas();
+  const { canvas, foregroundColor } = useCanvas();
 
     const applyFillStroke = (type, value) => {
         if (!canvas) return;
@@ -78,7 +78,7 @@ const applyPatternFill = (imageURL) => {
   
     return [
         { icon: <PaintBucket />, toolName: "Solid Fill", function: applyFillStroke, function_args: ["fill", "#ff0000"] },
-        { icon: <SquareRoundCorner />, toolName: "Stroke Color", function: applyFillStroke, function_args: ["stroke", "#000000"] },
+        { icon: <SquareRoundCorner />, toolName: "Stroke Color", function: applyFillStroke, function_args: ["stroke", "#fff"] },
         { icon: <Paintbrush />, toolName: "Linear Gradient", function: applyLinearGradient, function_args: [["#ff0000", "#0000ff"]] },
         { icon: <PaintbrushVertical />, toolName: "Radial Gradient", function: applyRadialGradient, function_args: [["#ff0000", "#ffff00"]] },
         { icon: <Image />, toolName: "Pattern Fill", function: applyPatternFill, function_args: ["https://example.com/pattern.jpg"] },
