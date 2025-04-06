@@ -17,7 +17,6 @@ export function useFillTools() {
         canvas.selection = true; // Ensure selection is enabled
         canvas.forEachObject(o => o.selectable = true);
         isClickModeActive.current = false; // Reset flag
-        setFloating("gradient")
         console.log("Fill tool listeners cleaned up.");
         // No need to renderAll here usually, action would have triggered render
     };
@@ -164,6 +163,10 @@ export function useFillTools() {
         }, { crossOrigin: 'anonymous' }); // Handle CORS if necessary
     };
 
+    const applyPictureTools = () => {
+        setFloating('picture')
+    }
+
 
     // --- Return Tool Definitions ---
     return [
@@ -183,24 +186,22 @@ export function useFillTools() {
         },
         // Linear Gradient Tool
         {
-            icon: <Waves />, // Changed Icon (represents direction)
-            toolName: "Linear Gradient",
-            function: () => applyGradientAction('linear'), // Calls with 'linear' type
-            function_args: [],
-        },
-         // Radial Gradient Tool
-        {
             icon: <Palette />, // Changed Icon (represents color spread)
             toolName: "Radial Gradient",
             function: () => applyGradientAction('radial'), // Calls with 'radial' type
             function_args: [],
         },
-        // Pattern Fill Tool
+        {
+            icon: <Waves />, // Changed Icon (represents direction)
+            toolName: "Pattern",
+            function: () => applyPatternFillAction('/patterns/adire.jpg'), // Calls with 'linear' type
+            function_args: [],
+        },
         {
             icon: <ImageIcon />, // Keep Image icon
             toolName: "Pattern Fill",
             // Example URL - needs UI to select image in practice
-            function: () => applyPatternFillAction('https://via.placeholder.com/50/09f/fff.png'),
+            function: () => applyPictureTools(),
             function_args: [], // URL passed directly for now
         },
     ];

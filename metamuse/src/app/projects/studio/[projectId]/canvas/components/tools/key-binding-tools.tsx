@@ -48,11 +48,8 @@ export function useKeyBindingTools() {
   };
 
   const copySelection = () => {
-    canvas
-    .getActiveObject()
-    .clone()
-    .then((cloned) => {
-      setClipboard(cloned)
+    canvas?.getActiveObject()?.clone().then((cloned) => {
+      setClipboard(cloned as any)
     });
 }
 

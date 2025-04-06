@@ -83,6 +83,7 @@ const ColorPalette: React.FC<ColorPaletteProps> = ({
             size={activeDroplet === "foreground" ? 32 : 24}
             fill={foregroundColor}
             strokeWidth={0.5}
+            color={foregroundColor}
             onClick={() => setActiveDroplet("foreground")}
           />
           <Droplet
@@ -91,6 +92,7 @@ const ColorPalette: React.FC<ColorPaletteProps> = ({
             }`}
             size={activeDroplet === "background" ? 32 : 24}
             fill={backgroundColor}
+            color={backgroundColor}
             strokeWidth={0.5}
             onClick={() => setActiveDroplet("background")}
           />

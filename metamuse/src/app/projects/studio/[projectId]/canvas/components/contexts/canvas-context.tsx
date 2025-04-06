@@ -54,6 +54,8 @@ export interface CanvasContextType {
   setFromColor: Dispatch<SetStateAction<string>>,
   toColor: string,
   setToColor: Dispatch<SetStateAction<string>>,
+  pattern: string,
+  setPattern: Dispatch<SetStateAction<string>>,
 }
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
@@ -70,7 +72,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [isItalic, setIsItalic] = useState(false);
   const [isEraser, setEraser] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
-  const [floating, setFloating] = useState(true);
+  const [floating, setFloating] = useState("");
   const [isStrikethrough, setIsStrikethrough] = useState(false);
   const [isSubscript, setIsSubscript] = useState(false);
   const [isSuperscript, setIsSuperscript] = useState(false);
@@ -78,6 +80,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [angle, setAngle] = useState(0);
   const [fromColor, setFromColor] = useState("#000000");
   const [toColor, setToColor] = useState("#FFFFFF");
+  const [pattern, setPattern] = useState("adire");
   const [dimensions, setDimensions] = useState({
     width: 375,
     height: 667,
@@ -155,6 +158,8 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         setFromColor,
         toColor,
         setToColor,
+        pattern,
+        setPattern,
       }}
     >
       {children}
