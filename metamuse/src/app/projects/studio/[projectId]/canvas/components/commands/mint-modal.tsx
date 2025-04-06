@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
   const [canvasData, setCanvasData] = useState<string | null>(null);
@@ -16,15 +17,15 @@ export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
     if (isOpen && canvas) {
       const dataURL = canvas.toDataURL({ format: "png" }); // Export as PNG
       setCanvasData(dataURL);
-    }
+    } 
   }, [isOpen, canvas]);
   const tags = ["Watercolor", "Illustration"];
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-auto w-auto ">
-        <DialogHeader>
-          <DialogTitle>Sunrise through the birds eye view</DialogTitle>
-        </DialogHeader>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="sm:max-w-auto w-auto ">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Sunrise through the birds eye view</AlertDialogTitle>
+        </AlertDialogHeader>
         <div className="flex flex-row  gap-4 w-auto">
           <div className="flex flex-col items-center gap-4">
             <div className="flex flex-row gap-2 self-start">
@@ -54,7 +55,7 @@ export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
           </div>
           <div className="border w-[300px]"></div>
         </div>
-        <DialogFooter className="w-full flex flex-row sm:justify-start gap-48 items-center">
+        <AlertDialogFooter className="w-full flex flex-row sm:justify-start gap-48 items-center">
           <Button
             variant="outline"
             onClick={onClose}
@@ -65,8 +66,8 @@ export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
           <Button className=" bg-btn-primary font-semibold cursor-pointer" onClick={onMint}>
             Mint
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

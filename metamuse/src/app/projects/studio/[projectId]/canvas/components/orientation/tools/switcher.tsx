@@ -1,8 +1,14 @@
 // src/components/canvas/CanvasOrientationSwitcher.tsx
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCanvasOrientation } from "../hooks/orientation";
+import { Label } from "@/components/ui/label";
 
 export const CanvasOrientationSwitcher = () => {
   const {
@@ -12,53 +18,84 @@ export const CanvasOrientationSwitcher = () => {
     setUnit,
     applyPreset,
     updateCustomDimensions,
-    presets
+    presets,
   } = useCanvasOrientation();
 
-  return (
-    <div className="flex gap-4 items-center">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">
-            {currentPreset.name}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {presets.map((preset) => (
-            <DropdownMenuItem 
-              key={preset.name}
-              onClick={() => applyPreset(preset)}
-            >
-              {preset.name}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+  const calculateAspectRatio = () => {
+    const { width, height } = currentPreset.dimensions;
+    if (height === 0) {
+      return 1; // Avoid division by zero, default to square
+    }
+    return width / height;
+  };
 
-      {currentPreset.name === "Custom" && (
-        <div className="flex gap-2">
+  const aspectRatio = calculateAspectRatio();
+  return (
+    <div className="flex flex-row gap-2 px-5 h-full items-center h-full border-r">
+      <div className="flex flex-col items-center justify-center gap-2">
+        <div
+          className="h-5 bg-white border border-gray-400" // Fixed height (h-5 = 20px), basic styling
+          style={{
+            aspectRatio: aspectRatio, // Apply calculated aspect ratio
+            // Add max width to prevent it getting too wide for landscape ratios
+            maxWidth: "28px", // Adjust as needed
+          }}
+          title={`Aspect Ratio: ${aspectRatio.toFixed(2)}`} // Tooltip for info
+        >
+          {/* Content inside is optional, it's just for visual shape */}
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="h-7 rounded-none  w-20 truncate-text justify-start p-1 overflow-x-auto cursor-pointer">
+              {currentPreset.name}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="rounded-none">
+            {presets.map((preset) => (
+              <DropdownMenuItem
+                key={preset.name}
+                onClick={() => applyPreset(preset)}
+                style={{ backgroundColor: currentPreset.name == preset.name? "gray-100": "inherit" }}
+              >
+                {preset.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="flex flex-col items-center justify-center w-30 gap-2">
+        <Label className="flex flex-row gap-2 items-center justify-between">
+          <span className="w-10">Width:</span>
           <Input
             type="number"
             value={customDimensions.width}
-            onChange={(e) => updateCustomDimensions(
-              Number(e.target.value),
-              customDimensions.height
-            )}
+            onChange={(e) =>
+              updateCustomDimensions(
+                Number(e.target.value),
+                customDimensions.height
+              )
+            }
             placeholder="Width"
+            className="h-6 px-1 focus:ring-none rounded-sm"
           />
+        </Label>
+        <Label className="flex flex-row gap-2 items-center justify-between">
+          <span className="w-10">Height:</span>
           <Input
             type="number"
             value={customDimensions.height}
-            onChange={(e) => updateCustomDimensions(
-              customDimensions.width,
-              Number(e.target.value)
-            )}
+            onChange={(e) =>
+              updateCustomDimensions(
+                customDimensions.width,
+                Number(e.target.value)
+              )
+            }
             placeholder="Height"
+            className="h-6 px-1 focus:ring-none rounded-sm"
           />
-        </div>
-      )}
-
-      <DropdownMenu>
+        </Label>
+      </div>
+      {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline">{unit.toUpperCase()}</Button>
         </DropdownMenuTrigger>
@@ -67,7 +104,7 @@ export const CanvasOrientationSwitcher = () => {
           <DropdownMenuItem onClick={() => setUnit("in")}>IN</DropdownMenuItem>
           <DropdownMenuItem onClick={() => setUnit("cm")}>CM</DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+      </DropdownMenu> */}
     </div>
   );
 };
