@@ -22,124 +22,166 @@ const Rulers: React.FC<RulersProps> = ({ containerRef, scale, position, onAddGui
   const draggingGuideline = useRef<{ orientation: 'horizontal' | 'vertical'; element: HTMLDivElement | null }>({ orientation: 'horizontal', element: null });
 
   // --- Drawing Logic ---
-  const drawRulers = useCallback(() => {
-    if (!containerRef.current || !horizontalRulerRef.current || !verticalRulerRef.current || !canvasRef.current) return;
+// src/components/canvas/Rulers.tsx (Modified drawRulers function)
 
-    const containerWidth = containerRef.current.clientWidth;
-    const containerHeight = containerRef.current.clientHeight;
+const drawRulers = useCallback(() => {
+  if (!containerRef.current || !horizontalRulerRef.current || !verticalRulerRef.current || !canvasRef.current) return;
 
-    const hCtx = horizontalRulerRef.current.getContext('2d');
-    const vCtx = verticalRulerRef.current.getContext('2d');
+  const containerWidth = containerRef.current.clientWidth;
+  const containerHeight = containerRef.current.clientHeight;
 
-    if (!hCtx || !vCtx) return;
+  const hCtx = horizontalRulerRef.current.getContext('2d');
+  const vCtx = verticalRulerRef.current.getContext('2d');
 
-    // --- Clear Rulers ---
-    horizontalRulerRef.current.width = containerWidth;
-    horizontalRulerRef.current.height = RULER_SIZE;
-    verticalRulerRef.current.width = RULER_SIZE;
-    verticalRulerRef.current.height = containerHeight;
+  if (!hCtx || !vCtx) return;
 
-    hCtx.clearRect(0, 0, containerWidth, RULER_SIZE);
-    vCtx.clearRect(0, 0, RULER_SIZE, containerHeight);
+  // --- Get Device Pixel Ratio for sharper rendering ---
+  const dpr = window.devicePixelRatio || 1;
+  const setupCanvas = (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, width: number, height: number) => {
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.scale(dpr, dpr);
+  };
 
-    hCtx.fillStyle = '#f0f0f0'; // Ruler background
-    vCtx.fillStyle = '#f0f0f0';
-    hCtx.fillRect(0, 0, containerWidth, RULER_SIZE);
-    vCtx.fillRect(0, 0, RULER_SIZE, containerHeight);
+  // --- Clear & Setup Rulers ---
+  setupCanvas(horizontalRulerRef.current, hCtx, containerWidth, RULER_SIZE); // Use containerWidth for drawing area
+  setupCanvas(verticalRulerRef.current, vCtx, RULER_SIZE, containerHeight); // Use containerHeight for drawing area
 
-    // --- Calculate Visible Canvas Range ---
-    // Top-left corner of the viewport in canvas coordinates
-    const viewX = -position.x / scale;
-    const viewY = -position.y / scale;
-    // Bottom-right corner of the viewport in canvas coordinates
-    // const viewXEnd = viewX + containerWidth / scale;
-    // const viewYEnd = viewY + containerHeight / scale;
+  hCtx.clearRect(0, 0, horizontalRulerRef.current.width, horizontalRulerRef.current.height);
+  vCtx.clearRect(0, 0, verticalRulerRef.current.width, verticalRulerRef.current.height);
 
-    // --- Highlight Canvas Area on Rulers ---
-     hCtx.fillStyle = CANVAS_AREA_COLOR;
-     vCtx.fillStyle = CANVAS_AREA_COLOR;
+  hCtx.fillStyle = '#f0f0f0'; // Ruler background
+  vCtx.fillStyle = '#f0f0f0';
+  hCtx.fillRect(0, 0, containerWidth, RULER_SIZE); // Fill based on logical size
+  vCtx.fillRect(0, 0, RULER_SIZE, containerHeight); // Fill based on logical size
 
-     // Horizontal Ruler Canvas Area
-     const canvasStartXOnRuler = position.x - RULER_SIZE;
-     const canvasWidthOnRuler = dimensions.width * scale;
-     hCtx.fillRect(canvasStartXOnRuler, 0, canvasWidthOnRuler, RULER_SIZE);
- 
-     // Vertical Ruler Canvas Area:
-     // Start position on the ruler's canvas = canvas visual start Y - ruler visual start Y
-     const canvasStartYOnRuler = position.y - RULER_SIZE;
-     const canvasHeightOnRuler = dimensions.height * scale;
-     vCtx.fillRect(0, canvasStartYOnRuler, RULER_SIZE, canvasHeightOnRuler);
+  // --- Calculate Visible Canvas Range (using logical coords) ---
+  // Canvas coordinate visible at the ruler's inner edge (adjusted for RULER_SIZE offset)
+  const viewX = (RULER_SIZE - position.x) / scale;
+  const viewY = (RULER_SIZE - position.y) / scale;
 
+  // --- Highlight Canvas Area on Rulers (Keep previous fix) ---
+  hCtx.fillStyle = CANVAS_AREA_COLOR;
+  vCtx.fillStyle = CANVAS_AREA_COLOR;
 
-    // --- Draw Markings ---
-    hCtx.strokeStyle = MARKING_COLOR;
-    vCtx.strokeStyle = MARKING_COLOR;
-    hCtx.fillStyle = TEXT_COLOR;
-    vCtx.fillStyle = TEXT_COLOR;
-    hCtx.font = '10px Arial';
-    vCtx.font = '10px Arial';
-    hCtx.textAlign = 'center';
-    vCtx.textAlign = 'center'; // Adjust as needed
+  // Horizontal: Start position *on the ruler canvas* = (canvas screen X) - (ruler screen X)
+  const canvasStartXOnRuler = (position.x) - RULER_SIZE;
+  const canvasWidthOnRuler = dimensions.width * scale;
+  hCtx.fillRect(canvasStartXOnRuler, 0, canvasWidthOnRuler, RULER_SIZE);
 
-    // Determine interval based on zoom
-    let interval = 100;
-    if (scale > 2) interval = 50;
-    if (scale > 5) interval = 10;
-    if (scale > 10) interval = 5;
-     if (scale < 0.5) interval = 200;
-     if (scale < 0.2) interval = 500;
+  // Vertical: Start position *on the ruler canvas* = (canvas screen Y) - (ruler screen Y)
+  const canvasStartYOnRuler = (position.y) - RULER_SIZE;
+  const canvasHeightOnRuler = dimensions.height * scale;
+  vCtx.fillRect(0, canvasStartYOnRuler, RULER_SIZE, canvasHeightOnRuler);
 
 
-    // --- Horizontal Markings ---
-    hCtx.beginPath();
-    const startX = Math.floor(viewX / interval) * interval;
-    for (let x = startX; x * scale < containerWidth - position.x ; x += interval) {
-      const screenX = position.x + x * scale + RULER_SIZE; // Adjust for vertical ruler offset
-        if (screenX < RULER_SIZE) continue; // Skip markings hidden behind vertical ruler
+  // --- Draw Markings (Revised Calculation) ---
+  hCtx.strokeStyle = MARKING_COLOR;
+  vCtx.strokeStyle = MARKING_COLOR;
+  hCtx.fillStyle = TEXT_COLOR;
+  vCtx.fillStyle = TEXT_COLOR;
+  hCtx.font = '10px Arial';
+  vCtx.font = '10px Arial';
+  // hCtx.textAlign = 'center'; // Default
+  // vCtx.textAlign = 'center'; // Default
 
-      hCtx.moveTo(screenX, RULER_SIZE);
-      hCtx.lineTo(screenX, RULER_SIZE - (x % (interval * 5) === 0 ? 10 : 5)); // Longer lines every 5 intervals
-      hCtx.fillText(String(x), screenX, 12);
-    }
-    hCtx.stroke();
+  // Determine interval based on zoom (same logic)
+  let interval = 100;
+   if (scale * dpr > 2) interval = 50; // Adjust threshold based on DPR for density
+   if (scale * dpr > 5) interval = 25; // Finer intervals sooner
+   if (scale * dpr > 10) interval = 10;
+   if (scale * dpr > 20) interval = 5;
+   if (scale * dpr < 0.5) interval = 200;
+   if (scale * dpr < 0.2) interval = 500;
 
-    // --- Vertical Markings ---
-    vCtx.beginPath();
-    const startY = Math.floor(viewY / interval) * interval;
-     for (let y = startY; y * scale < containerHeight - position.y; y += interval) {
-      const screenY = position.y + y * scale + RULER_SIZE; // Adjust for horizontal ruler offset
-        if (screenY < RULER_SIZE) continue; // Skip markings hidden behind horizontal ruler
+  // --- Horizontal Markings ---
+  hCtx.beginPath();
+  hCtx.textAlign = 'left'; // Align text starting from the tick
+  // Find the first marking coordinate >= the visible start
+  const startXCoord = Math.ceil(viewX / interval) * interval;
 
-      vCtx.moveTo(RULER_SIZE, screenY);
-      vCtx.lineTo(RULER_SIZE - (y % (interval * 5) === 0 ? 10 : 5), screenY); // Longer lines
+  for (let x = startXCoord; ; x += interval) {
+      // Calculate the position of canvas coordinate 'x' *on the horizontal ruler's canvas*
+      // rulerX = (screen position of x) - (screen position of ruler's start)
+      // screen position of x = position.x + x * scale
+      // screen position of ruler's start = RULER_SIZE
+      const rulerX = (position.x + x * scale) - RULER_SIZE;
 
-       // Draw text rotated (optional, can be complex) or beside the line
-       vCtx.save();
-       vCtx.translate(12, screenY);
-       vCtx.rotate(-Math.PI / 2); // Rotate text
-       vCtx.fillText(String(y), 0, 3);
-       vCtx.restore();
+      // Stop if the mark goes beyond the ruler's drawing width
+      if (rulerX > containerWidth) break; // Check against logical width
 
-      // Alternative: Text next to ruler
-      // vCtx.fillText(String(y), 10, screenY + 3);
-    }
-    vCtx.stroke();
+      // Skip if the mark is before the ruler's drawing area starts (shouldn't happen with ceil)
+      if (rulerX < 0) continue;
 
-    // Draw border lines
-    hCtx.beginPath();
-    hCtx.moveTo(RULER_SIZE, RULER_SIZE - 0.5);
-    hCtx.lineTo(containerWidth, RULER_SIZE - 0.5);
-    hCtx.strokeStyle = '#aaa';
-    hCtx.stroke();
+      const isMajorTick = Math.round(x / (interval * 5)) === x / (interval * 5); // More robust check for major ticks
+      const tickHeight = isMajorTick ? 10 : 5;
 
-    vCtx.beginPath();
-    vCtx.moveTo(RULER_SIZE - 0.5, RULER_SIZE);
-    vCtx.lineTo(RULER_SIZE - 0.5, containerHeight);
-    vCtx.strokeStyle = '#aaa';
-    vCtx.stroke();
+      hCtx.moveTo(rulerX + 0.5, RULER_SIZE); // +0.5 for sharper lines
+      hCtx.lineTo(rulerX + 0.5, RULER_SIZE - tickHeight);
 
+      // Draw text only for major ticks or when zoomed in enough
+      if (isMajorTick || interval <= 25) {
+          hCtx.fillText(String(x), rulerX + 2, 10); // Position text slightly right of the tick
+      }
+  }
+  hCtx.stroke();
 
-  }, [scale, position, dimensions, containerRef, canvasRef]);
+  // --- Vertical Markings ---
+  vCtx.beginPath();
+  vCtx.textAlign = 'center'; // Reset for vertical rotated text
+  // Find the first marking coordinate >= the visible start
+  const startYCoord = Math.ceil(viewY / interval) * interval;
+
+  for (let y = startYCoord; ; y += interval) {
+       // Calculate the position of canvas coordinate 'y' *on the vertical ruler's canvas*
+      // rulerY = (screen position of y) - (screen position of ruler's start)
+      // screen position of y = position.y + y * scale
+      // screen position of ruler's start = RULER_SIZE
+      const rulerY = (position.y + y * scale) - RULER_SIZE;
+
+      // Stop if the mark goes beyond the ruler's drawing height
+      if (rulerY > containerHeight) break; // Check against logical height
+
+      // Skip if the mark is before the ruler's drawing area starts
+      if (rulerY < 0) continue;
+
+      const isMajorTick = Math.round(y / (interval * 5)) === y / (interval * 5);
+      const tickWidth = isMajorTick ? 10 : 5;
+
+      vCtx.moveTo(RULER_SIZE, rulerY + 0.5);
+      vCtx.lineTo(RULER_SIZE - tickWidth, rulerY + 0.5);
+
+      // Draw text rotated (relative to rulerY) only for major ticks or when zoomed in
+      if (isMajorTick || interval <= 25) {
+          vCtx.save();
+          // Translate relative to the ruler's coordinate system
+          vCtx.translate(RULER_SIZE - tickWidth - 4, rulerY + 3); // Position text left of tick, adjust offset
+          vCtx.rotate(-Math.PI / 2);
+          vCtx.fillText(String(y), 0, 0); // Draw at the new origin
+          vCtx.restore();
+      }
+  }
+  vCtx.stroke();
+
+  // --- Draw Border Lines ---
+  // Draw along the inner edges of the rulers
+  hCtx.beginPath();
+  hCtx.moveTo(0, RULER_SIZE - 0.5); // Left edge to Right edge, along bottom of H ruler
+  hCtx.lineTo(containerWidth, RULER_SIZE - 0.5);
+  hCtx.strokeStyle = '#aaa';
+  hCtx.lineWidth = 1; // Use logical pixels
+  hCtx.stroke();
+
+  vCtx.beginPath();
+  vCtx.moveTo(RULER_SIZE - 0.5, 0); // Top edge to Bottom edge, along right of V ruler
+  vCtx.lineTo(RULER_SIZE - 0.5, containerHeight);
+  vCtx.strokeStyle = '#aaa';
+  vCtx.lineWidth = 1;
+  vCtx.stroke();
+
+}, [scale, position, dimensions, containerRef, canvasRef, window.devicePixelRatio]); // Add dpr dependency
 
   useEffect(() => {
     drawRulers();

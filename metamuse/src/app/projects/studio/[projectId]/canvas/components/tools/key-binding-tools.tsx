@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 import { useCanvas } from "../contexts/canvas-context";
 import * as fabric from 'fabric'
-import { set } from "lodash";
 export function useKeyBindingTools() {
   const { canvas } = useCanvas();
   const [clipboard, setClipboard] = useState(null);
@@ -80,8 +79,31 @@ export function useKeyBindingTools() {
   };
 
   const duplicateSelection = async () => {
-    setClipboard(null)
-    copySelection()
-    await pasteSelection()
+    canvas?.getActiveObject()?.clone().then(async (cloned) => {
+      const clonedObj = await cloned.clone();
+      canvas.discardActiveObject();
+      clonedObj.set({
+        left: clonedObj.left + 10,
+        top: clonedObj.top + 10,
+        evented: true,
+      });
+      if (clonedObj instanceof fabric.ActiveSelection) {
+        // active selection needs a reference to the canvas.
+        clonedObj.canvas = canvas;
+        clonedObj.forEachObject((obj) => {
+          canvas.add(obj);
+        });
+        // this should solve the unselectability
+        clonedObj.setCoords();
+      } else {
+        canvas.add(clonedObj);
+      }
+      cloned.top += 10;
+      cloned.left += 10;
+      setClipboard(clipboard)
+      canvas.setActiveObject(clonedObj);
+      canvas.requestRenderAll();    });
+  }
 }
-}
+
+

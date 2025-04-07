@@ -327,12 +327,12 @@ export default function CanvasComponent() {
          onMouseMove={handleMouseMove} // Use component's mouse move
          onMouseUp={handleMouseUp}     // Use component's mouse up
          onMouseLeave={handleMouseUp} // End pan if mouse leaves container
-         style={{ cursor: isPanning ? 'grabbing' : 'grab' }} // Dynamic cursor
+         style={{ cursor: isPanning ? 'grabbing' : 'normal' }} // Dynamic cursor
          >
 
       {/* Rulers - Pass necessary props */}
       <Rulers
-        containerRef={containerRef}
+        containerRef={containerRef as any }
         scale={scale}
         position={position}
         onAddGuideline={addGuideline}
