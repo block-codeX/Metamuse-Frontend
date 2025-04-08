@@ -10,26 +10,26 @@ export default function Commands() {
   const [isMintModalOpen, setIsMintModalOpen] = useState(false);
   const { canvas } = useCanvas();
 
-  const handleImportImage = () => {
+  const handleImportImage = async () => {
     console.log("adas");
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
     input.onchange = (event: any) => {
       const file = event.target.files[0];
+      console.log("File", file)
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const dataURL = e.target?.result as string;
         console.log(dataURL);
         if (canvas) {
-          fabric.FabricImage.fromURL(dataURL, (img: any) => {
-            img.scaleToWidth(canvas.width * 0.8); // Scale image to 80% of canvas width
-            img.set({ left: 50, top: 50 }); // Position it on the canvas
-            canvas.add(img);
-            canvas.renderAll();
-          });
+          const img = await fabric.FabricImage.fromURL(dataURL)
+          img.scaleToWidth(canvas.width * 0.8); // Scale image to 80% of canvas width
+          img.set({ left: 50, top: 50 }); // Position it on the canvas
+          canvas.add(img);
+          canvas.renderAll();
         }
       };
       reader.readAsDataURL(file);

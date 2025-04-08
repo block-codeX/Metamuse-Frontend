@@ -181,7 +181,7 @@ const drawRulers = useCallback(() => {
   vCtx.lineWidth = 1;
   vCtx.stroke();
 
-}, [scale, position, dimensions, containerRef, canvasRef, window.devicePixelRatio]); // Add dpr dependency
+}, [scale, position, dimensions, containerRef, canvasRef]); // Add dpr dependency
 
   useEffect(() => {
     drawRulers();
