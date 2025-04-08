@@ -36,7 +36,7 @@ export default function ToolOption({
   use,
 }: IToolOption) {
   const [activeTool, setActiveTool] = useState<Tool>(tools[0]);
-  const { canvas, setFloating } = useCanvas();
+  const { canvas, setFloating, setIsShape } = useCanvas();
   // State to control the popover visibility
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -56,8 +56,11 @@ export default function ToolOption({
 
   // Activates the given tool's logic
   const handleToolClick = (tool: Tool) => {
-    setFloating(""); // Clear any floating tool state
+    if (!canvas) return; // Ensure canvas is available
+    setFloating("text"); // Clear any floating tool state
+    setIsShape(false); // Reset shape state
     setActiveTool(tool); // Update the displayed icon on the main button
+    canvas.defaultCursor = "default"; // Reset cursor to default
     clearCanvasEvents();
     tool.function(...tool.function_args);
     use(group); // Notify parent that this group is now active
@@ -86,69 +89,48 @@ export default function ToolOption({
         "overflow-hidden" // Ensures border-radius clips internal elements properly
       )}
     >
-      {/* Button 1: Main Tool Activation (Icon Area) */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              // No border radius on the right side to merge visually
-              className={cn(
-                "flex items-center rounded-none justify-center w-full h-full m-0 p-0", // Adjust padding as needed
-                // Different hover style based on whether the group is active
-                group === current
-                  ? "hover:bg-btn-primary/90 hover:text-white"
-                  : "hover:bg-accent"
-              )}
-              onClick={() => {
-                // Clicking this button DIRECTLY activates the currently displayed tool
-                handleToolClick(activeTool);
-              }}
-            >
-              {activeTool.icon}
-            </Button>
-          </TooltipTrigger>
-          {/* Tooltip showing the name of the currently active tool */}
-          <TooltipContent side="right">
-            <p>{activeTool.toolName}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Button
+        variant="ghost"
+        // No border radius on the right side to merge visually
+        className={cn(
+          "flex items-center rounded-none justify-center w-full h-full m-0 p-0", // Adjust padding as needed
+          // Different hover style based on whether the group is active
+          group === current
+            ? "hover:bg-btn-primary/90 hover:text-white"
+            : "hover:bg-accent"
+        )}
+        onClick={() => {
+          // Clicking this button DIRECTLY activates the currently displayed tool
+          handleToolClick(activeTool);
+        }}
+      >
+        {activeTool.icon}
+      </Button>
 
       {/* Button 2: Popover Trigger (Chevron Area) */}
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              {/* The PopoverTrigger is ONLY this small button */}
-              <PopoverTrigger asChild>
-                <div
-                  className={cn(
-                    "absolute bottom-[2px] right-[2px] cursor-pointer", // Positioning and cursor
-                    "w-0 h-0", // Base dimensions for border trick
-                    // Define border widths - equal widths create a 45-degree angle hypotenuse
-                    // Adjust size as needed (e.g., 6px forms a 6x6 corner triangle)
-                    "border-t-[5px]",
-                    "border-l-[5px]",
-                    "border-b-[5px]",
-                    current === group ? "border-b-white border-r-white" : "border-b-btn-primary border-r-btn-primary",
-                    "border-r-[5px]",
-                    // Set adjacent borders transparent, the other two colored
-                    "border-t-transparent", // Top border is transparent
-                    "border-l-transparent", // Left border is transparent
-                    "hover:opacity-80" // Add slight hover effect
-                  )}
-                  // No onClick needed here, PopoverTrigger handles opening
-                />
-              </PopoverTrigger>
-            </TooltipTrigger>
-            {/* Tooltip indicating more options */}
-            <TooltipContent side="right">
-              <p>More {group} tools</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
+        <PopoverTrigger asChild>
+          <div
+            className={cn(
+              "absolute bottom-[2px] right-[2px] cursor-pointer", // Positioning and cursor
+              "w-0 h-0", // Base dimensions for border trick
+              // Define border widths - equal widths create a 45-degree angle hypotenuse
+              // Adjust size as needed (e.g., 6px forms a 6x6 corner triangle)
+              "border-t-[5px]",
+              "border-l-[5px]",
+              "border-b-[5px]",
+              current === group
+                ? "border-b-white border-r-white"
+                : "border-b-btn-primary border-r-btn-primary",
+              "border-r-[5px]",
+              // Set adjacent borders transparent, the other two colored
+              "border-t-transparent", // Top border is transparent
+              "border-l-transparent", // Left border is transparent
+              "hover:opacity-80" // Add slight hover effect
+            )}
+            // No onClick needed here, PopoverTrigger handles opening
+          />
+        </PopoverTrigger>
         {/* Popover Content: Shows all tools */}
         <PopoverContent
           side="right"

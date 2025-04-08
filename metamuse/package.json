@@ -33,6 +33,7 @@
     "date-fns": "^4.1.0",
     "debounce": "^2.2.0",
     "fabric": "^6.6.2",
+    "framer-motion": "^12.6.3",
     "input-otp": "^1.4.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.482.0",

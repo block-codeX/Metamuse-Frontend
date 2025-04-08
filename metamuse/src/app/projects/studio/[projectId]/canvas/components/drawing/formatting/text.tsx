@@ -6,7 +6,7 @@ import {
   Superscript,
   Underline,
 } from "lucide-react";
-import { useCanvas } from "../contexts/canvas-context";
+import { useCanvas } from "../../contexts/canvas-context";
 import {
   Select,
   SelectContent,

@@ -1,6 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { useCanvas } from "../contexts/canvas-context";
+import { useCanvas } from "../../contexts/canvas-context";
 import * as fabric from "fabric";
 import { Blend, Box, RectangleEllipsis, SlidersHorizontal, SlidersHorizontalIcon, Square } from "lucide-react";
 export default function OutlineFilters() {

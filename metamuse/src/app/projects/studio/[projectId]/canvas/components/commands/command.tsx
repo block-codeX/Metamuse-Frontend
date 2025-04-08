@@ -17,13 +17,10 @@ export default function Commands() {
     input.accept = "image/*";
     input.onchange = (event: any) => {
       const file = event.target.files[0];
-      console.log("File", file)
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = async (e) => {
         const dataURL = e.target?.result as string;
-        console.log(dataURL);
         if (canvas) {
           const img = await fabric.FabricImage.fromURL(dataURL)
           img.scaleToWidth(canvas.width * 0.8); // Scale image to 80% of canvas width

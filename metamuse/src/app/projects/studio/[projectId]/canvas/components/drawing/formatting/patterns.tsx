@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useCanvas } from '../contexts/canvas-context';
+import { useCanvas } from '../../contexts/canvas-context';
 
 const PatternFormatting: React.FC = () => {
   const availablePatterns = [

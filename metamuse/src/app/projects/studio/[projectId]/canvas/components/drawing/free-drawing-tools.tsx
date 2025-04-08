@@ -4,7 +4,8 @@ import * as fabric from "fabric";
 import { useCanvas } from "../contexts/canvas-context";
 
 export function useFreeDrawingTools() {
-  const { canvas, setEraser, backgroundColor, pencilWidth, eraserWidth, foregroundColor } = useCanvas();
+  const { canvas, setEraser, backgroundColor, pencilWidth, eraserWidth, foregroundColor, isEraser } = useCanvas();
+  const [isPaint, setPaint] = useState(false)
 
   // General setup/cleanup for path editing (should ideally run once or be part of select tool logic)
   useEffect(() => {
@@ -64,12 +65,53 @@ export function useFreeDrawingTools() {
 
   }, [canvas]);
 
+  useEffect(() => {
+    if (!canvas) return
+    if (canvas.isDrawingMode && !isEraser) {
+      if (canvas.freeDrawingBrush) {
+        if (isPaint) {
+          canvas.freeDrawingBrush.width = pencilWidth * 2
+        } else {
+          canvas.freeDrawingBrush.width = pencilWidth
+        }
+      }
+    }
+
+  }, [pencilWidth])
+
+  useEffect(() => {
+    if (!canvas) return
+    if (canvas.isDrawingMode && !isEraser) {
+      if (canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.color = foregroundColor
+      }
+    }
+    if (canvas.isDrawingMode && isEraser) {
+      if (canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.color = backgroundColor === "transparent" ? "white" : backgroundColor
+      }
+    }
+  }
+  , [foregroundColor, backgroundColor])
+
+  useEffect(() => {
+    if (!canvas) return
+      if (canvas.freeDrawingBrush) {
+        if (isEraser) {
+          canvas.freeDrawingBrush.width = eraserWidth
+        }
+      }
+      console.log("Current Eraser", eraserWidth)
+
+  }, [eraserWidth])
+
 
   // Function to remove listeners added by specific tools
   const cleanupToolEventListeners = () => {
     if (!canvas) return;
     // Turn off drawing mode and remove common drawing/path listeners
     canvas.isDrawingMode = false;
+    setPaint(false)
     setEraser(false)
     canvas.off("mouse:down");
     canvas.off("mouse:move");
@@ -112,6 +154,7 @@ export function useFreeDrawingTools() {
       color: 'rgba(0,0,0,0.3)' // Adjust shadow color/opacity
     });
     canvas.defaultCursor = "crosshair";
+    setPaint(true)
   };
 
   // Eraser Tool - Using fabric.EraserBrush
@@ -126,11 +169,11 @@ export function useFreeDrawingTools() {
     // } else {
       console.warn("fabric.EraserBrush not available. Falling back to background color painting.");
       // Fallback to painting with background color
-      const fallbackEraser = new fabric.PencilBrush(canvas);
-      fallbackEraser.color = backgroundColor === "transparent" ? "white" : backgroundColor;
-      fallbackEraser.width = eraserWidth;
+      canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+      canvas.freeDrawingBrush.color = backgroundColor === "transparent" ? "white" : backgroundColor;
+      canvas.freeDrawingBrush.width = eraserWidth;
+      // = fallbackEraser; // Use the fallback eraser brush
       setEraser(true)
-      canvas.freeDrawingBrush = fallbackEraser; // Use the fallback eraser brush
     // }
     canvas.defaultCursor = "crosshair"; // Or a specific eraser cursor
   };

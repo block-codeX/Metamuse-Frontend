@@ -59,6 +59,8 @@ export interface CanvasContextType {
   undoStack: RefObject<string[]>,
   redoStack: RefObject<string[]>,
   saveState: () => void
+  isShape: boolean,
+  setIsShape: Dispatch<SetStateAction<boolean>>,
 }
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
@@ -75,10 +77,11 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [isItalic, setIsItalic] = useState(false);
   const [isEraser, setEraser] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
-  const [floating, setFloating] = useState("");
+  const [floating, setFloating] = useState("text");
   const [isStrikethrough, setIsStrikethrough] = useState(false);
   const [isSubscript, setIsSubscript] = useState(false);
   const [isSuperscript, setIsSuperscript] = useState(false);
+  const [isShape, setIsShape] = useState(false);
   const [gradientType, setGradientType] = useState("linear");
   const [angle, setAngle] = useState(0);
   const [fromColor, setFromColor] = useState("#000000");
@@ -173,7 +176,9 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         setPattern,
         undoStack,
         redoStack,
-        saveState
+        saveState,
+        isShape,
+        setIsShape,
       }}
     >
       {children}

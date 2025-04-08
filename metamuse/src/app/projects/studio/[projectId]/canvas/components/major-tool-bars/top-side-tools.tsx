@@ -1,4 +1,4 @@
-import Strokes from "../formatting/strokes";
+import Strokes from "../drawing/formatting/strokes";
 import Commands from "../commands/command";
 import { CanvasOrientationSwitcher } from "../orientation/tools/switcher";
 export default function TopSideTools() {

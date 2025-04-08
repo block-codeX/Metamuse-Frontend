@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCanvas } from "../contexts/canvas-context";
+import { useCanvas } from "../../contexts/canvas-context";
 import {
   Popover,
   PopoverContent,
