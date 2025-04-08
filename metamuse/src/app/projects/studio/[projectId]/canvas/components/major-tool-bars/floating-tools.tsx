@@ -9,7 +9,6 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const FloatingTools = () => {
-  const { floating } = useCanvas();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
@@ -49,7 +48,7 @@ const FloatingTools = () => {
                 </TabsList>
               </motion.div>
               
-              <div className="p-3 pt-0">
+              <div className="p-3 pt-0 h-90 overflow-auto">
                 <TabsContent value="text" className="mt-2">
                   <TextFormatting />
                 </TabsContent>

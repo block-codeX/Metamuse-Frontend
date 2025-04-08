@@ -21,7 +21,6 @@ export function useShapeTools() {
     foregroundColor,
     pencilWidth,
     backgroundColor,
-    setFloating,
     fontSize,
     fontStyle,
     isBold,
@@ -43,94 +42,94 @@ export function useShapeTools() {
   const activeToolRef = useRef<string | null>(null); // Track active tool
 
   // --- Effect for context value changes ---
-  useEffect(() => {
-    if (!canvas) return;
+//   useEffect(() => {
+//     if (!canvas) return;
 
-    // 1. Update current drawing shape if it exists
-    if (currentShape.current) {
-      // Update style properties based on shape type
-      if (
-        currentShape.current instanceof fabric.Rect ||
-        currentShape.current instanceof fabric.Circle ||
-        currentShape.current instanceof fabric.Ellipse ||
-        currentShape.current instanceof fabric.Line ||
-        currentShape.current instanceof fabric.Triangle ||
-        currentShape.current instanceof fabric.Polygon ||
-        currentShape.current instanceof fabric.Polyline
-      ) {
-        currentShape.current.set({
-          stroke: foregroundColor,
-          strokeWidth: pencilWidth,
-          fill: backgroundColor,
-        });
+//     // 1. Update current drawing shape if it exists
+//     if (currentShape.current  && isShape) {
+//       // Update style properties based on shape type
+//       if (
+//         currentShape.current instanceof fabric.Rect ||
+//         currentShape.current instanceof fabric.Circle ||
+//         currentShape.current instanceof fabric.Ellipse ||
+//         currentShape.current instanceof fabric.Line ||
+//         currentShape.current instanceof fabric.Triangle ||
+//         currentShape.current instanceof fabric.Polygon ||
+//         currentShape.current instanceof fabric.Polyline
+//       ) {
+//         currentShape.current.set({
+//           stroke: foregroundColor,
+//           strokeWidth: pencilWidth,
+//           fill: backgroundColor,
+//         });
 
-        canvas.requestRenderAll();
-      } else if (currentShape.current instanceof fabric.Textbox) {
-        currentShape.current.set({
-          fill: foregroundColor,
-          fontSize: fontSize,
-          fontFamily: fontStyle,
-          fontWeight: isBold ? "bold" : "normal",
-          fontStyle: isItalic ? "italic" : "normal",
-          underline: isUnderline,
-          linethrough: isStrikethrough,
-          superscript: isSuperscript,
-          subscript: isSubscript,
-        });
+//         canvas.requestRenderAll();
+//       } else if (currentShape.current instanceof fabric.Textbox) {
+//         currentShape.current.set({
+//           fill: foregroundColor,
+//           fontSize: fontSize,
+//           fontFamily: fontStyle,
+//           fontWeight: isBold ? "bold" : "normal",
+//           fontStyle: isItalic ? "italic" : "normal",
+//           underline: isUnderline,
+//           linethrough: isStrikethrough,
+//           superscript: isSuperscript,
+//           subscript: isSubscript,
+//         });
 
-        canvas.requestRenderAll();
-      }
-    }
+//         canvas.requestRenderAll();
+//       }
+//     }
 
-    // 2. Update selected objects' style if they match the active tool type
-    const selectedObjects = canvas.getActiveObjects();
-    if (selectedObjects.length > 0) {
-      selectedObjects.forEach((obj) => {
-        if (obj instanceof fabric.Textbox) {
-          obj.set({
-            fill: foregroundColor,
-            fontSize: fontSize,
-            fontFamily: fontStyle,
-            fontWeight: isBold ? "bold" : "normal",
-            fontStyle: isItalic ? "italic" : "normal",
-            underline: isUnderline,
-            linethrough: isStrikethrough,
-            superscript: isSuperscript,
-            subscript: isSubscript,
-          });
-        } else if (
-          (obj instanceof fabric.Rect ||
-            obj instanceof fabric.Circle ||
-            obj instanceof fabric.Ellipse ||
-            obj instanceof fabric.Line ||
-            obj instanceof fabric.Triangle ||
-            obj instanceof fabric.Polygon ||
-            obj instanceof fabric.Polyline) &&
-          selectedObjects.length > 0
-        ) {
-          obj.set({
-            stroke: foregroundColor,
-            strokeWidth: pencilWidth,
-            fill: backgroundColor,
-          });
-        }
-      });
-      canvas.requestRenderAll();
-    }
-  }, [
-    canvas,
-    foregroundColor,
-    pencilWidth,
-    backgroundColor,
-    fontSize,
-    fontStyle,
-    isBold,
-    isItalic,
-    isStrikethrough,
-    isUnderline,
-    isSubscript,
-    isSuperscript,
-  ]);
+//     // 2. Update selected objects' style if they match the active tool type
+//     const selectedObjects = canvas.getActiveObjects();
+//     if (selectedObjects.length > 0) {
+//       selectedObjects.forEach((obj) => {
+//         if (obj instanceof fabric.Textbox) {
+//           obj.set({
+//             fill: foregroundColor,
+//             fontSize: fontSize,
+//             fontFamily: fontStyle,
+//             fontWeight: isBold ? "bold" : "normal",
+//             fontStyle: isItalic ? "italic" : "normal",
+//             underline: isUnderline,
+//             linethrough: isStrikethrough,
+//             superscript: isSuperscript,
+//             subscript: isSubscript,
+//           });
+//         } else if (
+//           (obj instanceof fabric.Rect ||
+//             obj instanceof fabric.Circle ||
+//             obj instanceof fabric.Ellipse ||
+//             obj instanceof fabric.Line ||
+//             obj instanceof fabric.Triangle ||
+//             obj instanceof fabric.Polygon ||
+//             obj instanceof fabric.Polyline) &&
+//           selectedObjects.length > 0
+//         ) {
+//           obj.set({
+//             stroke: foregroundColor,
+//             strokeWidth: pencilWidth,
+//             fill: backgroundColor,
+//           });
+//         }
+//       });
+//       canvas.requestRenderAll();
+//     }
+//   }, [
+//     canvas,
+//     foregroundColor,
+//     pencilWidth,
+//     backgroundColor,
+//     fontSize,
+//     fontStyle,
+//     isBold,
+//     isItalic,
+//     isStrikethrough,
+//     isUnderline,
+//     isSubscript,
+//     isSuperscript,
+//   ]);
 
   // --- Cleanup & Initialization ---
 
@@ -141,7 +140,6 @@ export function useShapeTools() {
     canvas.off("mouse:move");
     canvas.off("mouse:up");
     canvas.off("mouse:dblclick");
-    setFloating("text");
     setIsShape(false); // Reset shape mode
 
     isDrawing.current = false;
@@ -670,7 +668,7 @@ export function useShapeTools() {
 
     const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
       if (isDrawing.current) return;
-      startPoint.current = canvas!.getPointer(opt.e);
+      startPoint.current = canvas!.getScenePoint(opt.e);
       isDrawing.current = true;
       // No persistent shape needed during drag for star (created on mouseup)
     };
@@ -678,7 +676,7 @@ export function useShapeTools() {
     const handleMouseUp = (opt: fabric.IEvent<MouseEvent>) => {
       if (!isDrawing.current || !startPoint.current) return;
 
-      const endPoint = canvas!.getPointer(opt.e);
+      const endPoint = canvas!.getScenePoint(opt.e);
       const width = Math.abs(endPoint.x - startPoint.current.x);
       const height = Math.abs(endPoint.y - startPoint.current.y);
 
@@ -730,7 +728,6 @@ export function useShapeTools() {
   // Text Tool (Continuous Placement)
   const activateTextTool = () => {
     if (!initializeDrawingTool("text", "Text")) return;
-    setFloating("text");
 
     const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
       // Place text on mousedown

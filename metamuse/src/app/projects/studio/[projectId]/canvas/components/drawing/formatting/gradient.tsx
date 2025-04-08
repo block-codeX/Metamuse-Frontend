@@ -92,7 +92,7 @@ const GradientFormatting: React.FC = () => {
               key={color}
               className="w-6 h-6 rounded-sm cursor-pointer"
               style={{ backgroundColor: color }}
-              onClick={() => setFromColor(color)}
+              onClick={() => setToColor(color)}
             ></span>
           ))}
         </div>

@@ -44,8 +44,6 @@ export interface CanvasContextType {
   dimensions: { width: number; height: number };
   isEraser: boolean,
   setEraser: Dispatch<SetStateAction<boolean>>,
-  floating: string,
-  setFloating: Dispatch<SetStateAction<string>>,
   gradientType: string,
   setGradientType: Dispatch<SetStateAction<string>>,
   angle: number,
@@ -77,7 +75,6 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [isItalic, setIsItalic] = useState(false);
   const [isEraser, setEraser] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
-  const [floating, setFloating] = useState("text");
   const [isStrikethrough, setIsStrikethrough] = useState(false);
   const [isSubscript, setIsSubscript] = useState(false);
   const [isSuperscript, setIsSuperscript] = useState(false);
@@ -156,8 +153,6 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         setDimensions,
         isEraser,
         setEraser,
-        floating,
-        setFloating,
         isStrikethrough,
         setIsStrikethrough,
         isSubscript,

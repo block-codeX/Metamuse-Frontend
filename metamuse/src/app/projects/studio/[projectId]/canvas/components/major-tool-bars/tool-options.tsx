@@ -36,7 +36,7 @@ export default function ToolOption({
   use,
 }: IToolOption) {
   const [activeTool, setActiveTool] = useState<Tool>(tools[0]);
-  const { canvas, setFloating, setIsShape } = useCanvas();
+  const { canvas, setIsShape } = useCanvas();
   // State to control the popover visibility
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -57,7 +57,6 @@ export default function ToolOption({
   // Activates the given tool's logic
   const handleToolClick = (tool: Tool) => {
     if (!canvas) return; // Ensure canvas is available
-    setFloating("text"); // Clear any floating tool state
     setIsShape(false); // Reset shape state
     setActiveTool(tool); // Update the displayed icon on the main button
     canvas.defaultCursor = "default"; // Reset cursor to default
