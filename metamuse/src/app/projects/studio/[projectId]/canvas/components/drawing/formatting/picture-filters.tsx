@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Camera } from "lucide-react";
-import * as fabric from 'fabric';
+import { Camera, X } from "lucide-react";
+import * as fabric from "fabric";
+import { useCanvas } from "../../contexts/canvas-context";
 // fabric.FabricImage.filters.Sepia()
 
 const filters = [
@@ -21,28 +22,20 @@ const blendModes = [
 ];
 
 const PictureFormatting: React.FC = () => {
-  const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<string | null>("None");
   const [selectedBlendMode, setSelectedBlendMode] = useState<string | null>(
-    null
+    "None"
   );
-  const [canvas, setCanvas] = useState<any>(null);
-
-  // Mock useCanvas hook implementation
-  useEffect(() => {
-    // In a real implementation, this would be provided by your useCanvas hook
-    const { canvas } = window as any;
-    if (canvas) {
-      setCanvas(canvas);
-    }
-  }, []);
-
+  const { canvas } = useCanvas();
   const applyFilter = (filterName: string) => {
     setSelectedFilter(filterName);
-
+    console.log("canv", canvas);
     if (!canvas) return;
 
     const activeObject = canvas.getActiveObject();
+    console.log("Active", activeObject);
     if (!activeObject || activeObject.type !== "image") return;
+    console.log("DEaling with images", activeObject);
 
     // Remove any existing filters
     activeObject.filters = [];
@@ -50,31 +43,28 @@ const PictureFormatting: React.FC = () => {
     // Apply the selected filter
     switch (filterName) {
       case "Grayscale":
-        activeObject.filters.push(
-          new (window as any).fabric.Image.filters.Grayscale()
-        );
+        activeObject.filters.push(new fabric.filters.Grayscale());
         break;
       case "Sepia":
-        activeObject.filters.push(
-          new (window as any).fabric.Image.filters.Sepia()
-        );
+        activeObject.filters.push(new fabric.filters.Sepia());
         break;
       case "Invert":
-        activeObject.filters.push(
-          new (window as any).fabric.Image.filters.Invert()
-        );
+        activeObject.filters.push(new fabric.filters.Invert());
         break;
       case "Brightness":
         activeObject.filters.push(
-          new (window as any).fabric.Image.filters.Brightness({
+          new fabric.filters.Brightness({
             brightness: 0.3,
           })
         );
         break;
       case "Contrast":
         activeObject.filters.push(
-          new (window as any).fabric.Image.filters.Contrast({ contrast: 0.3 })
+          new fabric.filters.Contrast({ contrast: 0.3 })
         );
+        break;
+      case "None" :
+        activeObject.filters = []
         break;
     }
 
@@ -108,6 +98,16 @@ const PictureFormatting: React.FC = () => {
       </TabsList>
 
       <TabsContent value="filters">
+        <div
+          onClick={() => applyFilter("None")}
+          className={`w-13 h-13 border flex flex-row items-center justify-center border rounded cursor-pointer active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
+            selectedFilter === "None"
+              ? "shadow-sm transform ring-1 ring-btn-primary"
+              : "bg-gray-50"
+          }`}
+        >
+          <X size={72} strokeWidth={1} />
+        </div>
         <div className="grid grid-cols-3 gap-3 space-x-3 mt-4">
           {filters.map((filter) => (
             <div
@@ -135,6 +135,16 @@ const PictureFormatting: React.FC = () => {
       </TabsContent>
 
       <TabsContent value="blendModes">
+      <div
+          onClick={() => applyBlendMode("None")}
+          className={`w-13 h-13 border flex flex-row items-center justify-center border rounded cursor-pointer active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
+            selectedBlendMode === "None"
+              ? "shadow-sm transform ring-1 ring-btn-primary"
+              : "bg-gray-50"
+          }`}
+        >
+          <X size={72} strokeWidth={1} />
+        </div>
         <div className="grid grid-cols-3 gap-3 mt-4">
           {blendModes.map((mode) => (
             <div

@@ -7,13 +7,34 @@ import {
 } from "@/components/ui/context-menu";
 import * as fabric from "fabric";
 import useEditFunctions from "./tools/edit-functions";
-import { Clipboard, Copy, Delete, Scissors, Trash, Trash2 } from "lucide-react";
+import {
+  Clipboard,
+  Copy,
+  Delete,
+  Redo,
+  Scissors,
+  Trash,
+  Trash2,
+  Undo,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 export default function CanvasContextMenu({ children }) {
   const { canvas } = useCanvas();
-  const { cut, deleteObj, copy, paste, duplicate, group, ungroup, bringToBack, sendToFront, lock, unlock} = useEditFunctions()
-
-
-  
+  const {
+    cut,
+    deleteObj,
+    copy,
+    paste,
+    duplicate,
+    group,
+    ungroup,
+    bringToBack,
+    sendToFront,
+    lock,
+    unlock,
+    undo,
+    redo,
+  } = useEditFunctions();
 
   const handleSendToBack = () => {
     if (!canvas) return;
@@ -24,23 +45,48 @@ export default function CanvasContextMenu({ children }) {
     }
   };
 
-
-
-
   return (
     <ContextMenu>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       <ContextMenuContent>
-        <div className="flex flex-row items-center justify-evenly gap-2 py-2">
-          <Scissors strokeWidth={1.5} size={18} className="text-btn-primary active:scale-95 cursor-pointer"
-          onClick={cut}/>
-          <Copy strokeWidth={1.5} size={18} className="text-btn-primary active:scale-95 cursor-pointer"
-          onClick={copy}/>
-          <Clipboard strokeWidth={1.5} size={18} className="text-btn-primary active:scale-95 cursor-pointer"
-          onClick={paste}/>
-          <Trash2 strokeWidth={1.5} size={18} className="text-red-500 active:scale-95 cursor-pointer"
-          onClick={deleteObj}/>
-          </div>
+        <div className="flex flex-row items-center justify-evenly gap-3 py-2 px-2">
+          <Scissors
+            strokeWidth={2}
+            size={18}
+            className="text-btn-primary hover:scale-95 transition-all transition-200 cursor-pointer"
+            onClick={cut}
+          />
+          <Copy
+            strokeWidth={2}
+            size={18}
+            className="text-btn-primary active:scale-95 cursor-pointer"
+            onClick={copy}
+          />
+          <Clipboard
+            strokeWidth={2}
+            size={18}
+            className="text-btn-primary active:scale-95 cursor-pointer"
+            onClick={paste}
+          />
+          <Undo
+            strokeWidth={2}
+            size={18}
+            className="text-btn-primary active:scale-95 cursor-pointer"
+            onClick={undo}
+          />
+          <Redo
+            strokeWidth={2}
+            size={18}
+            className="text-btn-primary active:scale-95 cursor-pointer"
+            onClick={redo}
+          />
+          <Trash2
+            strokeWidth={2}
+            size={18}
+            className="text-red-500 active:scale-95 cursor-pointer"
+            onClick={deleteObj}
+          />
+        </div>
         <ContextMenuItem onClick={group}>Group</ContextMenuItem>
         <ContextMenuItem onClick={ungroup}>Ungroup</ContextMenuItem>
         <ContextMenuItem onClick={sendToFront}>Send to Front</ContextMenuItem>

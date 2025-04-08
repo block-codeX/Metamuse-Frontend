@@ -10,7 +10,12 @@ import {
   RefObject,
 } from "react";
 import * as fabric from "fabric";
-import { CanvasPreset, PRESETS } from "../orientation/presets";
+
+interface IActiveObj {
+  width: number,
+  height: number,
+  objType: "object" | "picture" | string
+}
 
 export interface CanvasContextType {
   canvas: fabric.Canvas | null;
@@ -39,7 +44,8 @@ export interface CanvasContextType {
   setIsSubscript: Dispatch<SetStateAction<boolean>>;
   isSuperscript: boolean;
   setIsSuperscript: Dispatch<SetStateAction<boolean>>;
-
+  preset: string
+  setPreset: Dispatch<SetStateAction<string>>
   setDimensions: Dispatch<SetStateAction<{ width: number; height: number }>>
   dimensions: { width: number; height: number };
   isEraser: boolean,
@@ -59,6 +65,8 @@ export interface CanvasContextType {
   saveState: () => void
   isShape: boolean,
   setIsShape: Dispatch<SetStateAction<boolean>>,
+  activeObjDimensions: IActiveObj,
+  setActiveObjDimensions: Dispatch<SetStateAction<IActiveObj>>
 }
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
@@ -84,6 +92,14 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [fromColor, setFromColor] = useState("#000000");
   const [toColor, setToColor] = useState("#FFFFFF");
   const [pattern, setPattern] = useState("adire");
+  const [preset, setPreset] = useState("Portrait (Mobile)")
+  const [activeObjDimensions, setActiveObjDimensions] = useState(
+    {
+      width: 0,
+      height: 0,
+      objType: ""
+    }
+  )
   const [dimensions, setDimensions] = useState({
     width: 375,
     height: 667,
@@ -174,6 +190,10 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         saveState,
         isShape,
         setIsShape,
+        activeObjDimensions,
+        setActiveObjDimensions,
+        preset,
+        setPreset
       }}
     >
       {children}

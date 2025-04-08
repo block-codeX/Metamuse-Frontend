@@ -179,7 +179,7 @@ export function useFillTools() {
     const handleSolidClick = (opt: fabric.IEvent<MouseEvent>) => {
       if (!opt.e || !canvas) return;
 
-      const pointer = canvas.getPointer(opt.e);
+      const pointer = canvas.getScenePoint(opt.e);
       const x = pointer.x;
       const y = pointer.y;
       const color = foregroundColor;

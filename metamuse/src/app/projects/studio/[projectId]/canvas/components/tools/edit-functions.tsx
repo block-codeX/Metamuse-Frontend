@@ -88,33 +88,23 @@ const useEditFunctions = () => {
   };
   const group = () => {
     if (!canvas) return;
-    const activeObjects = canvas.getActiveObjects();
-    if (activeObjects.length > 1) {
-      const group = new fabric.Group(activeObjects);
-      canvas.discardActiveObject();
-      activeObjects.forEach((obj) => canvas.remove(obj));
-      canvas.add(group);
-      canvas.setActiveObject(group);
-      canvas.renderAll();
-    }
+    const group = new fabric.Group(canvas.getActiveObject()?.removeAll())
+    canvas.add(group);
+    canvas.setActiveObject(group);
+    canvas.requestRenderAll();
   };
   const ungroup = () => {
     if (!canvas) return
-    const activeObject = canvas.getActiveObject();
-    if (!activeObject) return
-    if(activeObject.type=="group"){
-        const items = activeObject._objects;
-        canvas.remove(activeObject);
-        for(let i = 0; i < items.length; i++) {
-            items[i].clone().then((cloned) => {
-                canvas.add(cloned)
-            })
-        }
-        canvas.discardActiveObject()
-        activeObject._objects.forEach((obj) => canvas.remove(obj))
-
-        canvas.renderAll();
+    const group = canvas.getActiveObject();
+    if (!group || group.type !== 'group') {
+        return;
     }
+    canvas.remove(group);
+    var sel = new fabric.ActiveSelection(group.removeAll(), {
+        canvas: canvas,
+    });
+    canvas.setActiveObject(sel);
+    canvas.requestRenderAll();
   };
   const sendToFront = () => {
     if (!canvas) return;
@@ -164,6 +154,7 @@ const useEditFunctions = () => {
     // Get pointer coordinates relative to canvas
     // const pointer = canvas.getScenePoint(e.e);
     // // Find object under pointer
+
     const targetObject = canvas.findTarget(e.e);
     // Only unlock if we found an object and it's locked
     if (targetObject && targetObject.selectable === false) {

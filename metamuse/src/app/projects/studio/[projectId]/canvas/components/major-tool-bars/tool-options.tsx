@@ -115,6 +115,9 @@ export default function ToolOption({
               "w-0 h-0", // Base dimensions for border trick
               // Define border widths - equal widths create a 45-degree angle hypotenuse
               // Adjust size as needed (e.g., 6px forms a 6x6 corner triangle)
+              "active:border-t-[4px]",
+              "active:border-l-[4px]",
+              "active:border-b-[4px]",
               "border-t-[5px]",
               "border-l-[5px]",
               "border-b-[5px]",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCanvas } from "../../contexts/canvas-context";
 import {
   Popover,
@@ -14,9 +14,28 @@ const WIDTH_OPTIONS = [
 ];
 
 export default function Strokes() {
-  const { pencilWidth, setPencilWidth, eraserWidth, setEraserWidth } =
+  const { pencilWidth, setPencilWidth, eraserWidth, setEraserWidth, activeObjDimensions, setActiveObjDimensions } =
     useCanvas();
+    const [width, setWidth] = useState(activeObjDimensions.width)
+    const [height, setHeight] = useState(activeObjDimensions.height)
+    const [fromUs, setFromUs] = useState(true)
+    const [objType, setObjType] = useState("")
+    useEffect(() => {
+      if (fromUs) {
+        setFromUs(false)
+        return;
+      }
+      setObjType(activeObjDimensions.objType)
+      setWidth(activeObjDimensions.width)
+      setHeight(activeObjDimensions.height)
+      console.log("Width", width, "height", height, objType)
 
+    }, [activeObjDimensions])
+  useEffect(() => {
+    const res = { width, height, objType }
+    setFromUs(true)
+    setActiveObjDimensions(res)
+  }, [width, height])
   return (
     <div className="flex flex-row gap-2 px-2 h-full items-center h-full border-r">
       {/* Pencil Popover */}
@@ -72,17 +91,23 @@ export default function Strokes() {
       </div>
       <div className="flex flex-col items-center justify-center w-30 gap-2">
         <Label className="flex flex-row gap-2 items-center justify-between">
-          <span className="w-10">Width:</span>
+          <span className={`w-10 ${objType == ""? 'text-gray-400' : 'text-pri'}`}>Width:</span>
           <Input
             type="number"
             className="h-6 px-1 focus:ring-none rounded-sm"
+            disabled={objType == ""}
+            value={width}
+            onChange={(e) => setWidth(e.target.value)}
           />
         </Label>
         <Label className="flex flex-row gap-2 items-center justify-between">
-          <span className="w-10">Height:</span>
+          <span className={`w-10 ${objType == ""? 'text-gray-400' : 'text-pri'}`}>Height:</span>
           <Input
             type="number"
             className="h-6 px-1 focus:ring-none rounded-sm"
+            disabled={objType == ""}
+            value={height}
+            onChange={(e) => setHeight(e.target.value)}
           />
         </Label>
       </div>

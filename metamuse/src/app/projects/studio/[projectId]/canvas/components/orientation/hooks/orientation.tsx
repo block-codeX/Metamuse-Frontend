@@ -4,7 +4,7 @@ import { PRESETS, CanvasPreset } from '../presets'
 import { useCanvas } from "../../contexts/canvas-context";
 
 export const useCanvasOrientation = () => {
-  const { canvas, setDimensions, dimensions } = useCanvas();
+  const { canvas, setDimensions, setPreset, } = useCanvas();
   const [currentPreset, setCurrentPreset] = useState<CanvasPreset>(PRESETS[0]);
   const [customDimensions, setCustomDimensions] = useState({
     width: 0,
@@ -12,14 +12,15 @@ export const useCanvasOrientation = () => {
   });
   const [unit, setUnit] = useState<"px" | "in" | "cm">("px");
 
-  const applyPreset = (preset: CanvasPreset) => {
+  const applyPreset = (preset_: CanvasPreset) => {
     if (!canvas) return;
     
-    const dimensions = preset.name === "Custom" 
+    const dimensions = preset_.name === "Custom" 
       ? customDimensions
-      : preset.dimensions;
+      : preset_.dimensions;
     setDimensions(dimensions)
-    setCurrentPreset(preset);
+    setCurrentPreset(preset_);
+    setPreset(preset_.name)
   };
 
   const updateCustomDimensions = (width: number, height: number) => {

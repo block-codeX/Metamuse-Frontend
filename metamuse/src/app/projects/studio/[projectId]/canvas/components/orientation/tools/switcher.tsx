@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCanvasOrientation } from "../hooks/orientation";
 import { Label } from "@/components/ui/label";
+import { useCanvas } from "../../contexts/canvas-context";
 
 export const CanvasOrientationSwitcher = () => {
   const {
@@ -20,6 +21,7 @@ export const CanvasOrientationSwitcher = () => {
     updateCustomDimensions,
     presets,
   } = useCanvasOrientation();
+  const { preset } = useCanvas()
 
   const calculateAspectRatio = () => {
     const { width, height } = currentPreset.dimensions;
@@ -64,7 +66,7 @@ export const CanvasOrientationSwitcher = () => {
         </DropdownMenu>
       </div>
       <div className="flex flex-col items-center justify-center w-30 gap-2">
-        <Label className="flex flex-row gap-2 items-center justify-between">
+        <Label className={`flex flex-row gap-2 items-center ${preset !== "Custom" ? "text-gray-400": "text-pri"} justify-between`}>
           <span className="w-10">Width:</span>
           <Input
             type="number"
@@ -77,9 +79,10 @@ export const CanvasOrientationSwitcher = () => {
             }
             placeholder="Width"
             className="h-6 px-1 focus:ring-none rounded-sm"
+            disabled={preset!=="Custom"}
           />
         </Label>
-        <Label className="flex flex-row gap-2 items-center justify-between">
+        <Label className={`flex flex-row gap-2 ${preset !== "Custom" ? "text-gray-400": "text-pri"} items-center justify-between`}>
           <span className="w-10">Height:</span>
           <Input
             type="number"
@@ -91,6 +94,7 @@ export const CanvasOrientationSwitcher = () => {
               )
             }
             placeholder="Height"
+            disabled={preset!=="Custom"}
             className="h-6 px-1 focus:ring-none rounded-sm"
           />
         </Label>
