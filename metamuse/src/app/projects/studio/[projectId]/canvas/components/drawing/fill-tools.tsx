@@ -21,6 +21,8 @@ export function useFillTools() {
     gradientType,
     pencilWidth,
     pattern,
+    isFill,
+    setFill
   } = useCanvas();
 
   // Refs to track the active fill mode
@@ -50,6 +52,7 @@ export function useFillTools() {
       gradientType,
       pencilWidth,
       pattern,
+
     });
     
     // If a fill tool is active, update the click listeners with new parameters
@@ -58,6 +61,7 @@ export function useFillTools() {
       cleanupToolEventListeners();
       
       // Re-activate the currently active tool with new parameters
+      if (!isFill) return
       setTimeout(() => {
         switch (activeFillTool.current) {
           case "solidFill":
@@ -94,6 +98,7 @@ export function useFillTools() {
     canvas.selection = true;
     canvas.forEachObject((o) => (o.selectable = true));
     isClickModeActive.current = false;
+    setFill(false)
     console.log("Fill tool listeners cleaned up.");
   };
 
@@ -169,6 +174,7 @@ export function useFillTools() {
   const activateSolidFillMode = (actionType: "fill" | "stroke") => {
     if (!canvas) return;
     
+    setFill(true)
     console.log(`Activating ${actionType} click mode...`);
     isClickModeActive.current = true;
     activeFillTool.current = actionType === "fill" ? "solidFill" : "stroke";
@@ -209,7 +215,8 @@ export function useFillTools() {
           canvas.renderAll();
           console.log("Fill applied to enclosed area");
         } else {
-          canvas.setBackgroundColor(color, canvas.renderAll.bind(canvas));
+          canvas.backgroundColor = color;
+          canvas.renderAll()
           console.log("Fill applied to background");
         }
       }
@@ -225,7 +232,7 @@ export function useFillTools() {
   // Activate gradient fill click mode
   const activateGradientFillMode = () => {
     if (!canvas) return;
-    
+    setFill(true)
     console.log("Activating gradient fill click mode...");
     isClickModeActive.current = true;
     activeFillTool.current = "gradient";
@@ -287,7 +294,8 @@ export function useFillTools() {
   // Activate pattern fill click mode
   const activatePatternFillMode = () => {
     if (!canvas) return;
-    
+    setFill(true)
+
     console.log("Activating pattern fill click mode...");
     isClickModeActive.current = true;
     activeFillTool.current = "pattern";
@@ -385,6 +393,7 @@ export function useFillTools() {
     const activeObject = canvas.getActiveObject();
     const color = foregroundColor;
     const strokeWidth = pencilWidth;
+    setFill(true)
 
     if (activeObject) {
       // Mode 1: Apply to selected object
@@ -415,6 +424,7 @@ export function useFillTools() {
     const colors = [fromColor, toColor];
     const currentAngle = angle || 0; // Default to 0 if not set
     const isLinearGradient = gradientType === "linear";
+    setFill(true)
 
     // Calculate coordinates based on angle
     const coords = calculateGradientCoords(currentAngle, isLinearGradient);
@@ -452,6 +462,7 @@ export function useFillTools() {
 
     // Get pattern URL from pattern name
     const patternUrl = getPatternUrl(pattern);
+    setFill(true)
 
     if (!patternUrl) {
       console.warn("No pattern selected for pattern fill.");
@@ -495,6 +506,7 @@ export function useFillTools() {
   const deactivateAllFillTools = () => {
     cleanupToolEventListeners();
     activeFillTool.current = null;
+    setFill(false)
   };
 
   // --- Return Tool Definitions ---

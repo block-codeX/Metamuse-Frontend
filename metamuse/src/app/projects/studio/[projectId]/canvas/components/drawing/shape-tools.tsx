@@ -42,94 +42,108 @@ export function useShapeTools() {
   const activeToolRef = useRef<string | null>(null); // Track active tool
 
   // --- Effect for context value changes ---
-//   useEffect(() => {
-//     if (!canvas) return;
+  useEffect(() => {
+    if (!canvas) return;
 
-//     // 1. Update current drawing shape if it exists
-//     if (currentShape.current  && isShape) {
-//       // Update style properties based on shape type
-//       if (
-//         currentShape.current instanceof fabric.Rect ||
-//         currentShape.current instanceof fabric.Circle ||
-//         currentShape.current instanceof fabric.Ellipse ||
-//         currentShape.current instanceof fabric.Line ||
-//         currentShape.current instanceof fabric.Triangle ||
-//         currentShape.current instanceof fabric.Polygon ||
-//         currentShape.current instanceof fabric.Polyline
-//       ) {
-//         currentShape.current.set({
-//           stroke: foregroundColor,
-//           strokeWidth: pencilWidth,
-//           fill: backgroundColor,
-//         });
+    // 1. Update current drawing shape if it exists
+    if (currentShape.current && isShape) {
+      // Update style properties based on shape type
+      if (
+        currentShape.current instanceof fabric.Rect ||
+        currentShape.current instanceof fabric.Circle ||
+        currentShape.current instanceof fabric.Ellipse ||
+        currentShape.current instanceof fabric.Line ||
+        currentShape.current instanceof fabric.Triangle ||
+        currentShape.current instanceof fabric.Polygon ||
+        currentShape.current instanceof fabric.Polyline
+      ) {
+        currentShape.current.set({
+          stroke: foregroundColor,
+          strokeWidth: pencilWidth,
+          fill: backgroundColor,
+        });
 
-//         canvas.requestRenderAll();
-//       } else if (currentShape.current instanceof fabric.Textbox) {
-//         currentShape.current.set({
-//           fill: foregroundColor,
-//           fontSize: fontSize,
-//           fontFamily: fontStyle,
-//           fontWeight: isBold ? "bold" : "normal",
-//           fontStyle: isItalic ? "italic" : "normal",
-//           underline: isUnderline,
-//           linethrough: isStrikethrough,
-//           superscript: isSuperscript,
-//           subscript: isSubscript,
-//         });
+        canvas.requestRenderAll();
+      } else if (currentShape.current instanceof fabric.Textbox) {
+        currentShape.current.set({
+          fill: foregroundColor,
+          fontSize: fontSize,
+          fontFamily: fontStyle,
+          fontWeight: isBold ? "bold" : "normal",
+          fontStyle: isItalic ? "italic" : "normal",
+          underline: isUnderline,
+          linethrough: isStrikethrough,
+          superscript: isSuperscript,
+          subscript: isSubscript,
+        });
 
-//         canvas.requestRenderAll();
-//       }
-//     }
+        canvas.requestRenderAll();
+      }
+    }
 
-//     // 2. Update selected objects' style if they match the active tool type
-//     const selectedObjects = canvas.getActiveObjects();
-//     if (selectedObjects.length > 0) {
-//       selectedObjects.forEach((obj) => {
-//         if (obj instanceof fabric.Textbox) {
-//           obj.set({
-//             fill: foregroundColor,
-//             fontSize: fontSize,
-//             fontFamily: fontStyle,
-//             fontWeight: isBold ? "bold" : "normal",
-//             fontStyle: isItalic ? "italic" : "normal",
-//             underline: isUnderline,
-//             linethrough: isStrikethrough,
-//             superscript: isSuperscript,
-//             subscript: isSubscript,
-//           });
-//         } else if (
-//           (obj instanceof fabric.Rect ||
-//             obj instanceof fabric.Circle ||
-//             obj instanceof fabric.Ellipse ||
-//             obj instanceof fabric.Line ||
-//             obj instanceof fabric.Triangle ||
-//             obj instanceof fabric.Polygon ||
-//             obj instanceof fabric.Polyline) &&
-//           selectedObjects.length > 0
-//         ) {
-//           obj.set({
-//             stroke: foregroundColor,
-//             strokeWidth: pencilWidth,
-//             fill: backgroundColor,
-//           });
-//         }
-//       });
-//       canvas.requestRenderAll();
-//     }
-//   }, [
-//     canvas,
-//     foregroundColor,
-//     pencilWidth,
-//     backgroundColor,
-//     fontSize,
-//     fontStyle,
-//     isBold,
-//     isItalic,
-//     isStrikethrough,
-//     isUnderline,
-//     isSubscript,
-//     isSuperscript,
-//   ]);
+    // 2. Update selected objects' style if they match the active tool type
+    const selectedObjects = canvas.getActiveObjects();
+    if (selectedObjects.length > 0) {
+      if (selectedObjects.length > 0 && isShape && activeToolRef.current) {
+        // Only update properties when actively using a shape tool
+        selectedObjects.forEach((obj) => {
+          if (
+            obj instanceof fabric.Textbox &&
+            activeToolRef.current === "Text"
+          ) {
+            obj.set({
+              fill: foregroundColor,
+              fontSize: fontSize,
+              fontFamily: fontStyle,
+              fontWeight: isBold ? "bold" : "normal",
+              fontStyle: isItalic ? "italic" : "normal",
+              underline: isUnderline,
+              linethrough: isStrikethrough,
+              superscript: isSuperscript,
+              subscript: isSubscript,
+            });
+          } else if (
+            (obj instanceof fabric.Rect ||
+              obj instanceof fabric.Circle ||
+              obj instanceof fabric.Ellipse ||
+              obj instanceof fabric.Line ||
+              obj instanceof fabric.Triangle ||
+              obj instanceof fabric.Polygon ||
+              obj instanceof fabric.Polyline) &&
+            [
+              "Rectangle",
+              "Ellipse",
+              "Line",
+              "Triangle",
+              "Polygon",
+              "Polyline",
+              "Star",
+            ].includes(activeToolRef.current as string)
+          ) {
+            obj.set({
+              stroke: foregroundColor,
+              strokeWidth: pencilWidth,
+              fill: backgroundColor,
+            });
+          }
+        });
+        canvas.requestRenderAll();
+      }
+    }
+  }, [
+    canvas,
+    foregroundColor,
+    pencilWidth,
+    backgroundColor,
+    fontSize,
+    fontStyle,
+    isBold,
+    isItalic,
+    isStrikethrough,
+    isUnderline,
+    isSubscript,
+    isSuperscript,
+  ]);
 
   // --- Cleanup & Initialization ---
 
@@ -266,7 +280,7 @@ export function useShapeTools() {
 
     const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
       if (isDrawing.current) return; // Prevent starting new shape if already drawing
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       startPoint.current = { x: pointer.x, y: pointer.y };
       isDrawing.current = true;
 
@@ -280,6 +294,7 @@ export function useShapeTools() {
         fill: backgroundColor, // Uses latest context value for fill
         strokeUniform: true,
         selectable: false,
+        erasable: "deep",
         objectCaching: false, // Cache after creation
       });
       currentShape.current = rect;
@@ -289,7 +304,7 @@ export function useShapeTools() {
     const handleMouseMove = (opt: fabric.IEvent<MouseEvent>) => {
       if (!isDrawing.current || !startPoint.current || !currentShape.current)
         return;
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       const rect = currentShape.current as fabric.Rect;
       const left = Math.min(pointer.x, startPoint.current.x);
       const top = Math.min(pointer.y, startPoint.current.y);
@@ -333,7 +348,7 @@ export function useShapeTools() {
 
     const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
       if (isDrawing.current) return;
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       startPoint.current = { x: pointer.x, y: pointer.y };
       isDrawing.current = true;
       const ellipse = new fabric.Ellipse({
@@ -346,6 +361,7 @@ export function useShapeTools() {
         fill: backgroundColor,
         strokeUniform: true,
         selectable: false,
+        erasable: "deep",
         originX: "center",
         originY: "center",
         objectCaching: false,
@@ -356,7 +372,7 @@ export function useShapeTools() {
     const handleMouseMove = (opt: fabric.IEvent<MouseEvent>) => {
       if (!isDrawing.current || !startPoint.current || !currentShape.current)
         return;
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       const ellipse = currentShape.current as fabric.Ellipse;
       const rx = Math.abs(pointer.x - startPoint.current.x) / 2;
       const ry = Math.abs(pointer.y - startPoint.current.y) / 2;
@@ -395,7 +411,7 @@ export function useShapeTools() {
 
     const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
       if (isDrawing.current) return;
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       startPoint.current = { x: pointer.x, y: pointer.y };
       isDrawing.current = true;
       const line = new fabric.Line(
@@ -410,6 +426,7 @@ export function useShapeTools() {
           strokeWidth: pencilWidth,
           selectable: false,
           objectCaching: false,
+          erasable: "deep",
         }
       );
       currentShape.current = line;
@@ -417,7 +434,7 @@ export function useShapeTools() {
     };
     const handleMouseMove = (opt: fabric.IEvent<MouseEvent>) => {
       if (!isDrawing.current || !currentShape.current) return;
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       const line = currentShape.current as fabric.Line;
       line.set({
         x2: pointer.x,
@@ -451,7 +468,7 @@ export function useShapeTools() {
 
     const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
       if (isDrawing.current) return;
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       startPoint.current = { x: pointer.x, y: pointer.y };
       isDrawing.current = true;
 
@@ -465,6 +482,7 @@ export function useShapeTools() {
         fill: backgroundColor,
         strokeUniform: true,
         selectable: false,
+        erasable: "deep",
         objectCaching: false,
       });
       currentShape.current = triangle;
@@ -474,7 +492,7 @@ export function useShapeTools() {
     const handleMouseMove = (opt: fabric.IEvent<MouseEvent>) => {
       if (!isDrawing.current || !startPoint.current || !currentShape.current)
         return;
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       const triangle = currentShape.current as fabric.Triangle;
 
       const left = Math.min(pointer.x, startPoint.current.x);
@@ -545,6 +563,7 @@ export function useShapeTools() {
           selectable: true,
           hasBorders: true,
           hasControls: true,
+          erasable: "deep",
           objectCaching: true,
           stroke: foregroundColor, // Always use latest context values
           strokeWidth: pencilWidth,
@@ -568,7 +587,7 @@ export function useShapeTools() {
     const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
       if (opt.e.detail > 1) return; // Ignore double-clicks here
 
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
       const point = { x: pointer.x, y: pointer.y };
 
       // Triangle specific: Finish after 3 points
@@ -708,6 +727,7 @@ export function useShapeTools() {
         originY: "center",
         stroke: foregroundColor,
         strokeWidth: pencilWidth,
+        erasable: "deep",
         fill: backgroundColor,
         strokeUniform: true,
         selectable: false, // Will be set true in resetDrawingState
@@ -731,7 +751,7 @@ export function useShapeTools() {
 
     const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
       // Place text on mousedown
-      const pointer = canvas!.getPointer(opt.e);
+      const pointer = canvas!.getScenePoint(opt.e);
 
       const textbox = new fabric.Textbox("Enter text", {
         left: pointer.x,
@@ -751,6 +771,7 @@ export function useShapeTools() {
         selectable: true, // Make selectable immediately
         hasControls: true,
         editable: true,
+        erasable: "deep",
         objectCaching: true, // Cache immediately
         strokeUniform: true,
       });

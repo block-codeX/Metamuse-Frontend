@@ -25,6 +25,7 @@ export default function Commands() {
           const img = await fabric.FabricImage.fromURL(dataURL)
           img.scaleToWidth(canvas.width * 0.8); // Scale image to 80% of canvas width
           img.set({ left: 50, top: 50 }); // Position it on the canvas
+          img.erasable = "deep"
           canvas.add(img);
           canvas.renderAll();
         }

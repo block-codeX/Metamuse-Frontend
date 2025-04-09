@@ -65,8 +65,11 @@ export interface CanvasContextType {
   saveState: () => void
   isShape: boolean,
   setIsShape: Dispatch<SetStateAction<boolean>>,
-  activeObjDimensions: IActiveObj,
+  isFill: boolean,
+  setFill: Dispatch<SetStateAction<boolean>>,activeObjDimensions: IActiveObj,
   setActiveObjDimensions: Dispatch<SetStateAction<IActiveObj>>
+  brushType: string
+  setBrushType: Dispatch<SetStateAction<string>>
 }
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
@@ -87,12 +90,14 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [isSubscript, setIsSubscript] = useState(false);
   const [isSuperscript, setIsSuperscript] = useState(false);
   const [isShape, setIsShape] = useState(false);
+  const [isFill, setFill] = useState(false)
   const [gradientType, setGradientType] = useState("linear");
   const [angle, setAngle] = useState(0);
   const [fromColor, setFromColor] = useState("#000000");
   const [toColor, setToColor] = useState("#FFFFFF");
   const [pattern, setPattern] = useState("adire");
   const [preset, setPreset] = useState("Portrait (Mobile)")
+  const [brushType, setBrushType] = useState("pencil")
   const [activeObjDimensions, setActiveObjDimensions] = useState(
     {
       width: 0,
@@ -106,6 +111,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   });
   const undoStack: RefObject<string[]> = useRef([])
   const redoStack: RefObject<string[]> = useRef([])
+  fabric.FabricObject.prototype.erasable = "deep";
   useEffect(() => {
     if (!canvasRef.current) return;
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
@@ -193,7 +199,11 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         activeObjDimensions,
         setActiveObjDimensions,
         preset,
-        setPreset
+        setPreset,
+        isFill,
+        setFill,
+        brushType,
+        setBrushType
       }}
     >
       {children}
