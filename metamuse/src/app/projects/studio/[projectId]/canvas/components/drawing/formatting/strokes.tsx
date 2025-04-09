@@ -39,6 +39,7 @@ export default function Strokes() {
     activeObjDimensions,
     setActiveObjDimensions,
     brushType,
+    foregroundColor,
     setBrushType,
   } = useCanvas();
   const [width, setWidth] = useState(activeObjDimensions.width);
@@ -147,7 +148,7 @@ export default function Strokes() {
         <PopoverTrigger className="p-2 h-16 w-10 cursor-pointer active:scale-95 transition-scale transition-200 rounded-md shadow-sm border border-gray-300 flex items-center space-x-2">
           {(() => {
             const IconComponent = BRUSH_OPTIONS[brushType as "pencil"];
-            return <IconComponent fill="var(--btn-primary)" color={"gray"} strokeWidth={1} />;
+            return <IconComponent fill={foregroundColor} color={"gray"} strokeWidth={1} />;
           })()}
         </PopoverTrigger>
         <PopoverContent className=" rounded-none w-25  overflow-auto p-2 flex flex-col space-y-2">

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Pencil, Brush, Eraser, PenTool, Tangent } from "lucide-react";
+import { Pencil, Brush, Eraser, PenTool, Tangent, PencilLine } from "lucide-react";
 import * as fabric from "fabric";
 import { useCanvas } from "../contexts/canvas-context";
 import { EraserBrush, ClippingGroup } from "@erase2d/fabric";
+
 export function useFreeDrawingTools() {
   const {
     canvas,
@@ -12,6 +13,7 @@ export function useFreeDrawingTools() {
     eraserWidth,
     foregroundColor,
     isEraser,
+    brushType,
   } = useCanvas();
   const [isPaint, setPaint] = useState(false);
 
@@ -23,22 +25,10 @@ export function useFreeDrawingTools() {
       const obj = opt.target;
       // Make paths editable upon selection
       if (obj && obj.type === "path" && !obj.isEditing) {
-        // Add isEditing flag
-        // Disable selection styles while editing maybe?
-        // obj.set({
-        //   borderColor: 'gray',
-        //   cornerColor: 'black',
-        //   cornerStyle: 'circle',
-        //   transparentCorners: false,
-        //   hasBorders: true,
-        //   hasControls: true // Use default controls for path editing
-        // });
         obj.set({ editable: true });
         obj.isEditing = true; // Mark as editing
         console.log("Path set to editable", obj);
         canvas.renderAll();
-
-        // Custom handling for path editing might go here if needed
       }
     };
 
@@ -49,15 +39,10 @@ export function useFreeDrawingTools() {
         console.log("Path set to static", obj);
         obj.set({ editable: false });
         obj.isEditing = false; // Unmark
-        // Restore normal selection styles if needed
-        // obj.set({ hasBorders: true, hasControls: true });
         canvas.renderAll();
       }
     };
 
-    // --- Event Listeners for Path Editing ---
-    // Note: These listeners might conflict if other tools heavily rely on selection events.
-    // Consider activating/deactivating these based on the *currently selected tool* (e.g., only active for a 'Select/Edit' tool).
     canvas.on("selection:created", makePathEditable);
     canvas.on("selection:updated", makePathEditable);
     canvas.on("selection:cleared", makePathStatic); // Use selection:cleared for deselection
@@ -72,6 +57,66 @@ export function useFreeDrawingTools() {
     };
   }, [canvas]);
 
+  // Function to create and configure a brush based on the current brushType
+  const getBrush = (canvas) => {
+    let resolvedBrush;
+    switch (brushType) {
+      case "pencil": {
+        resolvedBrush = new fabric.PencilBrush(canvas);
+        resolvedBrush.color = foregroundColor;
+        resolvedBrush.width = pencilWidth;
+        break;
+      }
+      case "brush": {
+        resolvedBrush = new fabric.PencilBrush(canvas);
+        resolvedBrush.color = foregroundColor;
+        resolvedBrush.width = pencilWidth * 2; // Example: thicker brush
+        resolvedBrush.strokeLineCap = "round";
+        resolvedBrush.strokeLineJoin = "round";
+        resolvedBrush.shadow = new fabric.Shadow({
+          blur: Math.max(pencilWidth * 0.5, 2), // Blur based on width
+          offsetX: 1,
+          offsetY: 1,
+          color: "rgba(0,0,0,0.3)", // Adjust shadow color/opacity
+        });
+        canvas.defaultCursor = "crosshair";
+        setPaint(true);
+        break;
+      }
+      case "pattern": {
+        resolvedBrush = new fabric.PatternBrush(canvas);
+        resolvedBrush.color = foregroundColor;
+        resolvedBrush.width = pencilWidth;
+        break;
+      }
+      case "spray": {
+        resolvedBrush = new fabric.SprayBrush(canvas);
+        resolvedBrush.color = foregroundColor;
+        resolvedBrush.width = pencilWidth;
+        break;
+      }
+      case "circle": {
+        resolvedBrush = new fabric.CircleBrush(canvas);
+        resolvedBrush.color = foregroundColor;
+        resolvedBrush.width = pencilWidth;
+        break;
+      }
+    }
+    console.log("Resolved brush for", brushType, resolvedBrush);
+    return resolvedBrush;
+  };
+
+  // Track changes to brushType and update the brush accordingly
+  useEffect(() => {
+    if (!canvas) return;
+    if (canvas.isDrawingMode && !isEraser) {
+      // Update the brush when brushType changes
+      canvas.freeDrawingBrush = getBrush(canvas);
+      canvas.renderAll();
+    }
+  }, [brushType, canvas, isEraser]);
+
+  // Handle pencil width changes
   useEffect(() => {
     if (!canvas) return;
     if (canvas.isDrawingMode && !isEraser) {
@@ -83,8 +128,9 @@ export function useFreeDrawingTools() {
         }
       }
     }
-  }, [pencilWidth]);
+  }, [pencilWidth, canvas, isEraser, isPaint]);
 
+  // Handle color changes
   useEffect(() => {
     if (!canvas) return;
     if (canvas.isDrawingMode && !isEraser) {
@@ -92,23 +138,16 @@ export function useFreeDrawingTools() {
         canvas.freeDrawingBrush.color = foregroundColor;
       }
     }
-    if (canvas.isDrawingMode && isEraser) {
-      if (canvas.freeDrawingBrush) {
-        canvas.freeDrawingBrush.color =
-          backgroundColor === "transparent" ? "white" : backgroundColor;
-      }
-    }
-  }, [foregroundColor, backgroundColor]);
+  }, [foregroundColor, backgroundColor, canvas, isEraser]);
 
+  // Handle eraser width changes
   useEffect(() => {
     if (!canvas) return;
-    if (canvas.freeDrawingBrush) {
-      if (isEraser) {
-        canvas.freeDrawingBrush.width = eraserWidth;
-      }
+    if (canvas.freeDrawingBrush && isEraser) {
+      canvas.freeDrawingBrush.width = eraserWidth;
+      console.log("Current Eraser width:", eraserWidth);
     }
-    console.log("Current Eraser", eraserWidth);
-  }, [eraserWidth]);
+  }, [eraserWidth, canvas, isEraser]);
 
   // Function to remove listeners added by specific tools
   const cleanupToolEventListeners = () => {
@@ -134,11 +173,7 @@ export function useFreeDrawingTools() {
     if (!canvas) return;
     cleanupToolEventListeners(); // Use specific cleanup
     canvas.isDrawingMode = true;
-    // const pencil
-    canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-    canvas.freeDrawingBrush.erasable  = "deep"
-    canvas.freeDrawingBrush.color = foregroundColor;
-    canvas.freeDrawingBrush.width = pencilWidth;
+    canvas.freeDrawingBrush = getBrush(canvas);
     canvas.defaultCursor = "crosshair";
   };
 
@@ -147,20 +182,8 @@ export function useFreeDrawingTools() {
     if (!canvas) return;
     cleanupToolEventListeners(); // Use specific cleanup
     canvas.isDrawingMode = true;
-    canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-    canvas.freeDrawingBrush.color = foregroundColor;
-    canvas.freeDrawingBrush.width = pencilWidth * 2; // Example: thicker brush
-    canvas.freeDrawingBrush.strokeLineCap = "round";
-    canvas.freeDrawingBrush.strokeLineJoin = "round";
-    // Add shadow for a softer effect
-    canvas.freeDrawingBrush.shadow = new fabric.Shadow({
-      blur: Math.max(pencilWidth * 0.5, 2), // Blur based on width
-      offsetX: 1,
-      offsetY: 1,
-      color: "rgba(0,0,0,0.3)", // Adjust shadow color/opacity
-    });
+    canvas.freeDrawingBrush = getBrush(canvas); // Use the getBrush function for consistency
     canvas.defaultCursor = "crosshair";
-    setPaint(true);
   };
 
   // Eraser Tool - Using fabric.EraserBrush
@@ -170,7 +193,7 @@ export function useFreeDrawingTools() {
     const eraser = new EraserBrush(canvas);
     eraser.width = eraserWidth; // Set eraser width
     setEraser(true);
-    canvas.freeDrawingBrush = eraser
+    canvas.freeDrawingBrush = eraser;
     canvas.isDrawingMode = true;
     canvas.defaultCursor = "eraser"; // Or a specific eraser cursor
   };
@@ -185,10 +208,10 @@ export function useFreeDrawingTools() {
     canvas.forEachObject((o) => (o.selectable = false)); // Make existing objects non-selectable
 
     let isDrawing = false;
-    let currentPath: fabric.Path | null = null;
-    let points: number[] = []; // Store points as [x1, y1, x2, y2, ...]
+    let currentPath = null;
+    let points = []; // Store points as [x1, y1, x2, y2, ...]
 
-    const handleMouseDown = (opt: fabric.IEvent<MouseEvent>) => {
+    const handleMouseDown = (opt) => {
       const pointer = canvas.getScenePoint(opt.e);
       const x = pointer.x;
       const y = pointer.y;
@@ -243,7 +266,7 @@ export function useFreeDrawingTools() {
           const lastY = points[points.length - 1];
           if (x !== lastX || y !== lastY) {
             // Append Line command
-            currentPath.path!.push(["L", x, y]);
+            currentPath.path.push(["L", x, y]);
             points.push(x, y);
             // Path objects need explicit rendering after modification
             currentPath.setCoords(); // Recalculate coordinates
@@ -255,7 +278,7 @@ export function useFreeDrawingTools() {
     };
 
     // Separate handler for double click to ensure it fires correctly
-    const handleDoubleClick = (opt: fabric.IEvent<MouseEvent>) => {
+    const handleDoubleClick = (opt) => {
       console.log("Double click detected");
       if (isDrawing && currentPath) {
         // Finalize logic if any specific action needed on dblclick finish
@@ -274,22 +297,17 @@ export function useFreeDrawingTools() {
     // Attach PEN TOOL specific listeners
     canvas.on("mouse:down", handleMouseDown);
     canvas.on("mouse:dblclick", handleDoubleClick); // Use dedicated dblclick listener
-
-    // Note: No mouse:move needed for simple line segments on click
-    // Note: No mouse:up needed explicitly here unless handling drag for Bezier (which we removed)
   };
-
-  // Removed activatePathEditingTool as its logic is integrated into general selection handling
 
   return [
     {
-      icon: <Pencil />,
+      icon: <PencilLine />,
       toolName: "Pencil",
       function: activatePencilTool,
       function_args: [],
     },
     {
-      icon: <Brush />,
+      icon: <Brush />,  // Added Brush tool to the return array
       toolName: "Brush",
       function: activateBrushTool,
       function_args: [],
@@ -306,7 +324,5 @@ export function useFreeDrawingTools() {
       function: activatePenTool,
       function_args: [],
     },
-    // Removed the Bezier/Tangent tool as editing is now part of path selection
-    // { icon: <Tangent />, toolName: "Edit Path", function: ???, function_args: [] }, // Could add an explicit "Edit" tool later
   ];
 }
