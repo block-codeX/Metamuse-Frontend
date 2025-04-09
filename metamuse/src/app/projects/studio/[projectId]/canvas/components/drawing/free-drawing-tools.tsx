@@ -166,7 +166,6 @@ export function useFreeDrawingTools() {
     canvas.forEachObject((o) => (o.selectable = true));
   };
 
-  // --- Tool Activation Functions ---
 
   // Pencil Tool - Basic freehand drawing
   const activatePencilTool = () => {
@@ -174,15 +173,6 @@ export function useFreeDrawingTools() {
     cleanupToolEventListeners(); // Use specific cleanup
     canvas.isDrawingMode = true;
     canvas.freeDrawingBrush = getBrush(canvas);
-    canvas.defaultCursor = "crosshair";
-  };
-
-  // Brush Tool - Softer feel using shadow and round caps
-  const activateBrushTool = () => {
-    if (!canvas) return;
-    cleanupToolEventListeners(); // Use specific cleanup
-    canvas.isDrawingMode = true;
-    canvas.freeDrawingBrush = getBrush(canvas); // Use the getBrush function for consistency
     canvas.defaultCursor = "crosshair";
   };
 
@@ -304,12 +294,6 @@ export function useFreeDrawingTools() {
       icon: <PencilLine />,
       toolName: "Pencil",
       function: activatePencilTool,
-      function_args: [],
-    },
-    {
-      icon: <Brush />,  // Added Brush tool to the return array
-      toolName: "Brush",
-      function: activateBrushTool,
       function_args: [],
     },
     {

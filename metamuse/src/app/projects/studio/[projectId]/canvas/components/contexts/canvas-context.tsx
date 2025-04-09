@@ -17,6 +17,14 @@ interface IActiveObj {
   objType: "object" | "picture" | string
 }
 
+interface CanvasSettings {
+  dimensions: {
+    width: number;
+    height: number
+  }
+  preset: any
+  backgroundColor: any
+}
 export interface CanvasContextType {
   canvas: fabric.Canvas | null;
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -70,6 +78,8 @@ export interface CanvasContextType {
   setActiveObjDimensions: Dispatch<SetStateAction<IActiveObj>>
   brushType: string
   setBrushType: Dispatch<SetStateAction<string>>
+  canvasSettings: CanvasSettings | null
+  setCanvasSettings: Dispatch<SetStateAction<CanvasSettings | null>>
 }
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
@@ -98,6 +108,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [pattern, setPattern] = useState("adire");
   const [preset, setPreset] = useState("Portrait (Mobile)")
   const [brushType, setBrushType] = useState("pencil")
+  const [canvasSettings, setCanvasSettings] = useState(null)
   const [activeObjDimensions, setActiveObjDimensions] = useState(
     {
       width: 0,
@@ -148,6 +159,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
     canvas.renderAll()
   }, [dimensions, canvas]);
 
+  /** Use effect to update canvas settings Important for yjs updates */
   return (
     <CanvasContext.Provider
       value={{
@@ -203,7 +215,9 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         isFill,
         setFill,
         brushType,
-        setBrushType
+        setBrushType,
+        canvasSettings,
+        setCanvasSettings
       }}
     >
       {children}

@@ -166,7 +166,7 @@ const useCanvasSync = (projectId: string) => {
       canvas.off("object:removed", handlers.removed);
       canvas.off("path:created", handlers.pathCreated);
     }
-  }, [initialized]);
+  }, [initialized]);  
 
   useEffect(() => {
     if (!initialized || !canvas) return;
