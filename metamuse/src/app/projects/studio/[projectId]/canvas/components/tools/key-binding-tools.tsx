@@ -215,37 +215,37 @@ export function useKeyBindingTools() {
 
   // Effect to update active object dimensions when state changes
   // Effect to update active object dimensions when state changes
-  useEffect(() => {
-    if (!canvas) return;
-    const activeObject = canvas.getActiveObject();
-    if (
-      activeObject &&
-      (activeObjDimensions.width > 0 || activeObjDimensions.height > 0)
-    ) {
-      const currentWidth = activeObject.getScaledWidth();
-      const currentHeight = activeObject.getScaledHeight();
+  // useEffect(() => {
+  //   if (!canvas) return;
+  //   const activeObject = canvas.getActiveObject();
+  //   if (
+  //     activeObject &&
+  //     (activeObjDimensions.width > 0 || activeObjDimensions.height > 0)
+  //   ) {
+  //     const currentWidth = activeObject.getScaledWidth();
+  //     const currentHeight = activeObject.getScaledHeight();
 
-      // Only update if values actually changed to prevent infinite loops
-      if (
-        activeObject &&
-        !(
-          activeObject.type === "group" ||
-          activeObject.type === "activeSelection"
-        ) &&
-        (activeObjDimensions.width > 0 || activeObjDimensions.height > 0)
-      ) {
-        // Calculate scale factors
-        const scaleX = activeObjDimensions.width / activeObject.width;
-        const scaleY = activeObjDimensions.height / activeObject.height;
+  //     // Only update if values actually changed to prevent infinite loops
+  //     if (
+  //       activeObject &&
+  //       !(
+  //         activeObject.type === "group" ||
+  //         activeObject.type === "activeSelection"
+  //       ) &&
+  //       (activeObjDimensions.width > 0 || activeObjDimensions.height > 0)
+  //     ) {
+  //       // Calculate scale factors
+  //       const scaleX = activeObjDimensions.width / activeObject.width;
+  //       const scaleY = activeObjDimensions.height / activeObject.height;
 
-        activeObject.set({
-          scaleX: scaleX,
-          scaleY: scaleY,
-        });
-        canvas.requestRenderAll();
-      }
-    }
-  }, [canvas, activeObjDimensions]);
+  //       activeObject.set({
+  //         scaleX: scaleX,
+  //         scaleY: scaleY,
+  //       });
+  //       canvas.requestRenderAll();
+  //     }
+  //   }
+  // }, [canvas, activeObjDimensions]);
 
   // Add a separate effect to handle color changes only
   // This will run only when foregroundColor or backgroundColor changes, not when objects are selected

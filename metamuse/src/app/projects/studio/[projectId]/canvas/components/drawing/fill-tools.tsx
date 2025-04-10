@@ -205,6 +205,9 @@ export function useFillTools() {
           });
         }
         canvas.renderAll();
+        if (canvas.propertyChangeHandler) {
+          canvas.propertyChangeHandler();
+        }
         console.log(`${actionType} applied to object: ${target.type}`);
       } else if (actionType === "fill") {
         // For fill tool only, check for enclosed area or apply to background
@@ -213,11 +216,10 @@ export function useFillTools() {
         if (enclosedArea) {
           enclosedArea.set("fill", color);
           canvas.renderAll();
+          if (canvas.propertyChangeHandler) {
+            canvas.propertyChangeHandler();
+          }
           console.log("Fill applied to enclosed area");
-        } else {
-          canvas.backgroundColor = color;
-          canvas.renderAll()
-          console.log("Fill applied to background");
         }
       }
 
@@ -270,6 +272,9 @@ export function useFillTools() {
         // Apply gradient to the clicked object
         target.set("fill", gradient);
         canvas.renderAll();
+        if (canvas.propertyChangeHandler) {
+          canvas.propertyChangeHandler();
+        }
         console.log("Gradient applied to object:", target.type);
       } else {
         // Check for enclosed area
@@ -278,9 +283,10 @@ export function useFillTools() {
         if (enclosedArea) {
           enclosedArea.set("fill", gradient);
           canvas.renderAll();
+          if (canvas.propertyChangeHandler) {
+            canvas.propertyChangeHandler();
+          }
           console.log("Gradient applied to enclosed area");
-        } else {
-          console.log("Cannot apply gradient to background or non-enclosed area.");
         }
       }
 
@@ -345,6 +351,9 @@ export function useFillTools() {
 
         target.set("fill", patternFill);
         canvas.renderAll();
+        if (canvas.propertyChangeHandler) {
+          canvas.propertyChangeHandler();
+        }
       } else {
         // Check for enclosed area
         const enclosedArea = findEnclosedArea(x, y);
@@ -373,8 +382,9 @@ export function useFillTools() {
 
           enclosedArea.set("fill", patternFill);
           canvas.renderAll();
-        } else {
-          console.log("Cannot apply pattern to background or non-enclosed area.");
+          if (canvas.propertyChangeHandler) {
+            canvas.propertyChangeHandler();
+          }
         }
       }
 
@@ -407,6 +417,9 @@ export function useFillTools() {
       }
       activeObject.set(properties);
       canvas.renderAll();
+      if (canvas.propertyChangeHandler) {
+        canvas.propertyChangeHandler();
+      }
       console.log(`${actionType} applied to selected object.`);
       
       // Immediately activate click mode for subsequent fills
@@ -443,6 +456,9 @@ export function useFillTools() {
       // Mode 1: Apply to selected object
       activeObject.set("fill", gradient);
       canvas.renderAll();
+      if (canvas.propertyChangeHandler) {
+        canvas.propertyChangeHandler();
+      }
       console.log(
         `${gradientType} gradient applied to selected object with angle ${currentAngle}°.`
       );
@@ -493,6 +509,9 @@ export function useFillTools() {
 
       activeObject.set("fill", patternFill);
       canvas.renderAll();
+      if (canvas.propertyChangeHandler) {
+        canvas.propertyChangeHandler();
+      }
       
       // Immediately activate click mode for subsequent fills
       activatePatternFillMode();

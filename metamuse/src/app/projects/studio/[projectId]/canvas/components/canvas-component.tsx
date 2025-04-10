@@ -199,36 +199,6 @@ export default function CanvasComponent() {
      canvas.requestRenderAll(); // Redraw if stroke width changed
    }, [canvas, scale]);
 
-
-   // --- Modify Key Bindings Hook to Handle Guideline Deletion ---
-   // This requires modifying `useKeyBindingTools` itself.
-   // Inside `useKeyBindingTools`, when 'Delete' or 'Backspace' is pressed:
-   /*
-   const activeObject = canvas.getActiveObject();
-   if (activeObject) {
-       // Check if it's a single guideline or a selection containing guidelines
-       if (activeObject.type === 'activeSelection') {
-           (activeObject as fabric.ActiveSelection).getObjects().forEach(obj => {
-               // @ts-ignore
-               if (obj.customType === 'guideline') {
-                   canvas.remove(obj);
-               }
-               // Optionally remove other selected objects too, or only guidelines
-           });
-           canvas.discardActiveObject();
-       // @ts-ignore
-       } else if (activeObject.customType === 'guideline') {
-           canvas.remove(activeObject);
-       } else {
-           // Original delete logic for other objects
-           canvas.remove(activeObject);
-       }
-       canvas.requestRenderAll();
-   }
-   */
-   // Make sure `useKeyBindingTools` receives the `canvas` instance.
-
-
   // --- Existing Effects (dimension changes, initialization, cleanup) ---
    useEffect(() => {
      if (dimensions && (dimensions.width !== prevDimensions.width || dimensions.height !== prevDimensions.height)) {

@@ -17,13 +17,12 @@ interface IActiveObj {
   objType: "object" | "picture" | string
 }
 
-interface CanvasSettings {
+export interface CanvasSettings {
   dimensions: {
     width: number;
     height: number
   }
   preset: any
-  backgroundColor: any
 }
 export interface CanvasContextType {
   canvas: fabric.Canvas | null;
@@ -80,6 +79,7 @@ export interface CanvasContextType {
   setBrushType: Dispatch<SetStateAction<string>>
   canvasSettings: CanvasSettings | null
   setCanvasSettings: Dispatch<SetStateAction<CanvasSettings | null>>
+  isYjsSettingsUpdate: RefObject<boolean>
 }
 const CanvasContext = createContext<CanvasContextType | null>(null);
 
@@ -108,7 +108,8 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [pattern, setPattern] = useState("adire");
   const [preset, setPreset] = useState("Portrait (Mobile)")
   const [brushType, setBrushType] = useState("pencil")
-  const [canvasSettings, setCanvasSettings] = useState(null)
+  const [canvasSettings, setCanvasSettings] = useState<CanvasSettings | null>(null)
+  const isYjsSettingsUpdate = useRef(false)
   const [activeObjDimensions, setActiveObjDimensions] = useState(
     {
       width: 0,
@@ -153,13 +154,24 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
     undoStack.current.push(json)
     redoStack.current = []
   };
+
   useEffect(() => {
     if (!canvas) return;
-    canvas.setDimensions(dimensions);
-    canvas.renderAll()
-  }, [dimensions, canvas]);
+    if (isYjsSettingsUpdate.current) {
+        console.log("Provider: Skipping Yjs update (change was from Yjs)");
+        return;
+    }
+    console.log("Provider: Local change detected, updating Fabric & preparing Yjs update", dimensions, preset, isYjsSettingsUpdate.current);
+     if (canvas) {
+         if (canvas.getWidth() !== dimensions.width || canvas.getHeight() !== dimensions.height) {
+             canvas.setDimensions(dimensions);
+             canvas.renderAll();
+         }
+     }
 
-  /** Use effect to update canvas settings Important for yjs updates */
+}, [dimensions, preset, canvas]); // Add canvas dependency
+
+
   return (
     <CanvasContext.Provider
       value={{
@@ -217,7 +229,8 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
         brushType,
         setBrushType,
         canvasSettings,
-        setCanvasSettings
+        setCanvasSettings,
+        isYjsSettingsUpdate
       }}
     >
       {children}

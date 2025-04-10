@@ -4,14 +4,21 @@ import { PRESETS, CanvasPreset } from '../presets'
 import { useCanvas } from "../../contexts/canvas-context";
 
 export const useCanvasOrientation = () => {
-  const { canvas, setDimensions, setPreset, } = useCanvas();
+  const { canvas, setDimensions, setPreset, dimensions, preset} = useCanvas();
   const [currentPreset, setCurrentPreset] = useState<CanvasPreset>(PRESETS[0]);
   const [customDimensions, setCustomDimensions] = useState({
     width: 0,
     height: 0
   });
   const [unit, setUnit] = useState<"px" | "in" | "cm">("px");
-
+  useEffect(() => {
+    if (preset && preset != currentPreset.name) {
+      const preset_ = PRESETS.find(p => p.name === preset);
+      if (preset_) {
+        setCurrentPreset(preset_);
+      }
+    }
+  }, [preset])
   const applyPreset = (preset_: CanvasPreset) => {
     if (!canvas) return;
     

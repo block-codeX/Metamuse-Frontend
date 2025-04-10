@@ -1,60 +1,87 @@
-import {  useEffect, useRef, useState } from "react";
-import { useCanvas } from "./contexts/canvas-context";
+import { useEffect, useRef, useState } from "react";
+import { CanvasSettings, useCanvas } from "./contexts/canvas-context";
 import useYjs from "./hooks/useYjs";
 import * as Y from "yjs";
 import * as fabric from "fabric";
 import { v4 as uuidv4 } from "uuid";
 
 const useCanvasSync = (projectId: string) => {
-  const { canvas, setBackgroundColor } = useCanvas();
+  const {
+    canvas,
+    saveState,
+    dimensions,
+    preset,
+    setDimensions,
+    setPreset,
+    isYjsSettingsUpdate,
+  } = useCanvas();
+
   const { yDoc, isInitialized } = useYjs(projectId);
   const objectsMapRef = useRef<Y.Map<any> | null>(null);
   const canvasMapRef = useRef<Y.Map<any> | null>(null);
   const isLocal = useRef(false);
   const [initialized, setInitialized] = useState(false);
   const LOCAL_ORIGIN = "local";
+  
+  // Track previous dimensions and preset to detect actual changes
+  const prevDimensionsRef = useRef(dimensions);
+  const prevPresetRef = useRef(preset);
 
-  useEffect(() => { 
-    console.log(isInitialized, "nene")
+  // Initialize canvas and YJS
+  useEffect(() => {
     if (!yDoc.current || !canvas || !isInitialized || initialized) return;
-
     console.log("🔄 Initializing canvas sync");
     setInitialized(true);
-
-    // Initialize Yjs maps
     objectsMapRef.current = yDoc.current.getMap("objects");
     canvasMapRef.current = yDoc.current.getMap("canvas");
     console.log(
       "🔍 Yjs maps initialized:",
       objectsMapRef.current,
       canvasMapRef.current
-    )
+    );
 
     const loadInitialState = async () => {
       try {
         const initialObjects = objectsMapRef.current?.toJSON() || {};
-        const initialCanvasSettings = canvasMapRef.current?.toJSON() || {};
-
-        console.log("🎨 Initial canvas settings:", initialCanvasSettings);
-        setBackgroundColor(initialCanvasSettings.backgroundColor || "#ffffff");
-
+        const canvasSettings = canvasMapRef.current?.toJSON() as any || {};
+        
+        // Load canvas settings if available
+        if (canvasSettings.dimensions || canvasSettings.preset) {
+          console.log("🔄 Loading canvas settings:", canvasSettings.dimensions, canvasSettings.preset);
+          isYjsSettingsUpdate.current = true;
+          
+          if (canvasSettings.dimensions) {
+            setDimensions(canvasSettings.dimensions);
+            canvas.setDimensions(canvasSettings.dimensions);
+            // Store as previous value to prevent unnecessary updates
+            prevDimensionsRef.current = canvasSettings.dimensions;
+          }
+          
+          if (canvasSettings.preset) {
+            setPreset(canvasSettings.preset);
+            // Store as previous value to prevent unnecessary updates
+            prevPresetRef.current = canvasSettings.preset;
+          }
+          
+          canvas.renderAll();
+          isYjsSettingsUpdate.current = false;
+        }
+        
         // Load objects with proper async/await
         const loadPromises = Object.values(initialObjects).map(
           async (obj: any) => {
             return new Promise<void>((resolve) => {
-              // if (!obj?.type) {
-              //   console.warn("⚠️ Invalid object format:", obj);
-              //   return resolve();
-              // }
+              if (!obj?.type) {
+                console.warn("⚠️ Invalid object format:", obj);
+                return resolve();
+              }
               fabric.util
                 .enlivenObjects([obj])
                 .then((objects) => {
                   if (!objects?.[0]) {
                     return resolve();
                   }
-
                   const fabricObj = objects[0];
-
                   // Ensure required properties
                   fabricObj.set({
                     id: obj.id || uuidv4(),
@@ -62,9 +89,7 @@ const useCanvasSync = (projectId: string) => {
                     top: obj.top || 0,
                     visible: obj.visible ?? true,
                   });
-
                   canvas.add(fabricObj);
-                  // fabricObj.setCoords();
                   resolve();
                 })
                 .catch((error) => {
@@ -74,187 +99,327 @@ const useCanvasSync = (projectId: string) => {
             });
           }
         );
-
         await Promise.all(loadPromises);
-
         console.log("🚀 All objects loaded:", canvas.getObjects().length);
         canvas.renderAll();
-
-        // Verify canvas state
-        console.log("📐 Canvas dimensions:", {
-          width: canvas.getWidth(),
-          height: canvas.getHeight(),
-          zoom: canvas.getZoom(),
-        });
       } catch (error) {
         console.error("💥 Initialization failed:", error);
       }
     };
 
     loadInitialState();
-  }, [isInitialized, setBackgroundColor]); // Proper dependencies
+  }, [isInitialized, canvas]);
 
-  // Canvas handlers
+  // Sync canvas settings to YJS when they change
+  useEffect(() => {
+    if (
+      !initialized ||
+      !yDoc.current ||
+      !canvasMapRef.current ||
+      !dimensions ||
+      !preset
+    ) return;
+
+    // Skip if this is from a remote update or there's no actual change
+    if (
+      isLocal.current || 
+      isYjsSettingsUpdate.current ||
+      (JSON.stringify(dimensions) === JSON.stringify(prevDimensionsRef.current) && 
+       preset === prevPresetRef.current)
+    ) {
+      return;
+    }
+    
+    console.log("Local settings changed, updating YJS:", dimensions, preset);
+    
+    try {
+      yDoc.current.transact(() => {
+        // Only update what actually changed
+        if (JSON.stringify(dimensions) !== JSON.stringify(prevDimensionsRef.current)) {
+          canvasMapRef.current?.set("dimensions", dimensions);
+          prevDimensionsRef.current = dimensions;
+        }
+        
+        if (preset !== prevPresetRef.current) {
+          canvasMapRef.current?.set("preset", preset);
+          prevPresetRef.current = preset;
+        }
+      }, LOCAL_ORIGIN);
+      
+      console.log("📝 Updated canvas settings in YJS");
+    } catch (error) {
+      console.error("💥 Failed to update canvas settings:", error);
+    }
+  }, [dimensions, preset, initialized]);
+
+  // Canvas event handlers for objects
   useEffect(() => {
     if (!initialized || !yDoc.current || !canvas) return;
-
-    const handleAction = (e: fabric.TEvent| any, action: string) => {
+    const syncObjectToYjs = (obj: fabric.Object) => {
+      if (!obj || !yDoc.current || isLocal.current) return;
+      
+      // Ensure the object has an ID
+      if (!obj.id) {
+        (obj as any).id = uuidv4();
+      }
+      
+      const objId = (obj as any).id;
+      
+      yDoc.current.transact(() => {
+        if (objectsMapRef.current) {
+          objectsMapRef.current.set(objId, obj.toJSON());
+          console.log(`Synced object to YJS: ${objId}`);
+        }
+      }, LOCAL_ORIGIN);
+    };
+    const handleAction = (e: fabric.TEvent | any, action: string) => {
+      // Skip if this update is from YJS
       if (isLocal.current || !yDoc.current) {
         console.log("Skipping remote update in handler");
         return;
       }
+
+      
       switch (action) {
         case "add": {
           if (!e.target) return;
           const obj = e.target;
           obj.id = obj.id || uuidv4();
-          yDoc.current.transact(() => {
-            if (objectsMapRef.current) {
-              if (!objectsMapRef.current.has(obj.id)) {
-                console.log("Has this, ", obj.id)
-                objectsMapRef.current.set(obj.id, obj.toJSON());
-              }
-            }
-          }, LOCAL_ORIGIN);
+          syncObjectToYjs(obj);
           break;
         }
-        case "modify": {
+        case "modify":
+        case "text_edit":
+        case "pathCreated": {
           if (!e.target) return;
           const obj = e.target;
           obj.id = obj.id || uuidv4();
-          yDoc.current.transact(() => {
-            if (objectsMapRef.current) {
-                objectsMapRef.current.set(obj.id, obj.toJSON());
-            }
-          }, LOCAL_ORIGIN);
+          syncObjectToYjs(obj);
+          ;
           break;
         }
         case "remove": {
           if (!e.target) return;
           const obj = e.target;
-          // obj.id = obj.id || uuidv4();
           if (!obj.id) {
             console.error("Cannot delete object: missing id");
             return;
-          }        
+          }
           yDoc.current.transact(() => {
             if (objectsMapRef.current) {
               objectsMapRef.current.delete(obj.id);
-              console.log("Deleted object with id:", obj.id);
-              }
+              console.log("Deleted object from YJS:", obj.id);
+            }
           }, LOCAL_ORIGIN);
           break;
         }
+        case "selection_updated": {
+          // When selection changes, we need to handle it specially
+          // This helps capture changes when properties like fill/stroke change
+          const selectedObjects = canvas.getActiveObjects();
+          if (selectedObjects?.length) {
+            selectedObjects.forEach(obj => syncObjectToYjs(obj));
+          }
+          break;
       }
-      console.log("🔎 Current Yjs state:",objectsMapRef.current?.size);
+        case "cleared": {
+          // Handle canvas clearing
+          yDoc.current.transact(() => {
+            if (objectsMapRef.current) {
+              objectsMapRef.current.clear();
+              console.log("Cleared all objects in YJS");
+            }
+          }, LOCAL_ORIGIN);
+          break;
+        }
+    }
     };
-    
 
     const handlers = {
-      added: (e: fabric.TEvent) => handleAction(e, 'add'),
-      modified: (e: fabric.TEvent) => handleAction(e, 'modify'),
-      removed: (e: fabric.TEvent) => handleAction(e, 'remove'),
-      pathCreated: (e: fabric.TEvent) => handleAction(e as fabric.TEvent, 'add'),
+      added: (e: fabric.TEvent) => handleAction(e, "add"),
+      modified: (e: fabric.TEvent) => handleAction(e, "modify"),
+      removed: (e: fabric.TEvent) => handleAction(e, "remove"),
+      pathCreated: (e: fabric.TEvent) => handleAction(e, "add"),
+      textEditing: (e: fabric.TEvent) => handleAction(e, "text_edit"),
+      textChanged: (e: fabric.TEvent) => handleAction(e, "textChanged"),
+      cleared: (e: fabric.TEvent) => handleAction(e, "cleared"),
+      selectionUpdated: (e: fabric.TEvent) => handleAction(e, "selection_updated"),
     };
+    let selectedObjects: fabric.Object[] = [];
+    
+    // Create a mutation observer for property changes
+    const setupPropertyChangeDetection = () => {
+      // Called when the selected object properties change
+      const checkForPropertyChanges = () => {
+        const active = canvas.getActiveObjects();
+        if (active?.length) {
+          active.forEach(obj => {
+            syncObjectToYjs(obj);
+          });
+        }
+      };
+      
+      // Add our own handler that the application can call when properties change
+      (canvas as any).propertyChangeHandler = checkForPropertyChanges;
+    };
+    
+    // Set up the property change detection
+    setupPropertyChangeDetection();
+
+    // Attach all event listeners
     canvas.on("object:added", handlers.added as any);
     canvas.on("object:modified", handlers.modified as any);
     canvas.on("object:removed", handlers.removed as any);
     canvas.on("path:created", handlers.pathCreated as any);
-        return () => {
-      canvas.off("object:added", handlers.added);
-      canvas.off("object:modified", handlers.modified);
-      canvas.off("object:removed", handlers.removed);
-      canvas.off("path:created", handlers.pathCreated);
-    }
-  }, [initialized]);  
+    canvas.on("text:editing:exited", handlers.textEditing as any);
+    canvas.on("selection:updated", handlers.selectionUpdated as any)
+    canvas.on("canvas:cleared", handlers.cleared as any);
 
+    return () => {
+      // Remove all event listeners
+      canvas.off("object:added", handlers.added as any);
+      canvas.off("object:modified", handlers.modified as any);
+      canvas.off("object:removed", handlers.removed as any);
+      canvas.off("path:created", handlers.pathCreated as any);
+      canvas.off("text:editing:exited", handlers.textEditing as any);
+      canvas.off("canvas:cleared", handlers.cleared as any);
+      canvas.off("selection:updated", handlers.modified as any);
+    };
+  }, [initialized, canvas]);
+
+  // YJS observers for remote changes
   useEffect(() => {
     if (!initialized || !canvas) return;
 
     const objectObserver = (event: Y.YMapEvent<any>) => {
-      console.log("Transaction origin:", event.transaction.origin);  
       if (event.transaction.origin === LOCAL_ORIGIN) {
         console.log("Skipping local update in observer");
         return;
-      }    
+      }
+
       isLocal.current = true;
-      event.changes.keys.forEach((change, id) => {
-        if (change.action === "delete") {
-          const existing = canvas.getObjects().find((o: any) => o.id === id);
-          if (existing) {
-            canvas.remove(existing);
-            console.log("Removed object from canvas", id);
+
+      try {
+        event.changes.keys.forEach((change, id) => {
+          if (change.action === "delete") {
+            const existing = canvas.getObjects().find((o: any) => o.id === id);
+            if (existing) {
+              canvas.remove(existing);
+              console.log("Removed object from canvas", id);
+            }
+            return; // Skip further processing for deletions
+          }
+
+          const obj = objectsMapRef.current?.get(id);
+          if (!obj) return;
+
+          fabric.util
+            .enlivenObjects([obj])
+            .then((objects) => {
+              const fabricObj = objects?.[0] as any;
+              if (fabricObj) {
+                fabricObj.set({
+                  id,
+                  left: obj.left || 0,
+                  top: obj.top || 0,
+                  visible: obj.visible ?? true,
+                });
+
+                const existing = canvas
+                  .getObjects()
+                  .find((o: any) => o.id === id);
+                if (existing) {
+                  canvas.remove(existing);
+                }
+
+                if (change.action === "add" || change.action === "update") {
+                  if (fabricObj) {
+                    canvas.add(fabricObj);
+                    console.log("Added/updated object from Yjs", id);
+                  }
+                }
+
+                canvas.renderAll();
+              }
+            });
+        });
+      } finally {
+        // Ensure isLocal is always reset
+        setTimeout(() => {
+          isLocal.current = false;
+        }, 0);
+      }
+    };
+
+    const canvasSettingsObserver = (event: Y.YMapEvent<any>) => {
+      if (event.transaction.origin === LOCAL_ORIGIN) {
+        console.log("Skipping local settings update in observer");
+        return;
+      }
+      
+      isLocal.current = true;
+      isYjsSettingsUpdate.current = true;
+      
+      try {
+        // Only process dimensions if it actually changed
+        if (event.changes.keys.has("dimensions")) {
+          const newDimensions = canvasMapRef.current?.get("dimensions");
+          if (newDimensions && JSON.stringify(newDimensions) !== JSON.stringify(prevDimensionsRef.current)) {
+            console.log("Remote dimensions changed:", newDimensions);
+            setDimensions(newDimensions);
+            canvas.setDimensions(newDimensions);
+            prevDimensionsRef.current = newDimensions;
             canvas.renderAll();
           }
-          return; // Skip further processing for deletions.
         }
-        const obj = objectsMapRef.current?.get(id);
-        fabric.util.enlivenObjects([obj]).then((objects) => {
-          const fabricObj = objects?.[0] as any;
-          console.log(id, fabricObj)
-          if (fabricObj) {
-            fabricObj.set({ id, left: obj.left || 0, top: obj.top || 0, visible: obj.visible ?? true });
-          const existing = canvas.getObjects().find((o: any) => o.id === id);
-          if (existing)
-            canvas.remove(existing);
-          if (change.action === "add" || change.action === "update") {
-            // if (existing) {
-            //   console.log("Removing existing object", id);
-            //   canvas.remove(existing);
-            // }
-            if (fabricObj) {
-              canvas.add(fabricObj);
-              console.log("Added/updated object from Yjs", id);
-            }
-          } else if (change.action === "delete") {
-            console.log("Deleting object", id);
 
-              console.log("Removed object from canvas", id);
+        // Only process preset if it actually changed
+        if (event.changes.keys.has("preset")) {
+          const newPreset = canvasMapRef.current?.get("preset");
+          if (newPreset && newPreset !== prevPresetRef.current) {
+            console.log("Remote preset changed:", newPreset);
+            setPreset(newPreset);
+            prevPresetRef.current = newPreset;
           }
-          
         }
-          canvas.renderAll();
+      } finally {
+        // Ensure flags are always reset, using setTimeout to avoid race conditions
+        setTimeout(() => {
           isLocal.current = false;
-        });
-      });
-    
+          isYjsSettingsUpdate.current = false;
+        }, 0);
+      }
     };
     
-    const canvasSettingsObserver = (event: Y.YMapEvent<any>) => {
-      event.changes.keys.forEach((_, key) => {
-        if (key === "backgroundColor" && canvasMapRef.current) {
-          const bgColor = canvasMapRef.current.get(key) || "#ffffff";
-          setBackgroundColor(bgColor);
-          console.log("Updated canvas background from Yjs", bgColor);
-        }
-      });
-    };
-
+    // Attach observers
     if (objectsMapRef.current) {
       console.log("🔍 Observing Yjs objects map");
       objectsMapRef.current.observe(objectObserver);
-    }
-     else {
+    } else {
       console.error("⚠️ Objects map not initialized");
     }
-    
+
     if (canvasMapRef.current) {
       canvasMapRef.current.observe(canvasSettingsObserver);
       console.log("🔍 Observing Yjs canvas settings map");
     } else {
       console.error("⚠️ Canvas settings map not initialized");
     }
+
     return () => {
+      // Detach observers
       if (objectsMapRef.current) {
         objectsMapRef.current.unobserve(objectObserver);
       }
       if (canvasMapRef.current) {
         canvasMapRef.current.unobserve(canvasSettingsObserver);
       }
-    }
-  }, [initialized]);
+    };
+  }, [initialized, canvas]);
 
-  return { yDoc };
+  return {
+    yDoc,
+  };
 };
 
 export default useCanvasSync;
