@@ -18,22 +18,19 @@ import {
   Undo,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-export default function CanvasContextMenu({ children }) {
+export default function CanvasContextMenu({ children }: { children: React.ReactNode }) {
   const { canvas } = useCanvas();
   const {
     cut,
     deleteObj,
     copy,
     paste,
-    duplicate,
     group,
     ungroup,
     bringToBack,
     sendToFront,
     lock,
     unlock,
-    undo,
-    redo,
   } = useEditFunctions();
 
   const handleSendToBack = () => {
@@ -67,18 +64,6 @@ export default function CanvasContextMenu({ children }) {
             size={18}
             className="text-btn-primary active:scale-95 cursor-pointer"
             onClick={paste}
-          />
-          <Undo
-            strokeWidth={2}
-            size={18}
-            className="text-btn-primary active:scale-95 cursor-pointer"
-            onClick={undo}
-          />
-          <Redo
-            strokeWidth={2}
-            size={18}
-            className="text-btn-primary active:scale-95 cursor-pointer"
-            onClick={redo}
           />
           <Trash2
             strokeWidth={2}

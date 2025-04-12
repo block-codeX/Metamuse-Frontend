@@ -105,7 +105,7 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const [angle, setAngle] = useState(0);
   const [fromColor, setFromColor] = useState("#000000");
   const [toColor, setToColor] = useState("#FFFFFF");
-  const [pattern, setPattern] = useState("adire");
+  const [pattern, setPattern] = useState("autumn");
   const [preset, setPreset] = useState("Portrait (Mobile)")
   const [brushType, setBrushType] = useState("pencil")
   const [canvasSettings, setCanvasSettings] = useState<CanvasSettings | null>(null)

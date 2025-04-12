@@ -3,6 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Camera, X } from "lucide-react";
 import * as fabric from "fabric";
 import { useCanvas } from "../../contexts/canvas-context";
+import { useCanvasSync } from "../../contexts/canvas-sync-context";
 // fabric.FabricImage.filters.Sepia()
 
 const filters = [
@@ -27,6 +28,7 @@ const PictureFormatting: React.FC = () => {
     "None"
   );
   const { canvas } = useCanvas();
+  const { updateYjsObject} = useCanvasSync()
   const applyFilter = (filterName: string) => {
     setSelectedFilter(filterName);
     console.log("canv", canvas);
@@ -70,6 +72,7 @@ const PictureFormatting: React.FC = () => {
 
     // Apply the filters and render
     activeObject.applyFilters();
+    updateYjsObject(activeObject)
     canvas.renderAll();
   };
 
@@ -83,6 +86,7 @@ const PictureFormatting: React.FC = () => {
 
     // Apply the blend mode
     activeObject.globalCompositeOperation = blendMode.toLowerCase();
+    updateYjsObject(activeObject)
     canvas.renderAll();
   };
 

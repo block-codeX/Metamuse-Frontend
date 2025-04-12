@@ -9,6 +9,7 @@ import {
   Copy,
 } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
+import { useCanvasSync } from "../contexts/canvas-sync-context";
 
 export function useFillTools() {
   const {
@@ -22,9 +23,9 @@ export function useFillTools() {
     pencilWidth,
     pattern,
     isFill,
-    setFill
+    setFill,
   } = useCanvas();
-
+  const { updateYjsObject } = useCanvasSync();
   // Refs to track the active fill mode
   const activeFillTool = useRef<string | null>(null);
   const isClickModeActive = useRef(false);
@@ -52,16 +53,15 @@ export function useFillTools() {
       gradientType,
       pencilWidth,
       pattern,
-
     });
-    
+
     // If a fill tool is active, update the click listeners with new parameters
     if (isClickModeActive.current && activeFillTool.current) {
       // Clean up existing listeners
       cleanupToolEventListeners();
-      
+
       // Re-activate the currently active tool with new parameters
-      if (!isFill) return
+      if (!isFill) return;
       setTimeout(() => {
         switch (activeFillTool.current) {
           case "solidFill":
@@ -98,7 +98,7 @@ export function useFillTools() {
     canvas.selection = true;
     canvas.forEachObject((o) => (o.selectable = true));
     isClickModeActive.current = false;
-    setFill(false)
+    setFill(false);
     console.log("Fill tool listeners cleaned up.");
   };
 
@@ -163,18 +163,33 @@ export function useFillTools() {
   };
 
   // Function to get pattern URL from pattern name
-  const getPatternUrl = (patternName: string) => {
+const getPatternUrl = async (patternName: string, foreColor: string) => {
     if (!patternName) return null;
-    return `/patterns/${patternName}.jpg`;
+    try {
+      const response = await fetch(`/patterns/${patternName}.svg`);
+      let svgText = await response.text();
+
+      // Replace only the foreground color (assuming SVG uses #000000 for pattern elements)
+      svgText = svgText
+        .replace(/#000000/g, foreColor) // Replace black with current foreground
+        .replace(/#000/g, foreColor) // Replace short hex black
+        .replace(/black/gi, foreColor); // Replace named black colors
+      // Create blob URL from modified SVG
+      const blob = new Blob([svgText], { type: "image/svg+xml" });
+      return URL.createObjectURL(blob);
+    } catch (error) {
+      console.error("Error loading pattern:", error);
+      return null;
+    }
   };
 
   // --- Click Mode Activation Functions ---
-  
+
   // Activate solid fill or stroke click mode
   const activateSolidFillMode = (actionType: "fill" | "stroke") => {
     if (!canvas) return;
-    
-    setFill(true)
+
+    setFill(true);
     console.log(`Activating ${actionType} click mode...`);
     isClickModeActive.current = true;
     activeFillTool.current = actionType === "fill" ? "solidFill" : "stroke";
@@ -182,7 +197,7 @@ export function useFillTools() {
     canvas.selection = false;
     canvas.forEachObject((o) => (o.selectable = false));
 
-    const handleSolidClick = (opt: fabric.IEvent<MouseEvent>) => {
+    const handleSolidClick = (opt: any) => {
       if (!opt.e || !canvas) return;
 
       const pointer = canvas.getScenePoint(opt.e);
@@ -192,22 +207,21 @@ export function useFillTools() {
       const strokeWidth = pencilWidth;
 
       // Find object under click
-      const target = canvas.findTarget(opt.e, false);
+      const target = canvas.findTarget(opt.e);
 
       if (target && target.type !== "activeSelection") {
         // Apply fill/stroke to the clicked object
         if (actionType === "fill") {
           target.set("fill", color);
+          updateYjsObject(target);
         } else {
           target.set({
             stroke: color,
-            strokeWidth: strokeWidth
+            strokeWidth: strokeWidth,
           });
+          updateYjsObject(target);
         }
         canvas.renderAll();
-        if (canvas.propertyChangeHandler) {
-          canvas.propertyChangeHandler();
-        }
         console.log(`${actionType} applied to object: ${target.type}`);
       } else if (actionType === "fill") {
         // For fill tool only, check for enclosed area or apply to background
@@ -215,10 +229,8 @@ export function useFillTools() {
 
         if (enclosedArea) {
           enclosedArea.set("fill", color);
+          updateYjsObject(enclosedArea);
           canvas.renderAll();
-          if (canvas.propertyChangeHandler) {
-            canvas.propertyChangeHandler();
-          }
           console.log("Fill applied to enclosed area");
         }
       }
@@ -234,7 +246,7 @@ export function useFillTools() {
   // Activate gradient fill click mode
   const activateGradientFillMode = () => {
     if (!canvas) return;
-    setFill(true)
+    setFill(true);
     console.log("Activating gradient fill click mode...");
     isClickModeActive.current = true;
     activeFillTool.current = "gradient";
@@ -242,21 +254,21 @@ export function useFillTools() {
     canvas.selection = false;
     canvas.forEachObject((o) => (o.selectable = false));
 
-    const handleGradientClick = (opt: fabric.IEvent<MouseEvent>) => {
+    const handleGradientClick = (opt: any) => {
       if (!opt.e || !canvas) return;
 
-      const pointer = canvas.getPointer(opt.e);
+      const pointer = canvas.getScenePoint(opt.e);
       const x = pointer.x;
       const y = pointer.y;
-      
+
       // Get current gradient parameters
       const colors = [fromColor, toColor];
       const currentAngle = angle || 0;
       const isLinearGradient = gradientType === "linear";
       const coords = calculateGradientCoords(currentAngle, isLinearGradient);
 
-      const gradient = new fabric.Gradient({
-        type: gradientType,
+      const gradient: any = new fabric.Gradient({
+        type: gradientType as fabric.GradientType,
         gradientUnits: "percentage",
         coords: coords,
         colorStops: [
@@ -266,15 +278,13 @@ export function useFillTools() {
       });
 
       // Find object under click
-      const target = canvas.findTarget(opt.e, false);
+      const target = canvas.findTarget(opt.e);
 
       if (target && target.type !== "activeSelection") {
         // Apply gradient to the clicked object
         target.set("fill", gradient);
+        updateYjsObject(target);
         canvas.renderAll();
-        if (canvas.propertyChangeHandler) {
-          canvas.propertyChangeHandler();
-        }
         console.log("Gradient applied to object:", target.type);
       } else {
         // Check for enclosed area
@@ -282,10 +292,8 @@ export function useFillTools() {
 
         if (enclosedArea) {
           enclosedArea.set("fill", gradient);
+          updateYjsObject(enclosedArea);
           canvas.renderAll();
-          if (canvas.propertyChangeHandler) {
-            canvas.propertyChangeHandler();
-          }
           console.log("Gradient applied to enclosed area");
         }
       }
@@ -300,7 +308,7 @@ export function useFillTools() {
   // Activate pattern fill click mode
   const activatePatternFillMode = () => {
     if (!canvas) return;
-    setFill(true)
+    setFill(true);
 
     console.log("Activating pattern fill click mode...");
     isClickModeActive.current = true;
@@ -309,15 +317,16 @@ export function useFillTools() {
     canvas.selection = false;
     canvas.forEachObject((o) => (o.selectable = false));
 
-    const handlePatternClick = async (opt: fabric.IEvent<MouseEvent>) => {
+    const handlePatternClick = async (opt: any) => {
       if (!opt.e || !canvas) return;
 
-      const pointer = canvas.getPointer(opt.e);
+      const pointer = canvas.getScenePoint(opt.e);
       const x = pointer.x;
       const y = pointer.y;
-      
+
       // Get pattern URL from pattern name
-      const patternUrl = getPatternUrl(pattern);
+      console.log(pattern, foregroundColor)
+      const patternUrl = await getPatternUrl(pattern, foregroundColor);
 
       if (!patternUrl) {
         console.warn("No pattern selected for pattern fill.");
@@ -325,35 +334,37 @@ export function useFillTools() {
       }
 
       // Find object under click
-      const target = canvas.findTarget(opt.e, false);
+      const target = canvas.findTarget(opt.e);
 
       if (target && target.type !== "activeSelection") {
         // Apply pattern to the clicked object
         console.log("Applying pattern to clicked object:", target.type);
-        
+
         // Load pattern image
         const img = await fabric.util.loadImage(patternUrl);
-        
+
         // Get target dimensions
         const targetWidth = target.width || 100;
         const targetHeight = target.height || 100;
-        
+
         // Create a pattern scaled to match object dimensions
-        const patternFill = new fabric.Pattern({
+        const patternFill: any = new fabric.Pattern({
           source: img,
           repeat: "repeat",
           offsetX: 0,
           offsetY: 0,
           // Set pattern sizing relative to object
-          width: targetWidth / 4,  // Divide by 4 for nice repeating pattern
-          height: targetHeight / 4
         });
+        patternFill.color = foregroundColor
+        patternFill.name = pattern
 
-        target.set("fill", patternFill);
+        target.set({
+          fill: patternFill,
+          transparentCorners: false,
+          dirty: true,
+        });
+        updateYjsObject(target);
         canvas.renderAll();
-        if (canvas.propertyChangeHandler) {
-          canvas.propertyChangeHandler();
-        }
       } else {
         // Check for enclosed area
         const enclosedArea = findEnclosedArea(x, y);
@@ -361,14 +372,15 @@ export function useFillTools() {
         if (enclosedArea) {
           // Apply pattern to the enclosed area
           console.log("Applying pattern to enclosed area");
-          
+
           // Load pattern image
           const img = await fabric.util.loadImage(patternUrl);
-          
+          console.log("Pattern image loaded:", img);
+
           // Get enclosed area dimensions
           const areaWidth = enclosedArea.width || 100;
           const areaHeight = enclosedArea.height || 100;
-          
+
           // Create a pattern scaled to match object dimensions
           const patternFill = new fabric.Pattern({
             source: img,
@@ -376,15 +388,16 @@ export function useFillTools() {
             offsetX: 0,
             offsetY: 0,
             // Set pattern sizing relative to object
-            width: areaWidth / 4,
-            height: areaHeight / 4
+            patternTransform: [1, 0, 0, 1, 0, 0], // Maintain original orientation\
           });
 
-          enclosedArea.set("fill", patternFill);
+          enclosedArea.set({
+            fill: patternFill,
+            transparentCorners: false,
+            dirty: true,
+          });
+          updateYjsObject(enclosedArea);
           canvas.renderAll();
-          if (canvas.propertyChangeHandler) {
-            canvas.propertyChangeHandler();
-          }
         }
       }
 
@@ -403,7 +416,7 @@ export function useFillTools() {
     const activeObject = canvas.getActiveObject();
     const color = foregroundColor;
     const strokeWidth = pencilWidth;
-    setFill(true)
+    setFill(true);
 
     if (activeObject) {
       // Mode 1: Apply to selected object
@@ -416,12 +429,10 @@ export function useFillTools() {
         properties.strokeWidth = strokeWidth;
       }
       activeObject.set(properties);
+      updateYjsObject(activeObject);
       canvas.renderAll();
-      if (canvas.propertyChangeHandler) {
-        canvas.propertyChangeHandler();
-      }
       console.log(`${actionType} applied to selected object.`);
-      
+
       // Immediately activate click mode for subsequent fills
       activateSolidFillMode(actionType);
     } else {
@@ -437,13 +448,13 @@ export function useFillTools() {
     const colors = [fromColor, toColor];
     const currentAngle = angle || 0; // Default to 0 if not set
     const isLinearGradient = gradientType === "linear";
-    setFill(true)
+    setFill(true);
 
     // Calculate coordinates based on angle
     const coords = calculateGradientCoords(currentAngle, isLinearGradient);
 
     const gradient = new fabric.Gradient({
-      type: gradientType,
+      type: gradientType as fabric.GradientType,
       gradientUnits: "percentage",
       coords: coords,
       colorStops: [
@@ -455,14 +466,12 @@ export function useFillTools() {
     if (activeObject) {
       // Mode 1: Apply to selected object
       activeObject.set("fill", gradient);
+      updateYjsObject(activeObject);
       canvas.renderAll();
-      if (canvas.propertyChangeHandler) {
-        canvas.propertyChangeHandler();
-      }
       console.log(
         `${gradientType} gradient applied to selected object with angle ${currentAngle}°.`
       );
-      
+
       // Immediately activate click mode for subsequent fills
       activateGradientFillMode();
     } else {
@@ -477,8 +486,8 @@ export function useFillTools() {
     const activeObject = canvas.getActiveObject();
 
     // Get pattern URL from pattern name
-    const patternUrl = getPatternUrl(pattern);
-    setFill(true)
+    const patternUrl = await getPatternUrl(pattern, foregroundColor);
+    setFill(true);
 
     if (!patternUrl) {
       console.warn("No pattern selected for pattern fill.");
@@ -488,31 +497,26 @@ export function useFillTools() {
     if (activeObject) {
       // Mode 1: Apply to selected object
       console.log("Applying pattern fill to selected object...");
-      
+
       // Load pattern image
       const img = await fabric.util.loadImage(patternUrl);
-      
+
       // Get object dimensions
       const objectWidth = activeObject.width || 100;
       const objectHeight = activeObject.height || 100;
-      
+
       // Create a pattern scaled to match object dimensions
-      const patternFill = new fabric.Pattern({
+      const patternFill: any = new fabric.Pattern({
         source: img,
         repeat: "repeat",
         offsetX: 0,
         offsetY: 0,
-        // Set pattern sizing relative to object
-        width: objectWidth / 4,  // Divide by 4 for nice repeating pattern
-        height: objectHeight / 4
       });
-
+      patternFill.color = foregroundColor
+      patternFill.name = pattern
       activeObject.set("fill", patternFill);
+      updateYjsObject(activeObject);
       canvas.renderAll();
-      if (canvas.propertyChangeHandler) {
-        canvas.propertyChangeHandler();
-      }
-      
       // Immediately activate click mode for subsequent fills
       activatePatternFillMode();
     } else {
@@ -525,7 +529,7 @@ export function useFillTools() {
   const deactivateAllFillTools = () => {
     cleanupToolEventListeners();
     activeFillTool.current = null;
-    setFill(false)
+    setFill(false);
   };
 
   // --- Return Tool Definitions ---

@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
-import { Pencil, Brush, Eraser, PenTool, Tangent, PencilLine } from "lucide-react";
+import {
+  Pencil,
+  Brush,
+  Eraser,
+  PenTool,
+  Tangent,
+  PencilLine,
+} from "lucide-react";
 import * as fabric from "fabric";
 import { useCanvas } from "../contexts/canvas-context";
 import { EraserBrush, ClippingGroup } from "@erase2d/fabric";
+import { useCanvasSync } from "../contexts/canvas-sync-context";
 
 export function useFreeDrawingTools() {
   const {
@@ -15,6 +23,7 @@ export function useFreeDrawingTools() {
     isEraser,
     brushType,
   } = useCanvas();
+  const { updateYjsObject } = useCanvasSync();
   const [isPaint, setPaint] = useState(false);
 
   // General setup/cleanup for path editing (should ideally run once or be part of select tool logic)
@@ -47,12 +56,14 @@ export function useFreeDrawingTools() {
     canvas.on("selection:updated", makePathEditable);
     canvas.on("selection:cleared", makePathStatic); // Use selection:cleared for deselection
 
+
     // Cleanup these general listeners
     return () => {
       if (canvas) {
         canvas.off("selection:created", makePathEditable);
         canvas.off("selection:updated", makePathEditable);
         canvas.off("selection:cleared", makePathStatic);
+        canvas.off('erasing:end');
       }
     };
   }, [canvas]);
@@ -166,7 +177,6 @@ export function useFreeDrawingTools() {
     canvas.forEachObject((o) => (o.selectable = true));
   };
 
-
   // Pencil Tool - Basic freehand drawing
   const activatePencilTool = () => {
     if (!canvas) return;
@@ -183,6 +193,21 @@ export function useFreeDrawingTools() {
     const eraser = new EraserBrush(canvas);
     eraser.width = eraserWidth; // Set eraser width
     setEraser(true);
+    const originalOnMouseUp = eraser.onMouseUp.bind(eraser);
+    eraser.onMouseUp = function (e) {
+      originalOnMouseUp.call(this, e);
+
+      // Sync erased objects after eraser stroke completes
+      setTimeout(() => {
+        canvas.getObjects().forEach((obj) => {
+          if (obj.clipPath) {
+            // Update both the clipped object and its clip path
+            updateYjsObject(obj.clipPath as any);
+            updateYjsObject(obj);
+          }
+        });
+      }, 0);
+    };
     canvas.freeDrawingBrush = eraser;
     canvas.isDrawingMode = true;
     canvas.defaultCursor = "eraser"; // Or a specific eraser cursor

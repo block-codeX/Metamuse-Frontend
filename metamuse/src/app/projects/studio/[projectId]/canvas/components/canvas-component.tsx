@@ -248,7 +248,7 @@ export default function CanvasComponent() {
     useEffect(() => {
         if (!canvas) return;
 
-        const handleObjectMoving = (e: fabric.IEvent<Event>) => {
+        const handleObjectMoving = (e: any) => {
             const target = e.target;
              // @ts-ignore
             if (!target || target.customType !== 'guideline') return;
