@@ -12,6 +12,7 @@ import {
 import * as fabric from "fabric";
 import { useCanvas } from "../contexts/canvas-context";
 import { useRef, useEffect } from "react"; // Added useEffect for context changes
+import { useCanvasSync } from "../contexts/canvas-sync-context";
 
 export function useShapeTools() {
   // Get canvas instance and styling properties from context
@@ -32,7 +33,7 @@ export function useShapeTools() {
     isShape,
     setIsShape,
   } = useCanvas();
-
+ const { updateYjsObject } = useCanvasSync()
   // Refs for temporary drawing state
   const isDrawing = useRef(false);
   const startPoint = useRef<{ x: number; y: number } | null>(null);
@@ -179,6 +180,7 @@ export function useShapeTools() {
       // Make the completed shape selectable and cache it
       currentShape.current.set({ selectable: true, objectCaching: true });
       canvas.setActiveObject(currentShape.current); // Select the new shape
+      updateYjsObject(currentShape.current) // Update Yjs object
     }
     // Clear temporary guide lines
     tempLines.current.forEach((line) => canvas.remove(line));

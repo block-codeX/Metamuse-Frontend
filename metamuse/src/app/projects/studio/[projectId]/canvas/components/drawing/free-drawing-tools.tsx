@@ -193,21 +193,36 @@ export function useFreeDrawingTools() {
     const eraser = new EraserBrush(canvas);
     eraser.width = eraserWidth; // Set eraser width
     setEraser(true);
-    const originalOnMouseUp = eraser.onMouseUp.bind(eraser);
-    eraser.onMouseUp = function (e) {
-      originalOnMouseUp.call(this, e);
+    eraser.on("end", async (e) => {
+      e.preventDefault();
 
-      // Sync erased objects after eraser stroke completes
-      setTimeout(() => {
-        canvas.getObjects().forEach((obj) => {
-          if (obj.clipPath) {
-            // Update both the clipped object and its clip path
-            updateYjsObject(obj.clipPath as any);
-            updateYjsObject(obj);
-          }
-        });
-      }, 0);
-    };
+      const { path, targets } = e.detail;
+    
+      // commit erasing manually
+     await eraser.commit({ path, targets });
+      targets.forEach((obj) => {
+        console.log("Updating erased", obj.id)
+        setTimeout(() => {
+        updateYjsObject(obj)
+        }
+        , 0);
+      })
+      return true;
+    
+    })
+    // const originalOnMouseUp = eraser.onMouseUp.bind(eraser);
+    // eraser.onMouseUp = function (e) {
+    //   originalOnMouseUp.call(this, e);
+
+    //   // Sync erased objects after eraser stroke completes
+    //   setTimeout(() => {
+    //     canvas.getObjects().forEach((obj) => {
+    //       if (obj.clipPath) {
+    //         updateYjsObject(obj);
+    //       }
+    //     });
+    //   }, 0);
+    // };
     canvas.freeDrawingBrush = eraser;
     canvas.isDrawingMode = true;
     canvas.defaultCursor = "eraser"; // Or a specific eraser cursor
@@ -325,12 +340,6 @@ export function useFreeDrawingTools() {
       icon: <Eraser />,
       toolName: "Eraser",
       function: activateEraser,
-      function_args: [],
-    },
-    {
-      icon: <PenTool />,
-      toolName: "Pen",
-      function: activatePenTool,
       function_args: [],
     },
   ];

@@ -15,7 +15,6 @@ import * as Y from "yjs";
 import * as fabric from "fabric";
 import { v4 as uuidv4 } from "uuid";
 import { debounce } from "lodash-es";
-import { error } from "console";
 
 export interface CanvasSyncContextType {
   updateYjsObject: (obj: any) => void;
@@ -25,6 +24,8 @@ export interface CanvasSyncContextType {
 }
 
 const CanvasSyncContext = createContext<CanvasSyncContextType | null>(null);
+
+// Helper function to get pattern URL from pattern name
 const getPatternUrl = async (patternName: string, foreColor: string) => {
   if (!patternName) return null;
   try {
@@ -36,6 +37,7 @@ const getPatternUrl = async (patternName: string, foreColor: string) => {
       .replace(/#000000/g, foreColor) // Replace black with current foreground
       .replace(/#000/g, foreColor) // Replace short hex black
       .replace(/black/gi, foreColor); // Replace named black colors
+
     // Create blob URL from modified SVG
     const blob = new Blob([svgText], { type: "image/svg+xml" });
     return URL.createObjectURL(blob);
@@ -44,6 +46,7 @@ const getPatternUrl = async (patternName: string, foreColor: string) => {
     return null;
   }
 };
+
 export const CanvasSyncProvider = ({
   children,
   projectId,
@@ -76,8 +79,90 @@ export const CanvasSyncProvider = ({
   // Processing queue to prevent duplicates
   const processingQueue = useRef<Set<string>>(new Set());
 
-  // --- Exported Sync Function ---
-  // In canvas-sync-context.tsx, update the updateYjsObject function:
+  // --- Helper Functions for Complex Object Types ---
+
+  // Serialize a gradient object for YJS storage
+  const serializeGradient = (gradient: fabric.Gradient) => {
+    if (!gradient) return null;
+
+    return {
+      type: "gradient",
+      data: gradient.toObject(),
+      gradientType: gradient.type, // 'linear' or 'radial'
+    };
+  };
+
+  // Deserialize a gradient from YJS back to fabric.Gradient
+  const deserializeGradient = (serializedGradient: any) => {
+    if (!serializedGradient || !serializedGradient.data) return null;
+
+    return new fabric.Gradient(serializedGradient.data);
+  };
+
+  // Serialize a pattern object for YJS storage
+  const serializePattern = (pattern: any) => {
+    if (!pattern) return null;
+    
+    // Enhanced pattern serialization
+    const patternData = {
+      type: "pattern",
+      data: {
+        repeat: pattern.repeat || 'repeat',
+        name: pattern.name || '',
+        color: pattern.color || '#000000',
+        // Add additional properties if available
+        width: pattern.width,
+        height: pattern.height,
+        offsetX: pattern.offsetX,
+        offsetY: pattern.offsetY,
+        patternTransform: pattern.patternTransform
+      }
+    };
+    
+    // Remove undefined values
+    Object.keys(patternData.data).forEach(key => {
+      if (patternData.data[key] === undefined) {
+        delete patternData.data[key];
+      }
+    });
+    
+    return patternData;
+  };
+
+  // Create a pattern from serialized data
+  const createPatternFromSerialized = async (serializedPattern: any) => {
+    if (!serializedPattern || !serializedPattern.data) return null;
+
+    const { name, color } = serializedPattern.data;
+    if (!name || !color) return null;
+
+    try {
+      const patternUrl = await getPatternUrl(name, color);
+      if (!patternUrl) return null;
+
+      const img = await fabric.util.loadImage(patternUrl);
+
+      const pattern = new fabric.Pattern({
+        source: img,
+        repeat: serializedPattern.data.repeat || "repeat",
+      });
+
+      // Store the name and color as custom properties
+      (pattern as any).name = name;
+      (pattern as any).color = color;
+
+      return pattern;
+    } catch (error) {
+      console.error("Error recreating pattern:", error);
+      return null;
+    }
+  };
+
+  // --- Exported Sync Functions ---
+
+  // These are the key changes needed to the CanvasSyncProvider
+
+  // Update the updateYjsObject function to better handle complex objects:
   const updateYjsObject = useCallback(
     (obj: any) => {
       if (!obj || !objectsMapRef.current || !yDoc.current) {
@@ -87,7 +172,6 @@ export const CanvasSyncProvider = ({
       // Ensure object has an ID
       if (!obj.id) {
         (obj as any).id = uuidv4();
-        console.log(`Assigned new ID during sync: ${obj.id} to ${obj.type}`);
       }
       const objId = obj.id;
 
@@ -99,27 +183,37 @@ export const CanvasSyncProvider = ({
       try {
         processingQueue.current.add(objId);
         isLocal.current = true;
-        // Custom serialization for special fill types
+
+        // Serialize the object to JSON
         const jsonData = obj.toJSON();
         jsonData.id = objId;
 
+        // Handle selection objects specially
+        if (
+          obj instanceof fabric.ActiveSelection ||
+          obj instanceof fabric.Group
+        ) {
+          // For selections and groups, also update their child objects' positions
+          // This ensures that when they're ungrouped, they appear in the correct positions
+          if (obj.getObjects) {
+            obj.getObjects().forEach((childObj: any) => {
+              // Update child object positions
+              childObj.setCoords();
+            });
+          }
+        }
+
         // Handle gradient fill
         if (obj.fill instanceof fabric.Gradient) {
-          jsonData.fill = {
-            type: "gradient",
-            gradient: obj.fill.toObject(),
-          };
+          jsonData.fill = serializeGradient(obj.fill);
         }
 
         // Handle pattern fill
-        if (obj.fill instanceof fabric.Pattern) {
-          console.log("Source", obj.fill.toObject());
-          jsonData.fill = {
-            type: "pattern",
-            pattern: obj.fill.toObject(["color", "name"]),
-          };
+        if (obj.fill && typeof obj.fill === "object" && obj.fill.source) {
+          jsonData.fill = serializePattern(obj.fill);
         }
 
+        // Update YJS map
         yDoc.current.transact(() => {
           objectsMapRef.current!.set(objId, jsonData);
         }, LOCAL_ORIGIN);
@@ -135,28 +229,44 @@ export const CanvasSyncProvider = ({
 
   const deleteYjsObject = useCallback(
     (obj: any) => {
-      if (!obj || !obj.id || !objectsMapRef.current || !yDoc.current) {
+      if (!obj || !objectsMapRef.current || !yDoc.current) {
         return;
       }
-
+  
       const objId = obj.id;
-
+      if (!objId) {
+        console.warn("Attempted to delete object without ID");
+        return;
+      }
+  
       // Skip if already processing
       if (processingQueue.current.has(objId)) {
         return;
       }
-
+  
       try {
         // Mark as processing
         processingQueue.current.add(objId);
-
-        // Set local change flag
         isLocal.current = true;
-
+  
         console.log(`Sync: Deleting YJS object ${objId}`);
-
-        // Remove from local ref map first
-
+  
+        // Handle selection objects specially - we only delete the group, not its contents
+        if ((obj instanceof fabric.ActiveSelection || obj instanceof fabric.Group) && obj.getObjects) {
+          // When deleting a selection/group, we need to delete each member object as well
+          if (obj.type === 'activeSelection') {
+            // For active selection, delete each member
+            obj.getObjects().forEach((childObj: any) => {
+              if (childObj.id) {
+                yDoc.current!.transact(() => {
+                  objectsMapRef.current!.delete(childObj.id);
+                }, LOCAL_ORIGIN);
+              }
+            });
+          }
+        }
+  
+        // Delete from YJS map
         yDoc.current.transact(() => {
           objectsMapRef.current!.delete(objId);
         }, LOCAL_ORIGIN);
@@ -171,6 +281,7 @@ export const CanvasSyncProvider = ({
     [yDoc]
   );
 
+  // Update canvas settings in YJS
   const updateYjsCanvasSettings = useCallback(
     (settings: Partial<CanvasSettings>) => {
       if (!canvasMapRef.current || !yDoc.current || !settings) {
@@ -194,7 +305,6 @@ export const CanvasSyncProvider = ({
       }
 
       if (!changed) {
-        console.log("Sync: Skipping Yjs settings update (no change detected).");
         return;
       }
 
@@ -202,8 +312,7 @@ export const CanvasSyncProvider = ({
         // Set local change flag
         isLocal.current = true;
 
-        console.log("Sync: Updating Yjs canvas settings", settings);
-
+        // Update YJS map
         yDoc.current.transact(() => {
           if (settings.dimensions) {
             canvasMapRef.current!.set("dimensions", settings.dimensions);
@@ -222,9 +331,10 @@ export const CanvasSyncProvider = ({
     [yDoc]
   );
 
-  // Initialize canvas and YJS
+  // --- Initialize Canvas and YJS ---
   useEffect(() => {
     if (!isInitialized || !yDoc.current || !canvas || initialized) return;
+
     console.log("🔄 Initializing canvas sync...");
     objectsMapRef.current = yDoc.current.getMap("fabricObjects");
     canvasMapRef.current = yDoc.current.getMap("fabricCanvas");
@@ -237,10 +347,12 @@ export const CanvasSyncProvider = ({
           | { width: number; height: number }
           | undefined;
         const initialPreset = settingsData.preset as string | undefined;
+
         console.log("🎨 Initial settings from Yjs:", {
           dimensions: initialDimensions,
           preset: initialPreset,
         });
+
         let settingsApplied = false;
         if (initialDimensions || initialPreset) {
           isYjsSettingsUpdate.current = true;
@@ -261,35 +373,53 @@ export const CanvasSyncProvider = ({
         // --- Load Objects ---
         canvas.clear();
         const initialObjectsData = objectsMapRef.current?.toJSON() || {};
+
+        // Prepare JSON for fabric.Canvas.loadFromJSON
         const canvasJson = {
           version: fabric.version,
           objects: Object.values(initialObjectsData),
         };
 
-        await canvas
-          .loadFromJSON(canvasJson, (o, fabricObject: any) => {
-            let fill = o.fill;
-            if (o.fill?.type == "gradient") {
-              //  fill = new fabric.Gradient()
-              fill = "red";
-            } else if (o.fill?.type == "pattern") {
-              // fill = new fabric.Pattern()
-              fill = "red";
+        // Load objects with proper handling of complex fill types
+        await canvas.loadFromJSON(
+          canvasJson,
+          async (o: any, fabricObject: any) => {
+            if (!fabricObject) return;
+
+            try {
+              // Handle gradient fill
+              if (o.fill && o.fill.type === "gradient") {
+                const gradient = deserializeGradient(o.fill);
+                if (gradient) {
+                  fabricObject.set("fill", gradient);
+                }
+              }
+
+              // Handle pattern fill
+              else if (o.fill && o.fill.type === "pattern") {
+                const pattern = await createPatternFromSerialized(o.fill);
+                if (pattern) {
+                  fabricObject.set("fill", pattern);
+                }
+              }
+
+              // Ensure ID is set
+              fabricObject.set({
+                id: o.id,
+                transparentCorners: false,
+                dirty: true,
+                selectable: true,
+                evented: true,
+              });
+            
+            } catch (error) {
+              console.error("Error restoring object:", error);
             }
-            fabricObject.set({
-              fill,
-              transparentCorners: false,
-              dirty: true,
-            });
-            fabricObject.id = o.id;
-          })
-          .then((canvas) => {
-            canvas.renderAll();
-            console.log("✅ Initial objects loaded.");
-          })
-          .catch((error) => {
-            console.error("💥 Initialization failed: for canvas", error);
-          });
+          }
+        );
+        canvas.selection = true; 
+        canvas.renderAll();
+        console.log("✅ Initial objects loaded.");
       } catch (error) {
         console.error("💥 Initialization failed:", error);
       } finally {
@@ -298,9 +428,17 @@ export const CanvasSyncProvider = ({
     };
 
     loadInitialState();
-  }, [isInitialized, yDoc, canvas, initialized, isYjsSettingsUpdate]);
+  }, [
+    isInitialized,
+    yDoc,
+    canvas,
+    initialized,
+    isYjsSettingsUpdate,
+    setDimensions,
+    setPreset,
+  ]);
 
-  // Sync LOCAL canvas setting changes TO YJS
+  // --- Sync LOCAL canvas setting changes TO YJS ---
   useEffect(() => {
     if (!initialized || isYjsSettingsUpdate.current) {
       if (isYjsSettingsUpdate.current) {
@@ -319,7 +457,76 @@ export const CanvasSyncProvider = ({
     updateYjsCanvasSettings,
   ]);
 
-  // YJS observers for REMOTE changes -> Fabric
+  // --- Apply remote object changes to fabric canvas ---
+  const applyObjectUpdate = useCallback(
+    async (id: string, objData: any) => {
+      if (!canvas) return;
+
+      try {
+        // Create a clean copy of the object data for fabric
+        const objectData = { ...objData };
+
+        // Handle special fill types before enlivening
+        let fillToApply = objectData.fill;
+        let hasSpecialFill = false;
+
+        // Handle gradient fill
+        if (objectData.fill && objectData.fill.type === "gradient") {
+          hasSpecialFill = true;
+          // We'll apply gradient after object creation
+        }
+
+        // Handle pattern fill
+        if (objectData.fill && objectData.fill.type === "pattern") {
+          hasSpecialFill = true;
+          // We'll apply pattern after object creation
+        }
+
+        // If we have a special fill, temporarily set to a simple color
+        if (hasSpecialFill) {
+          objectData.fill = "rgba(0,0,0,0)"; // Transparent
+        }
+
+        // Create the fabric object
+        const fabricObjects = await fabric.util.enlivenObjects([objectData]);
+        const fabricObj = fabricObjects[0];
+
+        if (fabricObj) {
+          // Apply original position and ID
+          fabricObj.set({
+            id,
+            left: objData.left !== undefined ? objData.left : 0,
+            top: objData.top !== undefined ? objData.top : 0,
+            visible: objData.visible !== undefined ? objData.visible : true,
+          });
+
+          // Apply special fill types if needed
+          if (hasSpecialFill) {
+            if (fillToApply && fillToApply.type === "gradient") {
+              const gradient = deserializeGradient(fillToApply);
+              if (gradient) {
+                fabricObj.set("fill", gradient);
+              }
+            } else if (fillToApply && fillToApply.type === "pattern") {
+              const pattern = await createPatternFromSerialized(fillToApply);
+              if (pattern) {
+                fabricObj.set("fill", pattern);
+              }
+            }
+          }
+
+          // Add to canvas
+          canvas.add(fabricObj);
+          canvas.renderAll();
+        }
+      } catch (error) {
+        console.error(`Error applying object update for ${id}:`, error);
+      }
+    },
+    [canvas]
+  );
+
+  // --- YJS observers for REMOTE changes -> Fabric ---
   useEffect(() => {
     if (
       !initialized ||
@@ -329,34 +536,47 @@ export const CanvasSyncProvider = ({
     )
       return;
 
-    // In canvas-sync-context.tsx, update the objectObserver:
+    // Observer for remote object changes
     const objectObserver = (event: Y.YMapEvent<any>) => {
-      if (
-        !initialized ||
-        event.transaction.origin === LOCAL_ORIGIN ||
-        isLocal.current
-      ) {
+      // Skip if change originated locally
+      if (event.transaction.origin === LOCAL_ORIGIN || isLocal.current) {
         return;
       }
 
+      // Process each changed key
       event.changes.keys.forEach(async (change, id) => {
+        // Skip if already processing this object
         if (processingQueue.current.has(id)) return;
-        const existing = canvas.getObjects().find((o: any) => o.id === id);
-        if (existing) {
-          canvas.remove(existing);
-          console.log("Removed object from canvas", id);
-        }
+
         try {
+          // Add to processing queue
           processingQueue.current.add(id);
           isLocal.current = true;
+
           if (change.action === "add" || change.action === "update") {
+            // Find and remove existing object with same ID
+            const existing = canvas.getObjects().find((o: any) => o.id === id);
+            if (existing) {
+              canvas.remove(existing);
+            }
+
+            // Get updated object data
             const objData = objectsMapRef.current!.get(id);
             if (!objData) return;
-            applyObjectUpdate(id, objData);
+
+            // Apply the update
+            await applyObjectUpdate(id, objData);
           } else if (change.action === "delete") {
-            // Ignore, we've already removed existing objects..
+            console.log("Obj to be deleted", id)
+            // Find and remove existing object
+            const existing = canvas.getObjects().find((o: any) => o.id === id);
+            if (existing) {
+              canvas.remove(existing);
+              canvas.renderAll();
+            }
           }
         } finally {
+          // Reset processing flags
           setTimeout(() => {
             isLocal.current = false;
             processingQueue.current.delete(id);
@@ -365,40 +585,17 @@ export const CanvasSyncProvider = ({
       });
     };
 
-    // Helper function to apply updates
-    const applyObjectUpdate = (id: string, objData: any) => {
-      fabric.util.enlivenObjects([objData]).then((objects) => {
-        if (objects[0]) {
-          const fabricObj = objects?.[0] as any;
-          if (fabricObj) {
-            fabricObj.set({
-              id,
-              left: objData.left || 0,
-              top: objData.top || 0,
-              visible: objData.visible ?? true,
-            });
-            // Handle pattern and gradient
-            canvas.add(fabricObj);
-          }
-        }
-        canvas.renderAll();
-      });
-    };
-
-    const canvasSettingsObserver = (
-      event: Y.YMapEvent<any>,
-      transaction: Y.Transaction
-    ) => {
+    // Observer for remote canvas settings changes
+    const canvasSettingsObserver = (event: Y.YMapEvent<any>) => {
       // Skip if change originated locally
-      if (transaction.origin === LOCAL_ORIGIN || isLocal.current) {
+      if (event.transaction.origin === LOCAL_ORIGIN || isLocal.current) {
         return;
       }
-
-      console.log("📬 Remote canvas setting changes");
 
       try {
         isYjsSettingsUpdate.current = true;
 
+        // Handle dimensions change
         if (event.changes.keys.has("dimensions")) {
           const newDimensions = canvasMapRef.current?.get("dimensions");
           if (
@@ -410,6 +607,7 @@ export const CanvasSyncProvider = ({
           }
         }
 
+        // Handle preset change
         if (event.changes.keys.has("preset")) {
           const newPreset = canvasMapRef.current?.get("preset");
           if (newPreset && newPreset !== preset) {
@@ -442,48 +640,56 @@ export const CanvasSyncProvider = ({
     isYjsSettingsUpdate,
     dimensions,
     preset,
+    applyObjectUpdate,
   ]);
 
-  // Fabric event handlers -> YJS
+  // --- Fabric event handlers -> YJS ---
   useEffect(() => {
     if (!initialized || !canvas) return;
-
+  
+    // Enhanced object modification handler
     const handleModify = (e: any) => {
       if (isLocal.current || !e.target) return;
+      
+      // Also update the selection/group itself
       updateYjsObject(e.target);
     };
 
+    // Handle object addition
     const handleAdd = (e: any) => {
-      // if (isLocal.current) {
-      //   console.log("Sync: Skipping local object addition.");
-      //   return; // Remove this return to allow local additions to sync
-      // }
-      const target = e.target || (e as any).path;
+      if (isLocal.current) return;
+      console.log(e)
+      const target = e.target || e.path;
       if (!target) return;
+
+      // Ensure object has ID
       if (!target.id) {
         target.id = uuidv4();
-      }
+      } 
+      // Update in YJS
       updateYjsObject(target);
     };
 
+    // Handle object removal
     const handleRemove = (e: any) => {
       if (isLocal.current || !e.target) return;
       deleteYjsObject(e.target);
     };
 
+    // Handle text editing
     const handleTextEdit = (e: any) => {
       if (isLocal.current || !e.target) return;
       updateYjsObject(e.target);
     };
 
+    // Handle canvas clearing
     const handleClear = () => {
       if (isLocal.current || !yDoc.current || !objectsMapRef.current) return;
-
-      console.log("Sync: Clearing YJS objects map");
 
       try {
         isLocal.current = true;
 
+        // Clear YJS objects map
         yDoc.current.transact(() => {
           objectsMapRef.current!.clear();
         }, LOCAL_ORIGIN);
@@ -494,18 +700,17 @@ export const CanvasSyncProvider = ({
       }
     };
 
-    // Attach Listeners
-    canvas.on("object:added", handleAdd);
+    // Attach fabric event listeners
     canvas.on("object:modified", handleModify);
+    canvas.on("object:added", handleAdd);
     canvas.on("object:removed", handleRemove);
     canvas.on("path:created", handleAdd);
     canvas.on("text:editing:exited", handleTextEdit);
     canvas.on("canvas:cleared", handleClear);
-
     return () => {
-      // Detach Listeners
-      canvas.off("object:added", handleAdd);
+      // Detach fabric event listeners
       canvas.off("object:modified", handleModify);
+      canvas.off("object:added", handleAdd);
       canvas.off("object:removed", handleRemove);
       canvas.off("path:created", handleAdd);
       canvas.off("text:editing:exited", handleTextEdit);
@@ -513,6 +718,7 @@ export const CanvasSyncProvider = ({
     };
   }, [initialized, canvas, updateYjsObject, deleteYjsObject]);
 
+  // Expose context value
   const contextValue: CanvasSyncContextType = {
     updateYjsObject,
     updateYjsCanvasSettings,

@@ -170,6 +170,7 @@ const getPatternUrl = async (patternName: string, foreColor: string) => {
       let svgText = await response.text();
 
       // Replace only the foreground color (assuming SVG uses #000000 for pattern elements)
+      if (!["#000000", "#000", "black"].includes(foreColor))
       svgText = svgText
         .replace(/#000000/g, foreColor) // Replace black with current foreground
         .replace(/#000/g, foreColor) // Replace short hex black

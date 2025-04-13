@@ -80,12 +80,10 @@ const useEditFunctions = () => {
   };
   const deleteObj = () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObjects();
+    const obj = canvas.getActiveObject();
     if (obj) {
-      obj.forEach((o) => {
-        canvas.remove(o);
-      });
-      canvas.requestRenderAll();
+      canvas.remove(obj);
+      canvas.renderAll();
     }
   };
   const group = () => {
