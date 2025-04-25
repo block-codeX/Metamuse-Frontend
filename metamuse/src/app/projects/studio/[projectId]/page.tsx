@@ -229,7 +229,7 @@ export default function ProjectView() {
         isOpen={showAddUser}
         onClose={() => setShowAddUser(false)}
       />
-      <Toaster />{" "}
+      <Toaster />
       </div>
   );
 }

@@ -9,7 +9,12 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { api, getInitials, getRandomComplementaryColors, humanizeDate } from "@/lib/utils";
+import {
+  api,
+  getInitials,
+  getRandomComplementaryColors,
+  humanizeDate,
+} from "@/lib/utils";
 import { MessageSquare, SendHorizonal, X } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useChat } from "@/app/auth/context/chat-context";
@@ -21,7 +26,6 @@ import { usePathname } from "next/navigation";
 
 // Collaborator component
 
-
 export default function ChatComponent() {
   // State for dropdown visibility
   const { project } = useProject();
@@ -31,7 +35,7 @@ export default function ChatComponent() {
   const [toUpdate, setToUpdate] = useState("");
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
-  const isCanvasPage = pathname?.includes('/canvas');
+  const isCanvasPage = pathname?.includes("/canvas");
   const {
     setActiveConversation,
     sendMessage,
@@ -88,7 +92,7 @@ export default function ChatComponent() {
     if (!project) return;
     setActiveConversation(project.conversation);
     const handleMessages = ({ data }) => {
-       handleMessageFromServer(data, setMessages, toast);
+      handleMessageFromServer(data, setMessages, toast);
     };
     if (isConnected && ws.current?.val == project.conversation)
       ws.current.addEventListener("message", handleMessages);
@@ -100,9 +104,9 @@ export default function ChatComponent() {
   const toggleChat = () => {
     setIsVisible(!isVisible);
   };
-  
+
   // If on canvas page and chat is not visible, just show the toggle button
-  if (isCanvasPage && !isVisible) {
+  if (!isVisible) {
     return (
       <Button
         onClick={toggleChat}
@@ -113,28 +117,25 @@ export default function ChatComponent() {
       </Button>
     );
   }
-  const containerClassName = isCanvasPage
-  ? "fixed bottom-4 right-4 z-50 w-80 h-96 shadow-lg"
-  : "self-stretch max-w-[300px] w-full";
-//   const canvasStyle = isCanvas ? ""
   return (
-<div className={containerClassName}>
+    <div className="fixed bottom-4 right-4 z-50 w-80 h-120 shadow-lg">
       <Card className="px-2 h-full">
         <CardHeader className="flex flex-row items-center justify-between">
           <h2 className="text-xl font-semibold">Messages</h2>
-          {isCanvasPage && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleChat}
-              className="h-8 w-8"
-              aria-label="Close chat"
-            >
-              <X size={18} />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleChat}
+            className="h-8 w-8"
+            aria-label="Close chat"
+          >
+            <X size={18} />
+          </Button>
         </CardHeader>
-        <CardContent className="p-0 overflow-y-auto" style={{ height: 'calc(100% - 140px)' }}>
+        <CardContent
+          className="p-0 overflow-y-auto"
+          style={{ height: "calc(100% - 140px)" }}
+        >
           <div className="space-y-4 p-1">
             {messages.map((message) => {
               return (
