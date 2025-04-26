@@ -107,12 +107,6 @@ export default function ValuableAssets({ topAssets }) {
       initial="hidden"
       animate="visible"
     >
-      <Tabs defaultValue="assets" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="assets">Most Valuable Assets</TabsTrigger>
-          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
-        </TabsList>
-        <TabsContent value="assets">
           <div className="grid gap-6 md:grid-cols-2">
             <AssetCard 
               title="Top NFT Asset" 
@@ -125,19 +119,6 @@ export default function ValuableAssets({ topAssets }) {
               type="project"
             />
           </div>
-        </TabsContent>
-        <TabsContent value="activity">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Your latest transactions and collaborations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center py-8 text-muted-foreground">Activity data will be populated from the backend</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
     </motion.div>
   );
 }

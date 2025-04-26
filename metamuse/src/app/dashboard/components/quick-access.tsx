@@ -48,9 +48,8 @@ export default function QuickAccess() {
       variants={accessVariants}
       initial="hidden"
       animate="visible"
-      className="h-full"
     >
-      <Card className="h-full">
+      <Card>
         <CardHeader>
           <CardTitle>Quick Access</CardTitle>
           <CardDescription>Navigate to your creative spaces</CardDescription>
@@ -92,9 +91,6 @@ export default function QuickAccess() {
             whileHover="hover"
             whileTap="tap"
           >
-            <Button className="w-full">
-              <TrendingUp className="mr-2 h-4 w-4" /> Mint New Project
-            </Button>
           </motion.div>
         </CardContent>
       </Card>

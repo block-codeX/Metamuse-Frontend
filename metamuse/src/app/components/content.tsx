@@ -25,7 +25,7 @@ const Content: React.FC<ContentProps> = ({ children }) => {
 
           {/* Main Content */}
           <motion.main
-            className={`overflow-auto p-0 dark:bg-gray-900 sm:fixed sm:right-0 md:relative md:left-0 w-full`}
+            className={`overflow-auto p-0 dark:bg-gray-900 w-full`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
