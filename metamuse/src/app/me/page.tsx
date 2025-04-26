@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Eye, EyeOff, ChevronRight } from "lucide-react";
+import { Eye, EyeOff, ChevronRight, Sun, Moon } from "lucide-react";
 import { Toaster } from "sonner";
 import {
   Card,
@@ -18,13 +18,14 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserStore } from "@/lib/stores/user-store";
 import AuthFlowModal from "./components/profile-update";
+import { Switch } from "@/components/ui/switch";
 
 export default function UserProfilePage() {
   const { user } = useUserStore();
   const [showWalletAddress, setShowWalletAddress] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authTarget, setAuthTarget] = useState(null); // "password" or "wallet"
-
+  const [isDarkMode, setIsDarkMode] = useState(false); // Dark mode state
   const toggleWalletVisibility = () => {
     setShowWalletAddress(!showWalletAddress);
   };
@@ -50,25 +51,33 @@ export default function UserProfilePage() {
   return (
     <div className="bg-background space-y-8 w-full mb-10">
       <Toaster position="top-center" />
-      
+
       <div className="sticky flex top-0 bg-background items-center px-6 pt-6 justify-between">
         <h1 className="text-3xl font-bold">{user?.firstName}</h1>
-        <Avatar className="h-16 w-16">
-          <AvatarFallback>
-            {user?.firstName?.charAt(0)}
-            {user?.lastName?.charAt(0)}
-          </AvatarFallback>
-        </Avatar>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm">
+            {isDarkMode ? "Dark Mode" : "Light Mode"}
+          </span>
+          <Switch
+            checked={isDarkMode}
+            onCheckedChange={() => setIsDarkMode(!isDarkMode)}
+          >
+            <span className="mr-2">
+              {isDarkMode ? <Moon size={16} /> : <Sun size={16} />}
+            </span>
+          </Switch>
+        </div>
+
       </div>
-      
+
       <Card className="shadow-sm max-w-4xl mx-6">
         <CardHeader>
           <CardTitle className="flex items-end justify-between">
             <span>Personal Information</span>
             <span
               className={`self-end px-1 py-[3px] w-fit rounded-md text-[12px] ${
-                user?.status !== "active" 
-                  ? "bg-red-300 text-red-800 dark:text-red-400" 
+                user?.status !== "active"
+                  ? "bg-red-300 text-red-800 dark:text-red-400"
                   : "bg-green-300 text-green-800 dark:text-green-400"
               }`}
             >
@@ -96,7 +105,9 @@ export default function UserProfilePage() {
             <div>
               <p className="text-sm font-medium text-gray-500">Date Joined</p>
               <p className="mt-1 text-base">
-                {user?.createdAt ? format(new Date(user.createdAt), "PPP") : "N/A"}
+                {user?.createdAt
+                  ? format(new Date(user.createdAt), "PPP")
+                  : "N/A"}
               </p>
             </div>
           </div>
@@ -137,7 +148,7 @@ export default function UserProfilePage() {
           </Button>
         </CardFooter>
       </Card>
-      
+
       <Card className="shadow-sm max-w-4xl mx-6">
         <CardHeader>
           <CardTitle>Security Settings</CardTitle>
@@ -167,9 +178,9 @@ export default function UserProfilePage() {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Auth Flow Modal */}
-      <AuthFlowModal 
+      <AuthFlowModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         target={authTarget}
