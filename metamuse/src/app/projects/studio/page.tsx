@@ -164,8 +164,9 @@ export default function MarketPlace() {
 
   return (
     <>
-      <div className="flex flex-row justify-between w-full items-center justify-center">
-        <div className="w-full bg-background dark:bg-background text-text-pri dark:text-text-alt sticky top-0 z-10 py-4 px-6 border-b border-gray-200 dark:border-gray-800">
+      <div className="w-full items-center justify-center">
+        <div className="w-full flex flex-row items-center justify-between flex-wrap dark:bg-background text-text-pri dark:text-text-alt sticky top-0 z-10 py-4 px-6 border-b border-gray-200 dark:border-gray-800">
+          <div>
           <div className="flex flex-row flex-wrap items-center justify-start gap-3">
             <h1 className="font-bold text-2xl">Your Art Projects</h1>
             <div className="max-w-[400px] w-full relative">
@@ -216,8 +217,7 @@ export default function MarketPlace() {
               ))}
             </div>
           </div>
-        </div>
-        <div className="p-4 mr-6">
+          </div>
           <AlertDialog>
             <AlertDialogTrigger className="bg-background dark:bg-background shadow-md rounded-sm h-[45px] w-[45px] active:scale-95 transition-all-300 text-text-alt  bg-btn-primary dark:bg-btn-primary flex items-center justify-center p-3 cursor-pointer ">
               <Plus size={26} />
@@ -237,12 +237,12 @@ export default function MarketPlace() {
         </div>
       </div>
 
-      <div className="mx-6 w-[calc(100%-3rem)] mt-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-6">
+      <div className="w-inherit mt-4">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-6">
           {loading ? (
             // Loading skeletons
             Array.from({ length: 3 }).map((_, index) => (
-              <Card key={`skeleton-${index}`} className="overflow-hidden">
+              <Card key={`skeleton-${index}`} className="overflow-hidden w-[200px]">
                 <Skeleton className="h-64 w-full" />
                 <div className="p-4">
                   <Skeleton className="h-6 w-3/4 mb-2" />
