@@ -1,10 +1,9 @@
-// UserProfilePage.jsx
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { format } from "date-fns";
 import { Eye, EyeOff, ChevronRight } from "lucide-react";
+import { Toaster } from "sonner";
 import {
   Card,
   CardContent,
@@ -18,19 +17,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserStore } from "@/lib/stores/user-store";
+import AuthFlowModal from "./components/profile-update";
 
 export default function UserProfilePage() {
-  // Sample user data - replace with your actual data fetching logic
-  const [Kuser, setUser] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    avatarUrl: "/api/placeholder/100/100",
-    dateJoined: new Date("2023-05-15"),
-    walletAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-  });
   const { user } = useUserStore();
   const [showWalletAddress, setShowWalletAddress] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [authTarget, setAuthTarget] = useState(null); // "password" or "wallet"
 
   const toggleWalletVisibility = () => {
     setShowWalletAddress(!showWalletAddress);
@@ -44,27 +37,42 @@ export default function UserProfilePage() {
     )}`;
   };
 
+  const handleOpenModal = (target) => {
+    setAuthTarget(target);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setAuthTarget(null);
+  };
+
   return (
-    <div className="bg-background space-y-8 w-full  mb-10">
+    <div className="bg-background space-y-8 w-full mb-10">
+      <Toaster position="top-center" />
+      
       <div className="sticky flex top-0 bg-background items-center px-6 pt-6 justify-between">
         <h1 className="text-3xl font-bold">{user?.firstName}</h1>
         <Avatar className="h-16 w-16">
           <AvatarFallback>
-            {user?.firstName.charAt(0)}
-            {user?.lastName.charAt(0)}
+            {user?.firstName?.charAt(0)}
+            {user?.lastName?.charAt(0)}
           </AvatarFallback>
         </Avatar>
       </div>
+      
       <Card className="shadow-sm max-w-4xl mx-6">
         <CardHeader>
           <CardTitle className="flex items-end justify-between">
             <span>Personal Information</span>
             <span
-              className={`self-end px-1 py-[3px] w-fit rounded-md text-[12px]  text-red-800 dark:text-red-400 ${
-                user?.status !== "active" ? "bg-red-300" : "bg-green-300"
+              className={`self-end px-1 py-[3px] w-fit rounded-md text-[12px] ${
+                user?.status !== "active" 
+                  ? "bg-red-300 text-red-800 dark:text-red-400" 
+                  : "bg-green-300 text-green-800 dark:text-green-400"
               }`}
             >
-              {user?.status}
+              {user?.status || "active"}
             </span>
           </CardTitle>
           <CardDescription>
@@ -88,7 +96,7 @@ export default function UserProfilePage() {
             <div>
               <p className="text-sm font-medium text-gray-500">Date Joined</p>
               <p className="mt-1 text-base">
-                {format(user?.createdAt as string, "PPP")}
+                {user?.createdAt ? format(new Date(user.createdAt), "PPP") : "N/A"}
               </p>
             </div>
           </div>
@@ -121,12 +129,15 @@ export default function UserProfilePage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 items-start sm:items-center">
-          <Button variant="outline">Change Password</Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => handleOpenModal("password")}>
+            Change Password
+          </Button>
+          <Button variant="outline" onClick={() => handleOpenModal("wallet")}>
             {user?.walletAddress ? "Change Wallet" : "Connect Wallet"}
           </Button>
         </CardFooter>
       </Card>
+      
       <Card className="shadow-sm max-w-4xl mx-6">
         <CardHeader>
           <CardTitle>Security Settings</CardTitle>
@@ -156,6 +167,13 @@ export default function UserProfilePage() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Auth Flow Modal */}
+      <AuthFlowModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        target={authTarget}
+      />
     </div>
   );
 }
