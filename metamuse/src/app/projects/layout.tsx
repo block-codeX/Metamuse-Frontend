@@ -11,8 +11,8 @@ export default function AuthLayout({
 
   return (
     <ProjectProvider>
-        <div className="flex flex-col items-center justify-center h-screen bg-background">
-          <div className="flex flex-col justify-start items-start h-[calc(100vh-60px)] bg-background overflow-scroll">
+        <div className="flex flex-col items-center justify-center h-screen w-full bg-background">
+          <div className="flex flex-col justify-start items-start w-full bg-background overflow-scroll">
             {children}
           </div>
           <ChatComponent />

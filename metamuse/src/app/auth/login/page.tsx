@@ -67,7 +67,7 @@ export default function LoginPage() {
     console.log("Form submission successful:", values);
     const success = await login(values);
     if (success) {
-      router.push("/projects/marketplace");
+      router.push("/dashboard");
     }
     // In a real app, you would send this data to your backend
     // await signIn(values.email, values.password);

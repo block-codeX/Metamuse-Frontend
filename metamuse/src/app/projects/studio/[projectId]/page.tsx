@@ -68,7 +68,7 @@ export default function ProjectView() {
     }
   };
   return (
-    <div className=" max-w-[calc(100%-350px)] w-[90%] h-full">
+    <div className="h-full max-w-700px my-6 w-full mx-3">
       <Card className="w-full h-full  space-y-2 gap-1">
         {project ? (
           <>

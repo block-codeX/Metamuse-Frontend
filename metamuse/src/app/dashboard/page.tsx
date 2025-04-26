@@ -170,7 +170,7 @@ export default function Dashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="assets" className="border px-2 py-5 rounded-md">
+          <TabsContent value="assets" className="border p-5 bg-white rounded-md">
             <ValuableAssets topAssets={topAssets} />
           </TabsContent>
 

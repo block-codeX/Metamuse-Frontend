@@ -167,7 +167,7 @@ export default function Commands() {
     return 28;
   };
   return (
-    <div className="my-2 px-5 h-full border-r m-0">
+    <div className="my-2 px-5 h-full border-r m-0 sticky left-0 bg-background">
       <div className="grid grid-rows-[auto_auto] grid-cols-[auto_50px] h-full gap-x-3 gap-y-1 py-1 items-center">
         {commandOptions.map(({ icon: Icon, name, size, action }, index) => (
           <Button
