@@ -11,6 +11,7 @@ type User = {
   email: string;
   status: string;
   createdAt: string;
+  walletAddress: string | null;
 };
 type UserState = {
   user: User | null;

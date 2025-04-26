@@ -11,11 +11,13 @@ import {
   LogOut,
   Sidebar,
   Coins,
+  LayoutDashboard,
 } from "lucide-react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { set } from "lodash";
 
 interface MySidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -38,11 +40,17 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
   // Navigation items
   const navItems = [
     {
+      name: "Dashboard",
+      icon: <LayoutDashboard size={20}/>,
+      path: "/dashboard"
+
+    },
+    {
       name: "Marketplace",
       icon: <ShoppingBag size={20} />,
       path: "/projects/marketplace",
     },
-    { name: "Studio", icon: <Home size={20} />, path: "/projects/studio" },
+    { name: "Studio", icon: <Brush size={20} />, path: "/projects/studio" },
     { name: "Portfolio", icon: <Coins size={20} />, path: "/portfolio" },
   ];
 
@@ -96,7 +104,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
   };
 
   const goToSettings = () => {
-    router.push("/me");
+    router.push("/me");    
   };
 
   // Hide sidebar on "/auth/" pages
@@ -146,12 +154,12 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
                     whileTap={{ scale: 0.98 }}
                   >
                     <Button
-                      variant="ghost"
+                      variant={"ghost"}
                       className={`w-full flex items-center ${
                         isCollapsed ? "justify-center" : "justify-start"
                       } py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
                         pathname === item.path
-                          ? "bg-gray-100 dark:bg-gray-700 font-medium"
+                          ? "bg-btn-primary dark:bg-gray-700 font-medium text-text-alt"
                           : ""
                       }`}
                       onClick={() => navigateTo(item.path)}
@@ -171,7 +179,11 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
                 variant="ghost"
                 className={`w-full flex items-center ${
                   isCollapsed ? "justify-center" : "justify-between"
-                } py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 h-auto transition-colors duration-200`}
+                } py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 h-auto transition-colors duration-200 ${
+                  pathname === "/me" && isCollapsed
+                    ? "bg-btn-primary dark:bg-gray-700 font-medium text-text-alt"
+                    : ""
+                }`}
                 onClick={goToSettings}
               >
                 <div className="flex items-center">
