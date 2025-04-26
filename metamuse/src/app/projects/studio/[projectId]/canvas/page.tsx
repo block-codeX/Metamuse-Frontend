@@ -39,11 +39,6 @@ export default function Home() {
             </div>
             {/* Popover tools that expand functionality*/}
           </div>
-
-          {/* Bottom Footer Tools */}
-          {/* <div className="w-full h-16 flex flex-row justify-end items-center">
-            <FooterTools />
-          </div> */}
         </div>
       </CanvasSyncProvider>
     </CanvasProvider>

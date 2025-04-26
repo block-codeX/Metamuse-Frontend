@@ -6,8 +6,7 @@ import { Brush, CircleUser, Ghost, User } from "lucide-react";
 import { useUserStore } from "@/lib/stores/user-store";
 import ChatComponent from "./studio/[projectId]/components/chat-component";
 import { ProjectProvider } from "./studio/[projectId]/components/project-context";
-import { ChatProvider } from "../auth/context/chat-context";
-import { AnimatePresence, motion } from "framer-motion";
+  import { AnimatePresence, motion } from "framer-motion";
 
 export default function AuthLayout({
   children,
@@ -108,7 +107,6 @@ export default function AuthLayout({
 
   return (
     <ProjectProvider>
-      <ChatProvider>
         <div className="flex flex-col items-center justify-center h-screen bg-background">
           <header className="fixed top-0 h-[60px] w-full border-b border-gray-200 flex flex-row justify-between items-center px-4 bg-background z-10">
             <div className="flex flex-row space-x-4">
@@ -236,7 +234,6 @@ export default function AuthLayout({
           </div>
           <ChatComponent />
         </div>
-      </ChatProvider>
     </ProjectProvider>
   );
 }
