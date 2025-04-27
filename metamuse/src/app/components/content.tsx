@@ -25,12 +25,12 @@ const Content: React.FC<ContentProps> = ({ children }) => {
 
           {/* Main Content */}
           <motion.main
-            className={`overflow-auto p-0 dark:bg-gray-900 w-full`}
+            className={`overflow-auto p-0 dark:bg-gray-900 w-full `}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <div className="w-full h-full p-0">{children}</div>
+            <div className="w-full h-full p-0 flex flex-col-items-start justify-start bg-red-400">{children}</div>
           </motion.main>
         </div>
       </ChatProvider>

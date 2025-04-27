@@ -17,7 +17,6 @@ import { useUserStore } from "@/lib/stores/user-store";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { set } from "lodash";
 import { api } from "@/lib/utils";
 import { toast, Toaster } from "sonner";
 
@@ -137,7 +136,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
     <Toaster/>
       <motion.div
         className={`flex-col items-center justify-start  pb-10 top-0 left-0 h-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-width duration-300 ease-in-out border ${
-          isCollapsed ? "w-20 bg-red-500" : "w-64 sm:fixed md:relative"
+          isCollapsed ? "w-20 bg-red-500" : "w-64 fixed md:relative "
         }`}
         initial={{ x: -300 }}
         animate={{ x: 0 }}
@@ -260,7 +259,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
 
       {!isCollapsed && (
         <div
-          className="absolute top-0 left-0 w-full h-full bg-black opacity-70 z-30 md:hidden sm:block backdrop-blur-sm"
+          className="fixed top-0 left-0 w-full h-full bg-black opacity-70 z-30 md:hidden sm:block backdrop-blur-sm"
           onClick={toggleCollapse}
         ></div>
       )}

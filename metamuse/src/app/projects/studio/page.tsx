@@ -166,10 +166,10 @@ export default function MarketPlace() {
     <>
       <div className="w-full items-center justify-center">
         <div className="w-full flex flex-row items-center justify-between flex-wrap dark:bg-background text-text-pri dark:text-text-alt sticky top-0 z-10 py-4 px-6 border-b border-gray-200 dark:border-gray-800">
-          <div>
-          <div className="flex flex-row flex-wrap items-center justify-start gap-3">
+          <div className="flex flex-col overflow-x-auto">
+          <div className="w-full flex flex-row items-center justify-start gap-3">
             <h1 className="font-bold text-2xl">Your Art Projects</h1>
-            <div className="max-w-[400px] w-full relative">
+            <div className=" relative">
               <div className="flex items-center">
                 <div className="relative">
                   <Input
@@ -194,7 +194,7 @@ export default function MarketPlace() {
             </div>
           </div>
           {/* Category filters */}
-          <div className="mt-4 pb-2 overflow-x-auto">
+          <div className="w-full mt-4 pb-2 overflow-x-auto  ">
             <div className="flex space-x-2 pb-1">
               {artCategories.map((category) => (
                 <Button
@@ -237,7 +237,7 @@ export default function MarketPlace() {
         </div>
       </div>
 
-      <div className="w-inherit mt-4">
+      <div className="w-full mt-4">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-6">
           {loading ? (
             // Loading skeletons
