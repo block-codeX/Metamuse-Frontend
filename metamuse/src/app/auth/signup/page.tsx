@@ -21,7 +21,6 @@ import { toast } from "sonner";
 import { useUserStore } from "@/lib/stores/user-store";
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [showWalletAddr, setWalletAddr] = useState(false);
   const router = useRouter();
   const { setUserId } = useUserStore();
   
@@ -31,10 +30,7 @@ export default function SignupPage() {
     lastName: z.string().nonempty("Please enter your last name"),
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    walletAddress: z
-      .string().optional()
-      // .min(10, "Wallet address must be at least 42 characters"),
-  });
+  })
 
   // Define the form type based on the schema
   type SignupFormValues = z.infer<typeof signupSchema>;
@@ -66,23 +62,26 @@ export default function SignupPage() {
   };
   const requestOtp = async (email: string) => {
     try {
-      await api(true).post("/auth/otp/request", {
+      const response = await api().post("/auth/otp/request", {
         email,
         otpType: "EMAIL",
         multiUse: false,
       });
-      toast("Check your email for the OTP and very your account from there");
-    } catch (error) {}
+      if (response.status == 201) {
+        console.log(response.data)
+        localStorage.setItem("otp", JSON.stringify({ otpId: response.data.otp.otpId, email}))
+      }
+    } catch (error) {
+      console.error(error)
+    }
   };
   // Handle form submission
   async function onSubmit(values: SignupFormValues) {
     console.log("Form submission successful:", values);
-    const { walletAddress, ...rest } = values;
-    const success = await signup(rest);
+    const success = await signup(values);
     if (success) {
-      // await requestOtp(values.email);
-      // Navigate to otp page
-      router.push("/auth/login");
+      await requestOtp(values.email);
+      router.push('/auth/verify')
     }
   }
 
@@ -174,35 +173,7 @@ export default function SignupPage() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="walletAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Wallet Address</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        placeholder="0x0••••••••"
-                        type={showWalletAddr ? "text" : "password"}
-                        {...field}
-                      />
-                      <div
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                        onClick={() => setWalletAddr(!showWalletAddr)}
-                      >
-                        {showWalletAddr ? (
-                          <EyeOff size={20} />
-                        ) : (
-                          <Eye size={20} />
-                        )}
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <Button
               size="lg"

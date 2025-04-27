@@ -18,6 +18,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { set } from "lodash";
+import { api } from "@/lib/utils";
+import { toast, Toaster } from "sonner";
 
 interface MySidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -27,6 +29,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const router = useRouter();
+ const { setUser, setUserId} = useUserStore()
   // Notify parent component when sidebar state changes
   const toggleCollapse = () => {
     const newState = !isCollapsed;
@@ -104,6 +107,26 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
     router.push("/me");
   };
 
+  const logout = async () => {
+      try {
+        const apiInstance = api(true);
+        console.log("API URL:", apiInstance.defaults.baseURL);
+        const response = await api(true).post("/auth/logout");
+        if (response.status === 201) {
+          setUserId(null);
+          setUser(null);
+          toast("Logout Successful");
+          router.push('/auth/login')
+          return true;
+        }
+        return false;
+      } catch (error: any) {
+        console.error(error)
+        toast(error?.response?.data?.message?.message || "Something went wrong!");
+        return false;
+      }
+  }
+
   // Hide sidebar on "/auth/" pages
   if (pathname.startsWith("/auth/")) {
     return null;
@@ -111,6 +134,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
 
   return (
     <>
+    <Toaster/>
       <motion.div
         className={`flex-col items-center justify-start  pb-10 top-0 left-0 h-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-width duration-300 ease-in-out border ${
           isCollapsed ? "w-20 bg-red-500" : "w-64 sm:fixed md:relative"
@@ -223,6 +247,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
                 <Button
                   variant="ghost"
                   className="w-full flex items-center justify-start py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500 hover:text-red-600 transition-colors duration-200"
+                  onClick={logout}
                 >
                   <LogOut size={20} className="mr-3" />
                   {!isCollapsed && <span>Logout</span>}
