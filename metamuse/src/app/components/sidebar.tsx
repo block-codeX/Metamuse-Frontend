@@ -19,6 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/utils";
 import { toast, Toaster } from "sonner";
+import ChatComponent from "../projects/studio/[projectId]/components/chat-component";
 
 interface MySidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -263,6 +264,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
           onClick={toggleCollapse}
         ></div>
       )}
+      <ChatComponent/>
     </>
   );
 };

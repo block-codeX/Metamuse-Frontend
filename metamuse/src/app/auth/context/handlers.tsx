@@ -1,5 +1,5 @@
 export const addedMessage = (msgData: any, setMessages: React.Dispatch<React.SetStateAction<any[]>>) => {
-    setMessages(prevMessages => [...prevMessages, msgData]);
+    setMessages(prevMessages => [msgData, ...prevMessages]);
 }
 
 export const updatedMessage = (msgData: any, setMessages: React.Dispatch<React.SetStateAction<any[]>>) => {

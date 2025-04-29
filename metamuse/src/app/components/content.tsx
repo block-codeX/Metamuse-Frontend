@@ -30,7 +30,7 @@ const Content: React.FC<ContentProps> = ({ children }) => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <div className="w-full h-full p-0 flex flex-col-items-start justify-start bg-red-400">{children}</div>
+            <div className="w-full h-full p-0 ">{children}</div>
           </motion.main>
         </div>
       </ChatProvider>

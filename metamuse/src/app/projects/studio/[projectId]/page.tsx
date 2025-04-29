@@ -225,7 +225,7 @@ export default function ProjectView() {
         )}
       </Card>
       <AddUserModal
-        projectId={project?._id}
+        projectId={(project?._id) as string}
         isOpen={showAddUser}
         onClose={() => setShowAddUser(false)}
       />

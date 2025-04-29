@@ -11,12 +11,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   api,
+  getColorsFromId,
   getInitials,
-  getRandomComplementaryColors,
   humanizeDate,
 } from "@/lib/utils";
 import { ArrowLeft, MessageSquare, SendHorizonal, X } from "lucide-react";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, FC } from "react";
 import { useChat } from "@/app/auth/context/chat-context";
 import handleMessageFromServer from "@/app/auth/context/handlers";
 import { toast } from "sonner";
@@ -25,58 +25,9 @@ import { Message, MessageItem } from "./collaborator";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Sample conversations for the list view
-const sampleConversations = [
-  {
-    id: "conv1",
-    name: "Project Alpha",
-    firstName: "John",
-    lastName: "Mary",
-    lastMessage: "Let's review the design changes",
-    timestamp: "2h ago",
-    unread: 3,
-  },
-  {
-    id: "conv2",
-    name: "Marketing Campaign",
-    lastMessage: "I've updated the copy as requested",
-    timestamp: "Yesterday",
-    unread: 0,
-    firstName: "John",
-    lastName: "Mary",
-  },
-  {
-    id: "conv3",
-    name: "Website Redesign",
-    lastMessage: "The new mockups are ready for review",
-    timestamp: "2d ago",
-    unread: 0,
-    firstName: "John",
-    lastName: "Mary",
-  },
-  {
-    id: "conv4",
-    name: "Bug Fixes",
-    lastMessage: "All critical issues have been resolved",
-    timestamp: "3d ago",
-    unread: 5,
-    firstName: "John",
-    lastName: "Mary",
-  },
-  {
-    id: "conv5",
-    name: "Team Standup",
-    lastMessage: "Let's discuss progress on the new features",
-    timestamp: "4d ago",
-    unread: 0,
-    firstName: "John",
-    lastName: "Mary",
-  },
-];
-
 // Conversation list item component
-const ConversationItem = ({ conversation, onClick }) => {
-  const [bgColor, textColor] = getRandomComplementaryColors(conversation.name);
+const ConversationItem: FC = ({ conversation, onClick }) => {
+  const { background, text} = getColorsFromId(conversation._id);
   
   return (
     <motion.div
@@ -87,21 +38,21 @@ const ConversationItem = ({ conversation, onClick }) => {
     >
       <Avatar className="h-10 w-10 mr-3">
         <AvatarFallback 
-          style={{ backgroundColor: bgColor, color: textColor }}
+          style={{ backgroundColor: background, color: text }}
         >
-          {getInitials(conversation.firstName, conversation.lastName)}
+          {getInitials(conversation.name)}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
-          <h4 className="text-sm font-medium truncate">{conversation.firstName}{" "}{conversation.lastName}</h4>
-          <span className="text-xs text-muted-foreground">{conversation.timestamp}</span>
+          <h4 className="text-sm font-medium truncate">{conversation.name}</h4>
+          <span className="text-xs text-muted-foreground">{humanizeDate(conversation.updatedAt)}</span>
         </div>
-        <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage}</p>
+        <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage?.content}</p>
       </div>
-      {conversation.unread > 0 && (
+      {conversation.unreadCount > 0 && (
         <div className="ml-2 bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs">
-          {conversation.unread}
+          {conversation.unreadCount}
         </div>
       )}
     </motion.div>
@@ -110,39 +61,50 @@ const ConversationItem = ({ conversation, onClick }) => {
 
 export default function ChatComponent() {
   // State for chat visibility and view
-  const { project } = useProject();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [nextPage, setNextPage] = useState(null);
+  const [myConversations, setMyConversations] = useState<any[]>([])
+  const [nextMessagesPage, setNextMessagesPage] = useState(null);
   const [content, setContent] = useState("");
   const [toUpdate, setToUpdate] = useState("");
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
-  const [showConversationList, setShowConversationList] = useState(!pathname?.includes("/projects/"));
-  const isCanvasPage = pathname?.includes("/canvas");
+  const [activeConv, setActiveConv] = useState("")
+  const [nextConvPage, setNextConvPage] = useState(null)
+  const [showConversationList, setShowConversationList] = useState(true);
   const {
     setActiveConversation,
     sendMessage,
     updateMessage,
     deleteMessage,
+    readAllMessages,
     isConnected,
+    activeConversation,
     ws,
   } = useChat();
 
   const fetchMessages = async () => {
-    if (!project) return;
+    if (!activeConversation.current) return;
     const response = await api(true).get(
-      `/conversations/${project?.conversation}/messages?full=true`
+      `/conversations/${activeConversation.current}/messages?full=true`
     );
     if (response.status === 200) {
       console.log(response.data);
       const { docs, next, page, totalDocs } = response.data;
       setMessages(docs);
-      setNextPage(next);
+      setNextMessagesPage(next);
+    }
+  };
+  const fetchConversations = async () => {
+    const response = await api(true).get(`/conversations`);
+    if (response.status === 200) {
+      console.log("Responded", response.data);
+      const { docs, next, page, totalDocs } = response.data;
+      setMyConversations(docs);
+      setNextConvPage(next);
     }
   };
 
   const sendToServer = () => {
-    console.log("Got here", content);
     sendMessage(content);
     setContent("");
   };
@@ -150,7 +112,7 @@ export default function ChatComponent() {
   const handleKeyDown = useCallback(
     (e) => {
       // Send message on Ctrl+Enter or Cmd+Enter
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         sendToServer();
       }
@@ -170,39 +132,47 @@ export default function ChatComponent() {
     setContent("");
     setToUpdate("");
   };
+useEffect(() => {
+      fetchConversations()
+    }
+, []);
+
+
 
   useEffect(() => {
-    if (!project) return;
-    setActiveConversation(project.conversation);
-    fetchMessages();
-  }, [project]);
-
-  useEffect(() => {
-    if (!project) return;
-    setActiveConversation(project.conversation);
     const handleMessages = ({ data }) => {
       handleMessageFromServer(data, setMessages, toast);
     };
-    if (isConnected && ws.current?.val == project.conversation)
+    if (isConnected && ws.current?.val)
       ws.current.addEventListener("message", handleMessages);
     return () => {
       ws.current?.removeEventListener("message", handleMessages);
-      // ws.current?.close();
     };
-  }, [project, isConnected]);
+  }, [isConnected]);
 
   const toggleChat = () => {
     setIsVisible(!isVisible);
   };
 
-  const selectConversation = (conversationId) => {
-    // In a real implementation, you would set the active conversation here
-    // For now, we'll just switch to the messages view
+  const selectConversation = (conversationId: any, convName: string) => {
     setShowConversationList(false);
-    // Mock setting the conversation
-    console.log(`Selected conversation: ${conversationId}`);
+    setActiveConversation(conversationId)
+    setActiveConv(convName)
+    setContent("");
   };
-
+  
+  // Add a useEffect to fetch messages when activeConversation changes
+// Update your existing useEffect
+useEffect(() => {
+  if (activeConversation.current) {
+    fetchMessages();
+    
+    // Only call readAllMessages if the connection is established
+    if (isConnected) {
+      readAllMessages();
+    }
+  }
+}, [activeConversation.current, isConnected, showConversationList]); // Add isConnected as a dependency
   const goToConversationList = () => {
     setShowConversationList(true);
   };
@@ -243,7 +213,7 @@ export default function ChatComponent() {
 
   // View transition variants
   const viewTransitionVariants = {
-    enter: (direction) => ({
+    enter: (direction: any) => ({
       x: direction > 0 ? 300 : -300,
       opacity: 0
     }),
@@ -256,7 +226,7 @@ export default function ChatComponent() {
         damping: 30
       }
     },
-    exit: (direction) => ({
+    exit: (direction: any) => ({
       x: direction < 0 ? 300 : -300,
       opacity: 0,
       transition: {
@@ -274,7 +244,7 @@ export default function ChatComponent() {
         variants={chatButtonVariants}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="fixed right-16 bottom-16"
+        className="fixed right-16 bottom-16  z-50"
       >
         <Button
           onClick={toggleChat}
@@ -312,7 +282,7 @@ export default function ChatComponent() {
                 </Button>
               )}
               <h2 className="text-xl font-semibold">
-                {showConversationList ? "Conversations" : "Messages"}
+                {showConversationList ? "Conversations" : activeConv}
               </h2>
             </div>
             <Button
@@ -341,11 +311,11 @@ export default function ChatComponent() {
               >
                 {showConversationList ? (
                   <div className="space-y-1 p-2">
-                    {sampleConversations.map((conversation) => (
+                    {myConversations.map((conversation) => (
                       <ConversationItem
-                        key={conversation.id}
+                        key={conversation._id}
                         conversation={conversation}
-                        onClick={selectConversation}
+                        onClick={() => selectConversation(conversation._id, conversation.name)}
                       />
                     ))}
                   </div>

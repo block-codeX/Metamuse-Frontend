@@ -31,10 +31,44 @@ export const api = (withAuth = false) => {
   return instance;
 };
 
-export const getInitials = (firstName: string, lastName: string): string => {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`;
-};
+export const getInitials = (firstName: string, lastName?: string): string => {
+  if (lastName) {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`;
+  }
 
+  const splitName = firstName.split(" ");
+  if (splitName.length >= 2) {
+    return `${splitName[0].charAt(0)}${splitName[1].charAt(0)}`;
+  }
+
+  return `${firstName.charAt(0)}`;
+};
+// Add or update this function in your utils file
+
+export const getColorsFromId = (id: string) => {
+  // Generate a more distributed hash from the entire ID
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    // Use prime numbers to improve distribution
+    hash = (hash * 31 + id.charCodeAt(i)) % 360;
+  }
+  
+  // Use the last 6 characters of the ID to add more variation
+  const secondaryHash = parseInt(id.slice(-6), 16) % 100;
+  
+  // Create HSL values with good spread
+  const hue = hash; // 0-359
+  const saturation = 65 + (secondaryHash % 20); // 65-85%
+  const lightness = 45 + (secondaryHash % 15); // 45-60%
+  
+  // Calculate whether text should be light or dark based on background brightness
+  const isLightBackground = lightness > 50;
+  
+  return {
+    background: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+    text: isLightBackground ? '#000000' : '#ffffff'
+  };
+};
 export const getRandomComplementaryColors = () => {
   const color1 = chroma.random();
   const color2 = chroma.random();

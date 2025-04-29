@@ -1,13 +1,15 @@
 "use client"
-import { useEffect, useCallback, useContext, createContext, useRef, useState } from 'react';
+import { useEffect, useCallback, useContext, createContext, useRef, useState, RefObject } from 'react';
 import { useAuthStore } from '@/lib/stores/auth.store';
 import { CHAT_URL } from '@/lib/config';
 
 interface ChatContextType {
   setActiveConversation: (conversationId: string | null) => void;
   sendMessage: (content: any) => void;
+  activeConversation: RefObject<string | null>;
   isConnected: boolean;
   updateMessage: (content: any) => void;
+  readAllMessages: () => void;
   deleteMessage: (content: any) => void;
   ws: React.RefObject<WebSocket | null>;
 }
@@ -32,7 +34,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     ws.current = new WebSocket(url);
     ws.current.onopen = () => {
       setIsConnected(true);
-      ws.current.val = conversationId;
+      if (ws.current) 
+        // @ts-ignore
+        ws.current.val = conversationId;
       console.log('WebSocket connected to chat');
       reconnectAttempts.current = 0;
     };
@@ -83,6 +87,16 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const readAllMessages = useCallback(() => {
+    console.log('Reading all messages abeg');
+    if (ws.current?.readyState === WebSocket.OPEN && activeConversationId.current) {
+      console.log('Reading all messages');
+      ws.current.send(JSON.stringify({
+        event: 'msg:readAll',
+      }));
+    }
+  }, []);
+
   useEffect(() => {
     return () => {
       ws.current?.close(); // Cleanup on unmount
@@ -95,6 +109,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
       sendMessage,
       updateMessage,
       deleteMessage,
+      readAllMessages,
+      activeConversation: activeConversationId,
       ws,
       isConnected
     }}>

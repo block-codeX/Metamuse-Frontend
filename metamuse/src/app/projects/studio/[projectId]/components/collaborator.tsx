@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getInitials, getRandomComplementaryColors, humanizeDate } from "@/lib/utils";
+import { getColorsFromId, getInitials, humanizeDate } from "@/lib/utils";
 
 export interface Collaborator {
   _id: string;
@@ -23,15 +23,15 @@ export const MessageItem = ({
   message: Message;
   sender: Collaborator;
 }) => {
-  const colors = getRandomComplementaryColors();
+  const colors = getColorsFromId(sender._id);
   return (
     <div className="flex items-start space-x-3 mb-4">
       <Avatar className="h-8 w-8">
         <AvatarFallback
           className="bg-primary text-primary-foreground text-xs"
           style={{
-            backgroundColor: colors[0].background,
-            color: colors[0].text,
+            backgroundColor: colors.background,
+            color: colors.text,
           }}
         >
           {getInitials(sender.firstName, sender.lastName)}

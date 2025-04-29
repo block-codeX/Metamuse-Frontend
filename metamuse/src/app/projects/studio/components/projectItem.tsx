@@ -1,17 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { MoreVertical } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import ProjectDropDown from "./project-open";
 import {
+  getColorsFromId,
   getInitials,
-  getRandomComplementaryColors,
-  reconstructImg,
 } from "@/lib/utils";
-import * as fabric from "fabric";
 export default function ProjectItem({ project }: { project: any }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -51,14 +47,14 @@ export default function ProjectItem({ project }: { project: any }) {
         {/* Collaborators */}
         <div className="flex items-center mt-3 space-x-2">
           {project.collaborators.map((collab: any, index: number) => {
-            const colors = getRandomComplementaryColors();
+            const { background, text} = getColorsFromId(collab._id);
             return (
               <Avatar key={index}>
                 <AvatarFallback
                   className="bg-primary text-primary-foreground text-xs"
                   style={{
-                    backgroundColor: colors[index % 2].background,
-                    color: colors[index % 2].text,
+                    backgroundColor: background,
+                    color: text,
                   }}
                 >
                   {getInitials(collab.firstName, collab.lastName)}

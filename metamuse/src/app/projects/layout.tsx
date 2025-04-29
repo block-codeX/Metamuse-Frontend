@@ -1,5 +1,4 @@
 "use client";
-import ChatComponent from "./studio/[projectId]/components/chat-component";
 import { ProjectProvider } from "./studio/[projectId]/components/project-context";
 
 export default function AuthLayout({
@@ -15,7 +14,6 @@ export default function AuthLayout({
           <div className="flex flex-col justify-start items-start w-full h-full overflow-scroll">
             {children}
           </div>
-          <ChatComponent />
         </div>
     </ProjectProvider>
   );
