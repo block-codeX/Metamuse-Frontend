@@ -20,11 +20,9 @@ import {
   Send,
   SendHorizonal,
 } from "lucide-react";
-import * as fabric from "fabric";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Toaster } from "sonner";
 import AddUserModal from "./components/add-collab";
 import { CollaboratorItem } from "./components/collaborator";
 import {
@@ -232,7 +230,6 @@ export default function ProjectView() {
           isOpen={showAddUser}
           onClose={() => setShowAddUser(false)}
         />
-        <Toaster />
       </div>
     </>
   );

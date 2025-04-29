@@ -134,7 +134,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
 
   return (
     <>
-    <Toaster/>
+      <Toaster position="top-center" />
       <motion.div
         className={`flex-col items-center justify-start  pb-10 top-0 left-0 h-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-width duration-300 ease-in-out border ${
           isCollapsed ? "w-20 bg-red-500" : "w-64 fixed md:relative "

@@ -16,7 +16,6 @@ import { Loader, X } from "lucide-react";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Toaster } from "@/components/ui/sonner";
 
 // Define validation schema using Zod
 const newProjectSchema = z.object({
@@ -261,7 +260,6 @@ export default function NewProject() {
           </form>
         </Card>
       </TabsContent>
-      <Toaster/>
     </Tabs>
   );
 } 
