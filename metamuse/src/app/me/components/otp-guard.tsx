@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Check, Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import React, { FC, useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -19,35 +17,23 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useSecureTransaction } from "./useSecureTransaction";
 import { ChangePassword } from "./profile-update";
-import { string } from "zod";
-import { api } from "@/lib/utils";
 
 interface IPreset {
   title: string;
   description: string;
-  element: React.ReactElement;
-  successFn: (data: any) => Promise<void>;
+  element: React.ComponentType<{ transactionId: string }>;
 }
-const presets = {
+const presets: Record<string, IPreset> = {
   password: {
     title: "Change your password",
     description: "Enter in your new password below",
     element: ChangePassword,
-    successFn: async (data) => {
-      try {
-        await api(true).post("/auth/password/reset", data);
-      } catch (error) {
-        console.error(error);
-      }
-    },
   },
 };
 
-export const OTPGuardFlow = ({ tId }) => {
+export const OTPGuardFlow: FC<{tId: string}> = ({ tId }) => {
   const {
     isAuthModalOpen,
     step,
@@ -63,10 +49,6 @@ export const OTPGuardFlow = ({ tId }) => {
   const [isCounting, setIsCounting] = useState(false);
   const [countdown, setCountdown] = useState(60);
 
-  useEffect(() => {
-    console.log("Auth", isAuthModalOpen);
-    setSuccessFn(presets[transactionType]?.successFn);
-  }, [isAuthModalOpen]);
 
   const handleResend = async () => {
     setCountdown(60);
@@ -82,7 +64,7 @@ export const OTPGuardFlow = ({ tId }) => {
     } else if (countdown === 0) {
       setIsCounting(false);
     }
-  }, [countdown, isCounting]);
+  }, [countdown, isCounting]);  
   return (
     <AlertDialog open={isAuthModalOpen} onOpenChange={cancelTransaction}>
       <AlertDialogContent className="sm:max-w-md">
@@ -141,12 +123,8 @@ export const OTPGuardFlow = ({ tId }) => {
             )}
           </div>
         ) : (
-          transactionType && React.cloneElement(
-            presets[transactionType].element as React.ReactElement,
-            { transactionId: tId }
-          )
+            transactionType && React.createElement(presets[transactionType].element, { transactionId: tId })
         )}
-
         <AlertDialogFooter className="sm:justify-start">
           <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
         </AlertDialogFooter>

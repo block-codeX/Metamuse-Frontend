@@ -1,390 +1,269 @@
-
-//dashboard-header.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-
-// Animation variants for Framer Motion
-const headerVariants = {
-  hidden: { y: -20, opacity: 0 },
-  visible: { 
-    y: 0, 
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      delay: 0.1
-    }
-  }
-};
-
-export default function DashboardHeader({ totalEarnings }) {
-  const [greeting, setGreeting] = useState('');
-  
-  // Set greeting based on time of day
-  useEffect(() => {
-    const hour = new Date().getHours();
-    let newGreeting = '';
-    
-    if (hour < 12) newGreeting = 'Good morning';
-    else if (hour < 18) newGreeting = 'Good afternoon';
-    else newGreeting = 'Good evening';
-    
-    setGreeting(newGreeting);
-  }, []);
-
-  return (
-    <>
-      {/* Header */}
-      <motion.div variants={headerVariants} initial="hidden" animate="visible" className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">{greeting}, Creator</h1>
-        <p className="text-muted-foreground">
-          Here's an overview of your creative portfolio
-        </p>
-      </motion.div>
-
-      {/* Stats overview */}
-      <motion.div 
-        variants={headerVariants} 
-        initial="hidden" 
-        animate="visible" 
-        transition={{ delay: 0.2 }}
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Portfolio Earnings</CardTitle>
-            <CardDescription>Your total earnings across all activities</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold">{totalEarnings.toFixed(2)} SUI</div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </>
-  );
-}
-
-//portfolio-chat.tsx
-"use client";
-
-import { motion } from 'framer-motion';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
-  Legend, 
-  Tooltip 
-} from 'recharts';
-
-// Animation variants
-const chartVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      delay: 0.3
-    }
-  }
-};
-
-export default function PortfolioChart({ portfolioData }) {
-  return (
-    <motion.div 
-      variants={chartVariants}
-      initial="hidden"
-      animate="visible"
-      className="h-full"
-    >
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle>Portfolio Distribution</CardTitle>
-          <CardDescription>Value distribution across your assets</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center">
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={portfolioData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              >
-                {portfolioData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => `${value} SUI`} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
-// quick-access.tsx
-"use client";
-
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { useState } from "react";
+import { Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
-  Palette,
-  ShoppingBag,
-  TrendingUp
-} from 'lucide-react';
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-// Animation variants
-const accessVariants = {
-  hidden: { opacity: 0, scale: 0.95 },
-  visible: { 
-    opacity: 1, 
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      delay: 0.4
+// The expected OTP code
+const CORRECT_OTP = "123456";
+
+export default function AuthFlowModal({ isOpen, onClose, target }) {
+  const [step, setStep] = useState("otp"); // "otp" | "edit"
+  const [otp, setOtp] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: "",
+    walletAddress: "",
+    confirmWalletAddress: "",
+  });
+
+  const handleOtpSubmit = () => {
+    setIsSubmitting(true);
+    
+    // Simulate API verification delay
+    setTimeout(() => {
+      // For demo purposes, accept any 6-digit OTP
+      if (otp.length === 6) {
+        setStep("edit");
+        toast.success("OTP verified successfully");
+      } else {
+        toast.error("Invalid OTP. Please try again.");
+      }
+      setIsSubmitting(false);
+    }, 1000);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFormSubmit = () => {
+    setIsSubmitting(true);
+    
+    // Validation
+    if (target === "password") {
+      if (formData.password !== formData.confirmPassword) {
+        toast.error("Passwords do not match");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (formData.password.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        setIsSubmitting(false);
+        return;
+      }
+    } else if (target === "wallet") {
+      if (formData.walletAddress !== formData.confirmWalletAddress) {
+        toast.error("Wallet addresses do not match");
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Basic Ethereum address validation
+      const walletRegex = /^0x[a-fA-F0-9]{40}$/;
+      if (!walletRegex.test(formData.walletAddress)) {
+        toast.error("Please enter a valid Ethereum address");
+        setIsSubmitting(false);
+        return;
+      }
     }
-  }
-};
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      toast.success(
+        target === "password" 
+          ? "Password changed successfully" 
+          : "Wallet connected successfully"
+      );
+      
+      // Reset and close
+      setStep("otp");
+      setOtp("");
+      setFormData({
+        password: "",
+        confirmPassword: "",
+        walletAddress: "",
+        confirmWalletAddress: "",
+      });
+      onClose();
+      setIsSubmitting(false);
+    }, 1500);
+  };
 
-const buttonVariants = {
-  initial: { scale: 1 },
-  hover: { 
-    scale: 1.05,
-    transition: { type: "spring", stiffness: 300 }
-  },
-  tap: { 
-    scale: 0.95,
-    transition: { type: "spring", stiffness: 500 }
-  }
-};
+  const handleClose = () => {
+    // Reset state when closing
+    setStep("otp");
+    setOtp("");
+    setFormData({
+      password: "",
+      confirmPassword: "",
+      walletAddress: "",
+      confirmWalletAddress: "",
+    });
+    onClose();
+  };
 
-export default function QuickAccess() {
   return (
-    <motion.div 
-      variants={accessVariants}
-      initial="hidden"
-      animate="visible"
-      className="h-full"
-    >
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle>Quick Access</CardTitle>
-          <CardDescription>Navigate to your creative spaces</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <motion.div
-              variants={buttonVariants}
-              initial="initial"
-              whileHover="hover"
-              whileTap="tap"
+    <AlertDialog open={isOpen} onOpenChange={handleClose}>
+      <AlertDialogContent className="sm:max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            {step === "otp" ? (
+              "Verification Required"
+            ) : target === "password" ? (
+              "Change Password"
+            ) : (
+              "Connect Wallet"
+            )}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {step === "otp" ? (
+              "Please enter the 6-digit verification code to continue."
+            ) : target === "password" ? (
+              "Enter your new password below."
+            ) : (
+              "Enter your wallet address below."
+            )}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        {step === "otp" ? (
+          <div className="flex flex-col items-center py-4 space-y-4">
+            <InputOTP 
+              maxLength={6} 
+              value={otp} 
+              onChange={setOtp}
+              className="justify-center"
             >
-              <Button variant="outline" className="h-24 w-full flex flex-col gap-2 items-center justify-center" asChild>
-                <Link href="/projects/marketplace">
-                  <ShoppingBag className="h-6 w-6 mb-1" />
-                  <span>Marketplace</span>
-                </Link>
-              </Button>
-            </motion.div>
-            
-            <motion.div
-              variants={buttonVariants}
-              initial="initial"
-              whileHover="hover"
-              whileTap="tap"
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+            <Button 
+              onClick={handleOtpSubmit} 
+              disabled={otp.length !== 6 || isSubmitting}
+              className="w-full"
             >
-              <Button variant="outline" className="h-24 w-full flex flex-col gap-2 items-center justify-center" asChild>
-                <Link href="/projects/studio">
-                  <Palette className="h-6 w-6 mb-1" />
-                  <span>Studio</span>
-                </Link>
-              </Button>
-            </motion.div>
-          </div>
-          
-          <motion.div
-            variants={buttonVariants}
-            initial="initial"
-            whileHover="hover"
-            whileTap="tap"
-          >
-            <Button className="w-full">
-              <TrendingUp className="mr-2 h-4 w-4" /> Mint New Project
-            </Button>
-          </motion.div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
-
-// valuable.tsx
-    "use client";
-
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  ArrowUpRight,
-  Award
-} from 'lucide-react';
-
-// Animation variants
-const assetContainerVariants = {
-  hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1,
-    transition: { 
-      staggerChildren: 0.1,
-      delayChildren: 0.5
-    }
-  }
-};
-
-const assetItemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { 
-    y: 0, 
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 100
-    }
-  }
-};
-
-const imageVariants = {
-  initial: { scale: 1 },
-  hover: { 
-    scale: 1.1,
-    transition: { duration: 0.3 }
-  }
-};
-
-function AssetCard({ title, asset, type }) {
-  return (
-    <motion.div variants={assetItemVariants}>
-      <Card className="h-full overflow-hidden">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium flex justify-between items-center">
-            {title}
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <motion.div 
-              className="relative w-20 h-20 rounded-md overflow-hidden"
-              whileHover="hover"
-              initial="initial"
-            >
-              <motion.img 
-                variants={imageVariants}
-                src={asset.image} 
-                alt={asset.name}
-                className="object-cover w-full h-full"
-              />
-            </motion.div>
-            <div className="flex-1">
-              <h3 className="font-bold">{asset.name}</h3>
-              <p className="text-2xl font-bold text-primary">{asset.value} SUI</p>
-              {type === 'nft' ? (
-                <p className="text-xs text-muted-foreground">Created by {asset.creator}</p>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Verifying...
+                </>
               ) : (
-                <p className="text-xs text-muted-foreground">
-                  {asset.collaborators} collaborators • Your stake: {asset.stake}
-                </p>
+                "Verify"
               )}
-              <Link 
-                href={type === 'nft' ? `/marketplace/${asset.id}` : `/projects/studio/${asset.id}/view`}
-                className="mt-2 inline-flex items-center text-xs text-primary hover:underline"
-              >
-                View details <ArrowUpRight className="ml-1 h-3 w-3" />
-              </Link>
+            </Button>
+          </div>
+        ) : target === "password" ? (
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">New Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                placeholder="Enter new password"
+              />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                placeholder="Confirm new password"
+              />
+            </div>
+            <Button 
+              onClick={handleFormSubmit} 
+              disabled={!formData.password || !formData.confirmPassword || isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Change Password"
+              )}
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
+        ) : (
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="walletAddress">Wallet Address</Label>
+              <Input
+                id="walletAddress"
+                name="walletAddress"
+                value={formData.walletAddress}
+                onChange={handleInputChange}
+                placeholder="0x..."
+                className="font-mono"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmWalletAddress">Confirm Wallet Address</Label>
+              <Input
+                id="confirmWalletAddress"
+                name="confirmWalletAddress"
+                value={formData.confirmWalletAddress}
+                onChange={handleInputChange}
+                placeholder="0x..."
+                className="font-mono"
+              />
+            </div>
+            <Button 
+              onClick={handleFormSubmit} 
+              disabled={!formData.walletAddress || !formData.confirmWalletAddress || isSubmitting}
+              className="w-full"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                "Connect Wallet"
+              )}
+            </Button>
+          </div>
+        )}
 
-export default function ValuableAssets({ topAssets }) {
-  return (
-    <motion.div
-      variants={assetContainerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <Tabs defaultValue="assets" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="assets">Most Valuable Assets</TabsTrigger>
-          <TabsTrigger value="activity">Recent Activity</TabsTrigger>
-        </TabsList>
-        <TabsContent value="assets">
-          <div className="grid gap-6 md:grid-cols-2">
-            <AssetCard 
-              title="Top NFT Asset" 
-              asset={topAssets.nft}
-              type="nft"
-            />
-            <AssetCard 
-              title="Top Project" 
-              asset={topAssets.project}
-              type="project"
-            />
-          </div>
-        </TabsContent>
-        <TabsContent value="activity">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Your latest transactions and collaborations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center py-8 text-muted-foreground">Activity data will be populated from the backend</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </motion.div>
+        <AlertDialogFooter className="sm:justify-start">
+          <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

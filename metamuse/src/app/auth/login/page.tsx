@@ -18,7 +18,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useAuthStore } from "@/lib/stores/auth.store";
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
       return false;
     }
   }
-  // Handle form submission
+  // Handle form submission 
   async function onSubmit(values: LoginFormValues) {
     console.log("Form submission successful:", values);
     const success = await login(values);
@@ -166,6 +166,7 @@ export default function LoginPage() {
           </div>
         </div>
       </CardContent>
+      <Toaster/>
     </Card>
   );
 }
