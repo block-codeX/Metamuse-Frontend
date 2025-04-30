@@ -1,16 +1,12 @@
 "use client";
 
 import { FC, useState } from "react";
-import { format } from "date-fns";
 import {
   Eye,
   EyeOff,
   Plus,
   Check,
-  Trash2,
-  ChevronRight,
   Star,
-  RefreshCw,
   AlertCircle,
   Unlink,
   Link,
@@ -27,22 +23,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -55,11 +35,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { humanizeDate } from "@/lib/utils";
+import TransactionButton from "./transaction-btn";
 
 // Component for each wallet card/row
 interface WalletProps {
@@ -303,7 +282,16 @@ export const EmptyWalletState = ({ openAuthFlow }) => {
         <p className="text-sm text-gray-500 text-center mb-4">
           Connect your first wallet to start managing your digital assets
         </p>
-        <Button onClick={() => openAuthFlow("connect")}>Connect Wallet</Button>
+        <TransactionButton
+            buttonText={"Connect Wallet"}
+            transactionType={"connect"}
+            transactionData={{}}
+            setId={openAuthFlow}
+            icon={null}
+            iconOnly={false}
+            variant={"default"}
+            classes={'flex items-center space-x-1'}
+            />
       </CardContent>
     </Card>
   );
@@ -368,7 +356,7 @@ export const DeleteWalletDialog = ({
 };
 
 // Main Wallets Section Component
-export const WalletsSection = ({ openAuthFlow }) => {
+export const WalletsSection = ({ openAuthFlow, transactionId }) => {
   // Dummy wallet data
   const [wallets, setWallets] = useState([
     {
@@ -451,13 +439,17 @@ export const WalletsSection = ({ openAuthFlow }) => {
               Manage your connected blockchain wallets
             </CardDescription>
           </div>
-          <Button
-            onClick={() => openAuthFlow("connect")}
-            className="flex items-center space-x-1"
-          >
-            <Plus size={16} />
-            <span>Add Wallet</span>
-          </Button>
+          <TransactionButton
+            buttonText={"Add Wallet"}
+            transactionType={"connect"}
+            transactionData={{}}
+            setId={openAuthFlow}
+            icon={Plus}
+            iconOnly={false}
+            variant={"default"}
+            classes={'flex items-center space-x-1'}
+            />
+
         </div>
       </CardHeader>
 

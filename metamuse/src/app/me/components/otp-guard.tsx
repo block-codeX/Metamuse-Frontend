@@ -18,7 +18,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useSecureTransaction } from "./useSecureTransaction";
-import { ChangePassword } from "./profile-update";
+import { ChangePassword, NewWallet } from "./profile-update";
 
 interface IPreset {
   title: string;
@@ -31,6 +31,11 @@ const presets: Record<string, IPreset> = {
     description: "Enter in your new password below",
     element: ChangePassword,
   },
+  connect: {
+    title: "Create a new wallet",
+    description: "Add a new wallet to manage your assets",
+    element: NewWallet,
+  }
 };
 
 export const OTPGuardFlow: FC<{tId: string}> = ({ tId }) => {
@@ -42,7 +47,6 @@ export const OTPGuardFlow: FC<{tId: string}> = ({ tId }) => {
     cancelTransaction,
     requestOtp,
     setOTp,
-    setSuccessFn,
     otp,
   } = useSecureTransaction();
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -123,12 +123,14 @@ export default function UserProfilePage() {
             transactionType={"password"}
             transactionData={{}}
             setId={setTransactionId}
-            >
-          
-            </TransactionButton>
+            icon={null}
+            iconOnly={false}
+            classes={''}
+            variant={"outline"}
+            />
           </CardFooter>
         </Card>
-        <WalletsSection openAuthFlow={setAuthTarget} />
+        <WalletsSection openAuthFlow={setTransactionId} transactionId={transactionId}  />
         <Card className="shadow-sm max-w-4xl mx-6">
           <CardHeader>
             <CardTitle>Security Settings</CardTitle>

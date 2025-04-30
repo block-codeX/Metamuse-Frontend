@@ -3,8 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { useSecureTransaction } from "./useSecureTransaction";
 import { getNewTransactionId } from "./useSecureTransaction";
+import React from "react";
 
-const TransactionButton = ({ transactionType, transactionData, buttonText, setId }) => {
+const TransactionButton = ({ transactionType, transactionData, buttonText, setId, icon, iconOnly, classes, variant }) => {
   const { initiateTransaction } = useSecureTransaction();
 
   const handleClick = async () => {
@@ -13,12 +14,25 @@ const TransactionButton = ({ transactionType, transactionData, buttonText, setId
     setId(id)
   };
 
+  if (iconOnly) {
+    return (
+      <Button
+        variant={'ghost'}
+        onClick={handleClick}
+        className="transition-all transition-200 active:scale-95"
+      >
+        {icon}
+      </Button>
+    );
+  }
+
   return (
     <Button
-        variant={'outline'}
+        variant={variant || 'default'}
       onClick={handleClick}
-      className="transition-all transition-200 active:scale-95"
+      className={`transition-all transition-200 active:scale-95 ${classes}`}
     >
+      {icon && React.createElement(icon)}
       {buttonText || 'Start Transaction'}
     </Button>
   );
