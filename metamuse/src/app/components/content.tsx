@@ -34,6 +34,7 @@ const Content: React.FC<ContentProps> = ({ children }) => {
           </motion.main>
         </div>
       </ChatProvider>
+      
     </UserProvider>
   );
 };

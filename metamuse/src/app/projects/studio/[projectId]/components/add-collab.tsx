@@ -73,7 +73,7 @@ export default function AddUserModal({ projectId, isOpen, onClose }: { projectId
     const token = await addUserToProject(projectId, userId);
     onClose();
     console.log("Invite token:", token);
-    toast(token);
+    toast.success(token);
 
   };
 

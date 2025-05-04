@@ -115,14 +115,15 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
         if (response.status === 201) {
           setUserId(null);
           setUser(null);
-          toast("Logout Successful");
+          toast.success("Logout Successful");
           router.push('/auth/login')
           return true;
         }
         return false;
       } catch (error: any) {
         console.error(error)
-        toast(error?.response?.data?.message?.message || "Something went wrong!");
+        toast.error(error?.response?.data?.message?.message || "Something went wrong!");
+        router.push('/auth/login')
         return false;
       }
   }
@@ -134,7 +135,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
 
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" richColors/>
       <motion.div
         className={`flex-col items-center justify-start  pb-10 top-0 left-0 h-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-width duration-300 ease-in-out border ${
           isCollapsed ? "w-20 bg-red-500" : "w-64 fixed md:relative "

@@ -87,12 +87,12 @@ export default function NewProject() {
     try {
       const response = await api(true).post("/projects/new", data);
       if (response.status === 201) {
-        toast("Project created successfully");
+        toast,success("Project created successfully");
         router.push("studio/" + response.data._id);
         return true;
       }
     } catch (error: any) {
-      toast(error?.response?.data?.message?.message || "Something went wrong!");
+      toast.error(error?.response?.data?.message?.message || "Something went wrong!");
       return false;
     } finally {
       setIsLoading(false);
@@ -105,14 +105,14 @@ export default function NewProject() {
     try {
       const response = await api(true).post(`/projects/${data.token}/join`);
       if (response.status === 201) {
-        toast("You have joined the project successfully");
+        toast.success("You have joined the project successfully");
         router.push("studio/" + response.data._id);
         return true;
       }
     } catch (error: any) {
       let msg = error?.response?.data?.message?.message || "Something went wrong!"
       if (msg.startsWith("input must be")) msg = "Invalid token";
-      toast(msg);
+      toast.error(msg);
       return false;
     } finally {
       setIsLoading(false);

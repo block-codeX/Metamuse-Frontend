@@ -51,12 +51,12 @@ export default function SignupPage() {
       const response = await api(true).post("/auth/signup", data);
       if (response.status === 201) {
         setUserId(response.data.userId);
-        toast("Signup Successful");
+        toast.success("Signup Successful");
         return true;
       }
       return false;
     } catch (error: any) {
-      toast(error?.response?.data?.message?.message || "Something went wrong!");
+      toast.error(error?.response?.data?.message?.message || "Something went wrong!");
       return false;
     }
   };

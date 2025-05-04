@@ -37,7 +37,7 @@ export const useUserStore = create<UserState>()(
           const response = await api().get(`/users/${userId}`);
           set({ user: response.data });
         } catch (error: any) {
-          toast(
+          toast.error(
             error?.response?.data?.message?.message || "Something went wrong!"
           );
         }

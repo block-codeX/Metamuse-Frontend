@@ -67,7 +67,7 @@ export default function MarketPlace() {
       }
       setLoading(false);
     } catch (error: any) {
-      toast(
+      toast.error(
         error?.response?.data?.message?.message ||
           "Something went wrong loading the pages"
       );

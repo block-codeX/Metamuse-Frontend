@@ -53,12 +53,12 @@ export default function LoginPage() {
         const { userId, refresh_exp: refreshExpiry, access_exp: accessExpiry, accessToken } = response.data
         setUserId(userId);
         setAll({ refreshExpiry, accessExpiry, accessToken });
-        toast("Login successful");
+        toast.success("Login successful");
         return true;
       }
       return false;
     } catch (error: any) {
-      toast(error?.response?.data?.message?.message || "Something went wrong!");
+      toast.error(error?.response?.data?.message?.message || "Something went wrong!");
       return false;
     }
   }
@@ -166,7 +166,7 @@ export default function LoginPage() {
           </div>
         </div>
       </CardContent>
-      <Toaster/>
+      <Toaster richColors/>
     </Card>
   );
 }

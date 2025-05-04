@@ -63,7 +63,7 @@ const OTPComponent = () => {
         if (response.status == 201) {
           console.log(response.data)
           await fetchUser()
-          toast("Verification successful. Proceed to log in")
+          toast.success("Verification successful. Proceed to log in")
           router.push("/auth/login")
         }
       } catch (error) {
