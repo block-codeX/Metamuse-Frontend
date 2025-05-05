@@ -34,6 +34,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { set } from "lodash";
+import FancyProjectCard from "@/components/fancy-card";
 // Types
 
 // Helper to get initials from name
@@ -135,19 +136,13 @@ export default function ProjectView() {
               </CardHeader>
               <CardContent className="m-0">
                 <div className="flex flex-row items-stretch h-90">
-                  <div className="mr-5 border border-red-500 relative aspect-video w-full overflow-hidden justify-start rounded-md mb-4">
-                    {imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        alt={project.title}
-                        fill="true"
-                        // fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <Skeleton className="w-full h-full"></Skeleton>
-                    )}
+                  <div className="mr-5 py-2 shadow-md flex flex-row items-center relative aspect-video w-full overflow-hidden justify-center rounded-md mb-4">
+                    <div className="w-60 h-full">
+                    <FancyProjectCard
+                      title={project.title}
+                      _id={project._id}/>
+                    </div>
+
                   </div>
                   <div className="">
                     <Tabs defaultValue="details" className="w-60">

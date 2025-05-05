@@ -254,6 +254,7 @@ export default function MarketPlace() {
             projects.map((project, index) => (
               <ProjectItem key={index} project={project} />
             ))
+            
           ) : (
             <div className="w-full sm:col-span-2 md:col-span-3 justify-center">
               <EmptyProjectsCard />
