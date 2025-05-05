@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import AddUserModal from "./components/add-collab";
-import { CollaboratorItem } from "./components/collaborator";
+import { CollaboratorItem, PendingCollaboratorItem } from "./components/collaborator";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -33,6 +33,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import { set } from "lodash";
 // Types
 
 // Helper to get initials from name
@@ -41,11 +42,30 @@ export default function ProjectView() {
   const { project } = useProject();
   const [showAddUser, setShowAddUser] = useState(false);
   const [imgUrl, setImgUrl] = useState<string | null>(null);
+  const [pendingInvites, setPendingInvite] = useState([]);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const toCanvas = () => {
     router.push(`${project?._id}/canvas`);
   };
 
+  const getPendingInvite = async () => {
+    try {
+      const res = await api(true).get("/projects/invites/all", {
+        params: { projectId: project?._id }},)
+      if (res.status === 200) {
+        console.log(res.data);
+        setPendingInvite(res.data.docs)
+      }
+    } catch (error) {
+      console.error("Error fetching pending invites:", error);
+    }
+  }
+  useEffect(() => {
+    if (project) {
+      getPendingInvite();
+    }
+  }, [project, loading]);
   return (
     <>
       <div className="px-3 sticky top-0 w-full h-12 bg-background border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex items-center justify-between px-4 py-2">
@@ -187,9 +207,9 @@ export default function ProjectView() {
                           </CardContent>
                         </Card>
                       </TabsContent>
-                      <TabsContent value="collaborators" className="mt-4">
+                      <TabsContent value="collaborators" className="mt-4  max-h-[300px] overflow-y-auto rounded-md">
                         <Card>
-                          <CardHeader className="pb-3 flex flex-row justify-between items-center">
+                          <CardHeader className="pb-3 flex flex-row justify-between items-center sticky top-0 bg-white py-2 z-10">
                             <h3 className="text-lg font-medium">
                               Collaborators
                             </h3>
@@ -197,14 +217,23 @@ export default function ProjectView() {
                               <Plus />
                             </Button>
                           </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
+                          <CardContent className=" max-h-[300px] overflow-y-auto">
+                            <div className="space-y-2 ">
                               {project.collaborators.map((collaborator) => (
                                 <CollaboratorItem
                                   key={collaborator._id}
                                   collaborator={collaborator}
                                 />
                               ))}
+                              {pendingInvites.map((invite) => (
+                                <PendingCollaboratorItem
+                                  key={invite._id}
+                                  collaborator={invite.collaborator}
+                                  projectId={project._id}
+                                  setReload={setLoading}
+                                />
+                              ))}
+
                             </div>
                           </CardContent>
                         </Card>

@@ -129,8 +129,8 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
   }
 
   // Hide sidebar on "/auth/" pages
-  if (pathname.startsWith("/auth/")) {
-    return null;
+  if (pathname.startsWith("/auth/") || pathname === "/") {
+    return null;  
   }
 
   return (
