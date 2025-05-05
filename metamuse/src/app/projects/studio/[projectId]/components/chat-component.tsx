@@ -25,6 +25,10 @@ import { useProject } from "./project-context";
 import { Message, MessageItem } from "./collaborator";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { WaveDots } from "@/components/ui/pulse-loader";
+import { Input } from "@/components/ui/input";
+import { useUserStore } from "@/lib/stores/user-store";
 
 // Conversation list item component
 const ConversationItem: FC = ({ conversation, onClick }) => {
@@ -65,6 +69,7 @@ const ConversationItem: FC = ({ conversation, onClick }) => {
 export default function ChatComponent() {
   // State for chat visibility and view
   const [messages, setMessages] = useState<Message[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [myConversations, setMyConversations] = useState<any[]>([]);
   const [nextMessagesPage, setNextMessagesPage] = useState(null);
   const [content, setContent] = useState("");
@@ -73,7 +78,11 @@ export default function ChatComponent() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeConv, setActiveConv] = useState("");
   const [nextConvPage, setNextConvPage] = useState(null);
-  const [showConversationList, setShowConversationList] = useState(true);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState("");
+  const [nextUserPage, setNextUserPage] = useState(null);
+  const { user: currentUser } = useUserStore();
+  const [showConversationList, setShowConversationList] = useState("convo");
   const {
     setActiveConversation,
     sendMessage,
@@ -104,6 +113,21 @@ export default function ChatComponent() {
       const { docs, next, page, totalDocs } = response.data;
       setMyConversations(docs);
       setNextConvPage(next);
+    }
+  };
+  const fetchUsers = async (query = "") => {
+    try {
+      let url = "/users/all";
+      if (query.trim()) url += `?name=${query}`;
+      const response = await api(true).get(url);
+      if (response.status === 200) {
+        const { docs, next, page } = response.data;
+        console.log(docs, "ADDD");
+        setUsers(docs);
+        setNextUserPage(next);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
     }
   };
 
@@ -137,6 +161,7 @@ export default function ChatComponent() {
   };
   useEffect(() => {
     fetchConversations();
+    fetchUsers();
   }, []);
 
   useEffect(() => {
@@ -155,7 +180,7 @@ export default function ChatComponent() {
   };
 
   const selectConversation = (conversationId: any, convName: string) => {
-    setShowConversationList(false);
+    setShowConversationList("messages");
     setActiveConversation(conversationId);
     setActiveConv(convName);
     setContent("");
@@ -165,7 +190,8 @@ export default function ChatComponent() {
   // Update your existing useEffect
   useEffect(() => {
     if (activeConversation.current) {
-      fetchMessages();
+      if (showConversationList == "messages") fetchMessages();
+      if (showConversationList == "users") fetchUsers;
 
       // Only call readAllMessages if the connection is established
       if (isConnected) {
@@ -174,9 +200,35 @@ export default function ChatComponent() {
     }
   }, [activeConversation.current, isConnected, showConversationList]); // Add isConnected as a dependency
   const goToConversationList = () => {
-    setShowConversationList(true);
+    setShowConversationList("convo");
+  };
+  const handleSearch = async (e: any) => {
+    const query = e.target.value;
+    setSearch(query);
+    await fetchUsers(query);
   };
 
+  const handleConverse = async (second: string) => {
+    setLoading(second);
+    try {
+      const response = await api(true).post("/conversations/converse", {
+        second,
+      });
+      if (response.status == 200) {
+        console.log(response.data);
+        const conversation = response.data
+        setShowConversationList("messages");
+        setActiveConversation(conversation._id);
+        setActiveConv(conversation.name);
+        setContent("");
+        setSearch("")
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again later");
+    } finally {
+      setLoading("");
+    }
+  };
   // Chat button animation variants
   const chatButtonVariants = {
     hidden: { opacity: 0, scale: 0.8 },
@@ -267,10 +319,10 @@ export default function ChatComponent() {
         variants={chatPanelVariants}
         className="fixed bottom-4 right-4 z-50 w-80 h-120 shadow-lg"
       >
-        <Card className="px-2 h-full">
+        <Card className="px-2 h-full w-full">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center">
-              {!showConversationList && (
+              {showConversationList != "convo" && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -282,13 +334,20 @@ export default function ChatComponent() {
                 </Button>
               )}
               <h2 className="text-xl font-semibold flex flex-row items-center justify-start gap-4">
+                {showConversationList == "convo" && (
                   <UserPlus
                     size={24}
                     strokeWidth={2}
                     color="var(--btn-primary)"
+                    onClick={() => setShowConversationList("users")}
                     className=" h-full w-full p-2 hover:bg-background rounded-md cursor-pointer hover:bg-accent active:scale-95 transition-all duration-300"
                   />
-                {showConversationList ? "Conversations" : activeConv}
+                )}
+                {showConversationList == "convo"
+                  ? "Conversations"
+                  : showConversationList == "users"
+                  ? "Artists"
+                  : activeConv}
               </h2>
             </div>
             <Button
@@ -302,20 +361,26 @@ export default function ChatComponent() {
             </Button>
           </CardHeader>
           <CardContent
-            className="p-0 overflow-y-auto"
+            className="p-0 overflow-y-auto w-full"
             style={{ height: "calc(100% - 140px)" }}
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
-                key={showConversationList ? "list" : "messages"}
+                key={
+                  showConversationList == "convo"
+                    ? "list"
+                    : showConversationList == "users"
+                    ? "users"
+                    : "messages"
+                }
                 custom={showConversationList ? 1 : -1}
                 variants={viewTransitionVariants}
                 initial="enter"
                 animate="center"
                 exit="exit"
-                className="h-full"
+                className="h-full w-full"
               >
-                {showConversationList ? (
+                {showConversationList == "convo" && (
                   <div className="space-y-1 p-2">
                     {myConversations.map((conversation) => (
                       <ConversationItem
@@ -330,7 +395,8 @@ export default function ChatComponent() {
                       />
                     ))}
                   </div>
-                ) : (
+                )}
+                {showConversationList == "messages" && (
                   <div className="space-y-4 p-1">
                     {messages.map((message) => (
                       <MessageItem
@@ -341,11 +407,38 @@ export default function ChatComponent() {
                     ))}
                   </div>
                 )}
+                {showConversationList == "users" && (
+                  <div className="h-full space-y-4 p-1 overflow-x-hidden overflow-y-auto border-red-500">
+                    <Input
+                      placeholder="Search users..."
+                      value={search}
+                      onChange={handleSearch}
+                      className="w-full sticky top-0  "
+                    />
+                    {users.map(
+                      (user) =>
+                        user._id != currentUser?._id && (
+                          <Button
+                            key={user._id}
+                            variant="ghost"
+                            className="w-75 justify-start"
+                            onClick={() => handleConverse(user._id)}
+                          >
+                            {user.firstName} {user.lastName}
+                            <span className="text-xs text-gray-500 ml-2 grow flex flex-row items-center justify-between">
+                              {user.email}
+                              {loading == user._id && <WaveDots />}
+                            </span>
+                          </Button>
+                        )
+                    )}
+                  </div>
+                )}
               </motion.div>
             </AnimatePresence>
           </CardContent>
           <CardFooter className="border-t p-4">
-            {!showConversationList && (
+            {showConversationList == "messages" && (
               <div className="relative w-full items-center space-x-2">
                 <Textarea
                   value={content}
