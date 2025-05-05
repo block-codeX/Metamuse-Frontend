@@ -1,6 +1,9 @@
 "use client";
 
 import { FC, useState } from "react";
+import {ConnectButton} from '@suiet/wallet-kit';
+import {useWallet} from '@suiet/wallet-kit';
+import {Transaction} from "@mysten/sui/transactions";
 import {
   Eye,
   EyeOff,
@@ -60,21 +63,28 @@ interface WalletProps {
   openAuthFlow: (action: "connect" | "reconnect", walletId?: string) => void;
 }
 // Empty state component
-export const EmptyWalletState = () => {
+export const WalletState = ({ wallet }) => {
+
   return (
     <Card className="border-dashed border-2 bg-gray-50 dark:bg-gray-900">
       <CardContent className="p-6 flex flex-col items-center justify-center">
-        <div className="rounded-full p-3 bg-primary/10 mb-4">
+        {
+          !wallet ? (
+            <>
+                        <div className="rounded-full p-3 bg-primary/10 mb-4">
           <Plus size={24} className="text-primary" />
         </div>
         <h3 className="text-lg font-medium mb-2">No wallets connected</h3>
         <p className="text-sm text-gray-500 text-center mb-4">
           Connect your first wallet to start managing your digital assets
         </p>
-        <Button className="flex items-center space-x-2 cursor-pointer transition-all duration-200 ease-in-out active:scale-95">
-          <Plus size={16} />
-          Connect Wallet
-        </Button>
+        </>
+
+       
+
+          ): <></>
+        }
+                <ConnectButton />
       </CardContent>
     </Card>
   );
@@ -84,7 +94,7 @@ export const EmptyWalletState = () => {
 // Main Wallets Section Component
 export const WalletsSection = () => {
   // Dummy wallet data
-  const [wallet, setWallet] = useState(null);
+  const wallet = useWallet()
 
   return (
     <Card className="shadow-sm max-w-4xl mx-6">
@@ -97,13 +107,10 @@ export const WalletsSection = () => {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <AnimatePresence>
-          {wallet === null ? (
-            <EmptyWalletState/>
-          ) : (
-            <></>
-           )}
+            <WalletState wallet={wallet}/>
+
         </AnimatePresence>
       </CardContent>
     </Card>

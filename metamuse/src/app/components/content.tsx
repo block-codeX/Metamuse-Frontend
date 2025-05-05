@@ -4,6 +4,9 @@ import React, { ReactNode, useState } from "react";
 import { ChatProvider } from "../auth/context/chat-context";
 import { UserProvider } from "../auth/context/user-context";
 import MySidebar from "./sidebar";
+import {WalletProvider} from '@suiet/wallet-kit';
+import '@suiet/wallet-kit/style.css';
+
 
 interface ContentProps {
   children: ReactNode;
@@ -16,8 +19,10 @@ const Content: React.FC<ContentProps> = ({ children }) => {
   const handleSidebarToggle = (collapsed: any) => {
     setIsSidebarCollapsed(collapsed);
   };
+  
   return (
     <UserProvider>
+              <WalletProvider>
       <ChatProvider>
         <div className="flex flex-row items-center justify-between gap-0 h-screen w-screen dark:bg-gray-900 overflow-hidden p-0 m-0">
           {/* Sidebar */}
@@ -34,7 +39,7 @@ const Content: React.FC<ContentProps> = ({ children }) => {
           </motion.main>
         </div>
       </ChatProvider>
-      
+      </WalletProvider>
     </UserProvider>
   );
 };
