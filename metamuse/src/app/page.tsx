@@ -14,7 +14,7 @@ function Home() {
     router.push("auth/login")
   }
   return (
-    <div className="h-screen bg-gradient-to-b from-white to-red-50 text-gray-900 overflow-auto border border-red-500">
+    <div className="h-screen bg-gradient-to-b from-white to-red-50 text-gray-900 overflow-auto">
       {/* Hero Section */}
       <header className="relative py-24 px-4 sm:px-6 lg:px-8">
         <div className="absolute inset-0 overflow-hidden">

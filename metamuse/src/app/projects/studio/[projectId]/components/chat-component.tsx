@@ -9,13 +9,14 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { api, getColorsFromId, getInitials, humanizeDate } from "@/lib/utils";
 import {
-  api,
-  getColorsFromId,
-  getInitials,
-  humanizeDate,
-} from "@/lib/utils";
-import { ArrowLeft, MessageSquare, SendHorizonal, X } from "lucide-react";
+  ArrowLeft,
+  MessageSquare,
+  SendHorizonal,
+  UserPlus,
+  X,
+} from "lucide-react";
 import { useState, useRef, useEffect, useCallback, FC } from "react";
 import { useChat } from "@/app/auth/context/chat-context";
 import handleMessageFromServer from "@/app/auth/context/handlers";
@@ -27,8 +28,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 // Conversation list item component
 const ConversationItem: FC = ({ conversation, onClick }) => {
-  const { background, text} = getColorsFromId(conversation._id);
-  
+  const { background, text } = getColorsFromId(conversation._id);
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -37,18 +38,20 @@ const ConversationItem: FC = ({ conversation, onClick }) => {
       onClick={() => onClick(conversation.id)}
     >
       <Avatar className="h-10 w-10 mr-3">
-        <AvatarFallback 
-          style={{ backgroundColor: background, color: text }}
-        >
+        <AvatarFallback style={{ backgroundColor: background, color: text }}>
           {getInitials(conversation.name)}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline">
           <h4 className="text-sm font-medium truncate">{conversation.name}</h4>
-          <span className="text-xs text-muted-foreground">{humanizeDate(conversation.updatedAt)}</span>
+          <span className="text-xs text-muted-foreground">
+            {humanizeDate(conversation.updatedAt)}
+          </span>
         </div>
-        <p className="text-xs text-muted-foreground truncate">{conversation.lastMessage?.content}</p>
+        <p className="text-xs text-muted-foreground truncate">
+          {conversation.lastMessage?.content}
+        </p>
       </div>
       {conversation.unreadCount > 0 && (
         <div className="ml-2 bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs">
@@ -62,14 +65,14 @@ const ConversationItem: FC = ({ conversation, onClick }) => {
 export default function ChatComponent() {
   // State for chat visibility and view
   const [messages, setMessages] = useState<Message[]>([]);
-  const [myConversations, setMyConversations] = useState<any[]>([])
+  const [myConversations, setMyConversations] = useState<any[]>([]);
   const [nextMessagesPage, setNextMessagesPage] = useState(null);
   const [content, setContent] = useState("");
   const [toUpdate, setToUpdate] = useState("");
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(false);
-  const [activeConv, setActiveConv] = useState("")
-  const [nextConvPage, setNextConvPage] = useState(null)
+  const [activeConv, setActiveConv] = useState("");
+  const [nextConvPage, setNextConvPage] = useState(null);
   const [showConversationList, setShowConversationList] = useState(true);
   const {
     setActiveConversation,
@@ -132,12 +135,9 @@ export default function ChatComponent() {
     setContent("");
     setToUpdate("");
   };
-useEffect(() => {
-      fetchConversations()
-    }
-, []);
-
-
+  useEffect(() => {
+    fetchConversations();
+  }, []);
 
   useEffect(() => {
     const handleMessages = ({ data }) => {
@@ -156,23 +156,23 @@ useEffect(() => {
 
   const selectConversation = (conversationId: any, convName: string) => {
     setShowConversationList(false);
-    setActiveConversation(conversationId)
-    setActiveConv(convName)
+    setActiveConversation(conversationId);
+    setActiveConv(convName);
     setContent("");
   };
-  
+
   // Add a useEffect to fetch messages when activeConversation changes
-// Update your existing useEffect
-useEffect(() => {
-  if (activeConversation.current) {
-    fetchMessages();
-    
-    // Only call readAllMessages if the connection is established
-    if (isConnected) {
-      readAllMessages();
+  // Update your existing useEffect
+  useEffect(() => {
+    if (activeConversation.current) {
+      fetchMessages();
+
+      // Only call readAllMessages if the connection is established
+      if (isConnected) {
+        readAllMessages();
+      }
     }
-  }
-}, [activeConversation.current, isConnected, showConversationList]); // Add isConnected as a dependency
+  }, [activeConversation.current, isConnected, showConversationList]); // Add isConnected as a dependency
   const goToConversationList = () => {
     setShowConversationList(true);
   };
@@ -180,42 +180,42 @@ useEffect(() => {
   // Chat button animation variants
   const chatButtonVariants = {
     hidden: { opacity: 0, scale: 0.8 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       scale: 1,
-      transition: { type: "spring", stiffness: 300, damping: 20 }
-    }
+      transition: { type: "spring", stiffness: 300, damping: 20 },
+    },
   };
 
   // Chat panel animation variants
   const chatPanelVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.9 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    visible: {
+      opacity: 1,
+      y: 0,
       scale: 1,
-      transition: { 
-        type: "spring", 
-        stiffness: 300, 
+      transition: {
+        type: "spring",
+        stiffness: 300,
         damping: 25,
-        duration: 0.3
-      }
+        duration: 0.3,
+      },
     },
-    exit: { 
-      opacity: 0, 
-      y: 20, 
+    exit: {
+      opacity: 0,
+      y: 20,
       scale: 0.9,
-      transition: { 
-        duration: 0.2 
-      }
-    }
+      transition: {
+        duration: 0.2,
+      },
+    },
   };
 
   // View transition variants
   const viewTransitionVariants = {
     enter: (direction: any) => ({
       x: direction > 0 ? 300 : -300,
-      opacity: 0
+      opacity: 0,
     }),
     center: {
       x: 0,
@@ -223,16 +223,16 @@ useEffect(() => {
       transition: {
         type: "spring",
         stiffness: 300,
-        damping: 30
-      }
+        damping: 30,
+      },
     },
     exit: (direction: any) => ({
       x: direction < 0 ? 300 : -300,
       opacity: 0,
       transition: {
-        duration: 0.2
-      }
-    })
+        duration: 0.2,
+      },
+    }),
   };
 
   // If chat is not visible, just show the toggle button
@@ -281,7 +281,13 @@ useEffect(() => {
                   <ArrowLeft size={18} />
                 </Button>
               )}
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-semibold flex flex-row items-center justify-start gap-4">
+                  <UserPlus
+                    size={24}
+                    strokeWidth={2}
+                    color="var(--btn-primary)"
+                    className=" h-full w-full p-2 hover:bg-background rounded-md cursor-pointer hover:bg-accent active:scale-95 transition-all duration-300"
+                  />
                 {showConversationList ? "Conversations" : activeConv}
               </h2>
             </div>
@@ -315,7 +321,12 @@ useEffect(() => {
                       <ConversationItem
                         key={conversation._id}
                         conversation={conversation}
-                        onClick={() => selectConversation(conversation._id, conversation.name)}
+                        onClick={() =>
+                          selectConversation(
+                            conversation._id,
+                            conversation.name
+                          )
+                        }
                       />
                     ))}
                   </div>

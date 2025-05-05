@@ -8,6 +8,7 @@ import {
   getColorsFromId,
   getInitials,
 } from "@/lib/utils";
+import FancyProjectCard from "@/components/fancy-card";
 export default function ProjectItem({ project }: { project: any }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -36,12 +37,13 @@ export default function ProjectItem({ project }: { project: any }) {
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col relative">
       {/* Project fancy */}
-      <div className="w-full h-40 bg-gray-300 rounded-lg overflow-hidden">
+      <div className="w-full h-50">
+      <FancyProjectCard title={project.title} _id={project._id} useTitle={true}/>
+
       </div>
 
       {/* Project Details */}
       <div className="mt-3">
-        <h2 className="font-bold text-lg">{project.title}</h2>
         <p className="text-sm text-gray-500 mt-1">{project.description}</p>
 
         {/* Collaborators */}
