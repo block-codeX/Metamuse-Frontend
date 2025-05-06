@@ -207,6 +207,10 @@ export const CanvasSyncProvider = ({
         if (obj.fill instanceof fabric.Gradient) {
           jsonData.fill = serializeGradient(obj.fill);
         }
+        // Handle clipPath caused by erasing
+        if (obj.clipPath) {
+          jsonData.clipPath = serializeClipPath(obj.clipPath);
+        }
 
         // Handle pattern fill
         if (obj.fill && typeof obj.fill === "object" && obj.fill.source) {
@@ -330,7 +334,13 @@ export const CanvasSyncProvider = ({
     },
     [yDoc]
   );
-
+  const serializeClipPath = (clipPath: fabric.Object) => {
+    return clipPath.toObject([
+      'type', 'path', 'fill', 'stroke', 'strokeWidth',
+      'top', 'left', 'scaleX', 'scaleY', 'angle',
+    ]);
+  };
+  
   // --- Initialize Canvas and YJS ---
   useEffect(() => {
     if (!isInitialized || !yDoc.current || !canvas || initialized) return;
@@ -490,7 +500,6 @@ export const CanvasSyncProvider = ({
         // Create the fabric object
         const fabricObjects = await fabric.util.enlivenObjects([objectData]);
         const fabricObj = fabricObjects[0];
-
         if (fabricObj) {
           // Apply original position and ID
           fabricObj.set({
@@ -499,7 +508,8 @@ export const CanvasSyncProvider = ({
             top: objData.top !== undefined ? objData.top : 0,
             visible: objData.visible !== undefined ? objData.visible : true,
           });
-
+          // if (objData.clipPath) {
+          //   const clipPath = 
           // Apply special fill types if needed
           if (hasSpecialFill) {
             if (fillToApply && fillToApply.type === "gradient") {
