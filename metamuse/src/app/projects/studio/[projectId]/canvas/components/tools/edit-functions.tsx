@@ -3,7 +3,10 @@ import { useState, useEffect } from "react";
 import { useCanvas } from "../contexts/canvas-context";
 import * as fabric from "fabric";
 import { useCanvasSync } from "../contexts/canvas-sync-context";
-export function preserveCustomPatternProps(sourceObj: fabric.Object, targetObj: fabric.Object) {
+export function preserveCustomPatternProps(
+  sourceObj: fabric.Object,
+  targetObj: fabric.Object
+) {
   const srcFill = sourceObj.fill as any;
   const tgtFill = targetObj.fill as any;
 
@@ -44,9 +47,9 @@ const useEditFunctions = () => {
   const paste = async () => {
     if (!canvas || !clipboard) return;
     const clonedObj = await clipboard.clone();
-    console.log("Clipboard", clipboard)
+    console.log("Clipboard", clipboard);
     console.log(clonedObj);
-      preserveCustomPatternProps(clipboard, clonedObj); 
+    preserveCustomPatternProps(clipboard, clonedObj);
     canvas.discardActiveObject();
     clonedObj.set({
       left: clonedObj.left + 10,
@@ -114,22 +117,21 @@ const useEditFunctions = () => {
   // };
   const deleteObj = () => {
     if (!canvas) return;
-    const active = canvas.getActiveObject();
-    if (!active) return;
-    if (active.type === "activeSelection") {
-      active.getObjects().forEach((obj) => {
-        canvas.remove(obj);
-        deleteYjsObject(obj); // mark for deletion
-      });
-    } else {
-      canvas.remove(active);
-      deleteYjsObject(active); // mark for deletion
-    }
-  
+    const active = canvas.getActiveObjects();
+    if (!active || active.length === 0) return;
+
+    // Clone the array to avoid mutation during iteration
+    const toDelete = [...active];
+        console.log(active);
+    toDelete.forEach((obj) => {
+      console.log("To delete", obj);
+      canvas.remove(obj);
+      deleteYjsObject(obj )
+    });
     canvas.discardActiveObject();
     canvas.requestRenderAll();
   };
-  
+
   const group = () => {
     if (!canvas) return;
     const group = new fabric.Group(canvas.getActiveObject()?.removeAll());
