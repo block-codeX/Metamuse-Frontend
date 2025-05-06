@@ -364,6 +364,8 @@ const getPatternUrl = async (patternName: string, foreColor: string) => {
           transparentCorners: false,
           dirty: true,
         });
+        target.color = foregroundColor
+        target.name = pattern
         updateYjsObject(target);
         canvas.renderAll();
       } else {
@@ -516,6 +518,8 @@ const getPatternUrl = async (patternName: string, foreColor: string) => {
       patternFill.color = foregroundColor
       patternFill.name = pattern
       activeObject.set("fill", patternFill);
+      activeObject.color = foregroundColor
+      activeObject.name = pattern
       updateYjsObject(activeObject);
       canvas.renderAll();
       // Immediately activate click mode for subsequent fills

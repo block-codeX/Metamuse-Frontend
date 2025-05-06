@@ -2,9 +2,27 @@
 import { useState, useEffect } from "react";
 import { useCanvas } from "../contexts/canvas-context";
 import * as fabric from "fabric";
+import { useCanvasSync } from "../contexts/canvas-sync-context";
+export function preserveCustomPatternProps(sourceObj: fabric.Object, targetObj: fabric.Object) {
+  const srcFill = sourceObj.fill as any;
+  const tgtFill = targetObj.fill as any;
+
+  if (
+    srcFill &&
+    srcFill.source &&
+    typeof srcFill === "object" &&
+    tgtFill &&
+    tgtFill.source
+  ) {
+    if (srcFill.name) tgtFill.name = srcFill.name;
+    if (srcFill.color) tgtFill.color = srcFill.color;
+  }
+}
+
 const useEditFunctions = () => {
   const [clipboard, setClipboard] = useState<any>(null);
   const { canvas, undoStack, redoStack } = useCanvas();
+  const { updateYjsObject, deleteYjsObject } = useCanvasSync();
 
   const copy = () => {
     canvas
@@ -16,16 +34,19 @@ const useEditFunctions = () => {
   };
   const cut = async () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject()
-    if (!obj) return
-    const cloned = await obj.clone()
-    setClipboard(cloned)
-    canvas.remove(obj)
-    canvas.renderAll()
-  }
+    const obj = canvas.getActiveObject();
+    if (!obj) return;
+    const cloned = await obj.clone();
+    setClipboard(cloned);
+    canvas.remove(obj);
+    canvas.renderAll();
+  };
   const paste = async () => {
     if (!canvas || !clipboard) return;
     const clonedObj = await clipboard.clone();
+    console.log("Clipboard", clipboard)
+    console.log(clonedObj);
+      preserveCustomPatternProps(clipboard, clonedObj); 
     canvas.discardActiveObject();
     clonedObj.set({
       left: clonedObj.left + 10,
@@ -37,10 +58,12 @@ const useEditFunctions = () => {
       clonedObj.canvas = canvas;
       clonedObj.forEachObject((obj) => {
         canvas.add(obj);
+        updateYjsObject(obj);
       });
       clonedObj.setCoords();
     } else {
       canvas.add(clonedObj);
+      updateYjsObject(clonedObj);
     }
     clipboard.top += 10;
     clipboard.left += 10;
@@ -54,6 +77,7 @@ const useEditFunctions = () => {
       ?.clone()
       .then(async (cloned) => {
         const clonedObj = await cloned.clone();
+        preserveCustomPatternProps(cloned, clonedObj); // 👈 this line
         canvas.discardActiveObject();
         clonedObj.set({
           left: clonedObj.left + 10,
@@ -65,11 +89,13 @@ const useEditFunctions = () => {
           clonedObj.canvas = canvas;
           clonedObj.forEachObject((obj) => {
             canvas.add(obj);
+            updateYjsObject(obj);
           });
           // this should solve the unselectability
           clonedObj.setCoords();
         } else {
           canvas.add(clonedObj);
+          updateYjsObject(clonedObj);
         }
         cloned.top += 10;
         cloned.left += 10;
@@ -78,30 +104,48 @@ const useEditFunctions = () => {
         canvas.requestRenderAll();
       });
   };
+  // const deleteObj = () => {
+  //   if (!canvas) return;
+  //   const obj = canvas.getActiveObject();
+  //   if (obj) {
+  //     canvas.remove(obj);
+  //     canvas.renderAll();
+  //   }
+  // };
   const deleteObj = () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject();
-    if (obj) {
-      canvas.remove(obj);
-      canvas.renderAll();
+    const active = canvas.getActiveObject();
+    if (!active) return;
+    if (active.type === "activeSelection") {
+      active.getObjects().forEach((obj) => {
+        canvas.remove(obj);
+        deleteYjsObject(obj); // mark for deletion
+      });
+    } else {
+      canvas.remove(active);
+      deleteYjsObject(active); // mark for deletion
     }
+  
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
   };
+  
   const group = () => {
     if (!canvas) return;
-    const group = new fabric.Group(canvas.getActiveObject()?.removeAll())
+    const group = new fabric.Group(canvas.getActiveObject()?.removeAll());
     canvas.add(group);
     canvas.setActiveObject(group);
     canvas.requestRenderAll();
   };
   const ungroup = () => {
-    if (!canvas) return
+    if (!canvas) return;
     const group = canvas.getActiveObject();
-    if (!group || group.type !== 'group') {
-        return;
+    if (!group || group.type !== "group") {
+      return;
     }
     canvas.remove(group);
     var sel = new fabric.ActiveSelection(group.removeAll(), {
-        canvas: canvas,
+      canvas: canvas,
     });
     canvas.setActiveObject(sel);
     canvas.requestRenderAll();
@@ -122,23 +166,29 @@ const useEditFunctions = () => {
       canvas.renderAll();
     }
   };
-  
+
   const undo = () => {
-    if (!canvas) return
+    if (!canvas) return;
     if (undoStack.current.length <= 1) return;
     const currentState = undoStack.current.pop();
-    if (currentState) redoStack.current.push(currentState)
-    
+    if (currentState) redoStack.current.push(currentState);
+
     const previousState = undoStack.current[undoStack.current.length - 1];
-    canvas.loadFromJSON(JSON.parse(previousState), canvas.renderAll.bind(canvas));
+    canvas.loadFromJSON(
+      JSON.parse(previousState),
+      canvas.renderAll.bind(canvas)
+    );
   };
 
   const redo = () => {
     if (redoStack.current.length === 0 || !canvas) return;
     const nextState = redoStack.current.pop();
-    undoStack.current.push(nextState as string);    
-    canvas.loadFromJSON(JSON.parse(nextState as string), canvas.renderAll.bind(canvas));
-  };  
+    undoStack.current.push(nextState as string);
+    canvas.loadFromJSON(
+      JSON.parse(nextState as string),
+      canvas.renderAll.bind(canvas)
+    );
+  };
   const lock = () => {
     if (!canvas) return;
     const obj = canvas.getActiveObject();
@@ -159,7 +209,7 @@ const useEditFunctions = () => {
     // Only unlock if we found an object and it's locked
     if (targetObject && targetObject.selectable === false) {
       targetObject.selectable = true;
-      targetObject.hoverCursor = 'move';
+      targetObject.hoverCursor = "move";
       targetObject.evented = true;
       // Only rendering the specific object is more efficient
       canvas.requestRenderAll();
@@ -179,7 +229,7 @@ const useEditFunctions = () => {
     redo,
     lock,
     unlock,
-    cut
-  }
+    cut,
+  };
 };
 export default useEditFunctions;
