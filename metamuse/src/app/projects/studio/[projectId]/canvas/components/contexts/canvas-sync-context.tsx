@@ -21,6 +21,8 @@ export interface CanvasSyncContextType {
   updateYjsCanvasSettings: (settings: Partial<CanvasSettings>) => void;
   deleteYjsObject: (obj: any) => void;
   yDoc: RefObject<Y.Doc | null>;
+  processingQueue: RefObject<Set<string> | null>;
+  objectsMapRef: RefObject<Y.Map<any> | null>;
 }
 
 const CanvasSyncContext = createContext<CanvasSyncContextType | null>(null);
@@ -173,7 +175,19 @@ export const CanvasSyncProvider = ({
         (obj as any).id = uuidv4();
       }
       const objId = obj.id;
-
+      // Check if object is a group or active selection
+      if (obj instanceof fabric.ActiveSelection || obj instanceof fabric.Group) {
+        obj.setCoords();
+        console.log("ActiveSelection", obj);
+        for (const childObj of obj.getObjects()) {
+          if (childObj.id) {
+            // delete the child object from YJS
+            yDoc.current.transact(() => {
+              objectsMapRef.current!.delete(childObj.id);
+            }, LOCAL_ORIGIN);
+          }
+        }
+      }
       // Skip if already processing this object
       if (processingQueue.current.has(objId)) {
         return;
@@ -750,6 +764,8 @@ export const CanvasSyncProvider = ({
     updateYjsCanvasSettings,
     deleteYjsObject,
     yDoc,
+    processingQueue,
+    objectsMapRef
   };
 
   return (
