@@ -102,30 +102,30 @@ export const CanvasSyncProvider = ({
   // Serialize a pattern object for YJS storage
   const serializePattern = (pattern: any) => {
     if (!pattern) return null;
-    
+
     // Enhanced pattern serialization
     const patternData = {
       type: "pattern",
       data: {
-        repeat: pattern.repeat || 'repeat',
-        name: pattern.name || '',
-        color: pattern.color || '#000000',
+        repeat: pattern.repeat || "repeat",
+        name: pattern.name || "",
+        color: pattern.color || "#000000",
         // Add additional properties if available
         width: pattern.width,
         height: pattern.height,
         offsetX: pattern.offsetX,
         offsetY: pattern.offsetY,
-        patternTransform: pattern.patternTransform
-      }
+        patternTransform: pattern.patternTransform,
+      },
     };
-    
+
     // Remove undefined values
-    Object.keys(patternData.data).forEach(key => {
+    Object.keys(patternData.data).forEach((key) => {
       if (patternData.data[key] === undefined) {
         delete patternData.data[key];
       }
     });
-    
+
     return patternData;
   };
 
@@ -165,9 +165,8 @@ export const CanvasSyncProvider = ({
   // Update the updateYjsObject function to better handle complex objects:
   const updateYjsObject = useCallback(
     (obj: any) => {
-      if (!obj || !objectsMapRef.current || !yDoc.current) {
-        return;
-      }
+      if (!obj || !objectsMapRef.current || !yDoc.current) return;
+      if (obj.customType == "guideline") return;
 
       // Ensure object has an ID
       if (!obj.id) {
@@ -207,6 +206,10 @@ export const CanvasSyncProvider = ({
         if (obj.fill instanceof fabric.Gradient) {
           jsonData.fill = serializeGradient(obj.fill);
         }
+        // Handle clipPath caused by erasing
+        if (obj.clipPath) {
+          jsonData.clipPath = serializeClipPath(obj.clipPath);
+        }
 
         // Handle pattern fill
         if (obj.fill && typeof obj.fill === "object" && obj.fill.source) {
@@ -232,29 +235,34 @@ export const CanvasSyncProvider = ({
       if (!obj || !objectsMapRef.current || !yDoc.current) {
         return;
       }
-  
+
       const objId = obj.id;
       if (!objId) {
         console.warn("Attempted to delete object without ID");
         return;
       }
-  
+
       // Skip if already processing
       if (processingQueue.current.has(objId)) {
         return;
       }
-  
+
       try {
         // Mark as processing
         processingQueue.current.add(objId);
         isLocal.current = true;
-  
+
         console.log(`Sync: Deleting YJS object ${objId}`);
-  
+
         // Handle selection objects specially - we only delete the group, not its contents
-        if ((obj instanceof fabric.ActiveSelection || obj instanceof fabric.Group) && obj.getObjects) {
+        if (
+          (obj instanceof fabric.ActiveSelection ||
+            obj instanceof fabric.Group) &&
+          obj.getObjects()
+        ) {
+          console.log("Omo ee")
           // When deleting a selection/group, we need to delete each member object as well
-          if (obj.type === 'activeSelection') {
+          if (obj.type === "activeSelection") {
             // For active selection, delete each member
             obj.getObjects().forEach((childObj: any) => {
               if (childObj.id) {
@@ -265,7 +273,7 @@ export const CanvasSyncProvider = ({
             });
           }
         }
-  
+
         // Delete from YJS map
         yDoc.current.transact(() => {
           objectsMapRef.current!.delete(objId);
@@ -330,6 +338,20 @@ export const CanvasSyncProvider = ({
     },
     [yDoc]
   );
+  const serializeClipPath = (clipPath: fabric.Object) => {
+    return clipPath.toObject([
+      "type",
+      "path",
+      "fill",
+      "stroke",
+      "strokeWidth",
+      "top",
+      "left",
+      "scaleX",
+      "scaleY",
+      "angle",
+    ]);
+  };
 
   // --- Initialize Canvas and YJS ---
   useEffect(() => {
@@ -411,13 +433,12 @@ export const CanvasSyncProvider = ({
                 selectable: true,
                 evented: true,
               });
-            
             } catch (error) {
               console.error("Error restoring object:", error);
             }
           }
         );
-        canvas.selection = true; 
+        canvas.selection = true;
         canvas.renderAll();
         console.log("✅ Initial objects loaded.");
       } catch (error) {
@@ -490,7 +511,6 @@ export const CanvasSyncProvider = ({
         // Create the fabric object
         const fabricObjects = await fabric.util.enlivenObjects([objectData]);
         const fabricObj = fabricObjects[0];
-
         if (fabricObj) {
           // Apply original position and ID
           fabricObj.set({
@@ -499,7 +519,8 @@ export const CanvasSyncProvider = ({
             top: objData.top !== undefined ? objData.top : 0,
             visible: objData.visible !== undefined ? objData.visible : true,
           });
-
+          // if (objData.clipPath) {
+          //   const clipPath =
           // Apply special fill types if needed
           if (hasSpecialFill) {
             if (fillToApply && fillToApply.type === "gradient") {
@@ -567,7 +588,7 @@ export const CanvasSyncProvider = ({
             // Apply the update
             await applyObjectUpdate(id, objData);
           } else if (change.action === "delete") {
-            console.log("Obj to be deleted", id)
+            console.log("Obj to be deleted", id);
             // Find and remove existing object
             const existing = canvas.getObjects().find((o: any) => o.id === id);
             if (existing) {
@@ -646,11 +667,11 @@ export const CanvasSyncProvider = ({
   // --- Fabric event handlers -> YJS ---
   useEffect(() => {
     if (!initialized || !canvas) return;
-  
+
     // Enhanced object modification handler
     const handleModify = (e: any) => {
       if (isLocal.current || !e.target) return;
-      
+
       // Also update the selection/group itself
       updateYjsObject(e.target);
     };
@@ -658,21 +679,23 @@ export const CanvasSyncProvider = ({
     // Handle object addition
     const handleAdd = (e: any) => {
       if (isLocal.current) return;
-      console.log(e)
+      console.log(e);
       const target = e.target || e.path;
       if (!target) return;
 
       // Ensure object has ID
       if (!target.id) {
         target.id = uuidv4();
-      } 
+      }
       // Update in YJS
       updateYjsObject(target);
     };
 
     // Handle object removal
+
     const handleRemove = (e: any) => {
       if (isLocal.current || !e.target) return;
+      console.log("to be deleted", e.target);
       deleteYjsObject(e.target);
     };
 

@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Bitcoin, Camera, Gavel, ImageDown, ImageUp, Save } from "lucide-react";
+import { Bitcoin, ImageDown, Save } from "lucide-react";
 import MintModal from "./mint-modal";
 import { useState } from "react";
 import { useCanvas } from "../contexts/canvas-context";
@@ -111,7 +111,7 @@ export default function Commands() {
       action: handleSave,
     },
     {
-      icon: ImageUp,
+      icon: ImageDown,
       name: "Import Image",
       size: "sm col-start-1 row-start-2 row-span-1 flex flex-row items-center text-xs justify-start",
       action: handleImportImage,

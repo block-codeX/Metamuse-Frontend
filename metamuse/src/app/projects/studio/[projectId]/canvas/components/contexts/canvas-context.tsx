@@ -124,6 +124,17 @@ export function CanvasProvider({ children }: { children: React.ReactNode }) {
   const undoStack: RefObject<string[]> = useRef([])
   const redoStack: RefObject<string[]> = useRef([])
   fabric.FabricObject.prototype.erasable = "deep";
+  fabric.FabricImage.prototype.erasable = "deep";
+  fabric.FabricText.prototype.erasable = "deep";
+  fabric.Pattern.prototype.toObject = (function (toObject) {
+    return function (propertiesToInclude = []) {
+      return {
+        ...toObject.call(this, propertiesToInclude),
+        name: this.name,
+        color: this.color,
+      };
+    };
+  })(fabric.Pattern.prototype.toObject);
   useEffect(() => {
     if (!canvasRef.current) return;
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {

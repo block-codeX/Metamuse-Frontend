@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Pencil,
-  Brush,
   Eraser,
-  PenTool,
-  Tangent,
   PencilLine,
 } from "lucide-react";
 import * as fabric from "fabric";
@@ -198,7 +194,8 @@ export function useFreeDrawingTools() {
 
       const { path, targets } = e.detail;
     
-      // commit erasing manually
+      console.log("Erasing path", path, targets);
+      // commit erasing manually  
      await eraser.commit({ path, targets });
       targets.forEach((obj) => {
         console.log("Updating erased", obj.id)
