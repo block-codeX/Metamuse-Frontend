@@ -231,60 +231,63 @@ export const CanvasSyncProvider = ({
   );
 
   const deleteYjsObject = useCallback(
-    (obj: any) => {
+    (obj: any | any[]) => {
       if (!obj || !objectsMapRef.current || !yDoc.current) {
         return;
       }
+      if (obj instanceof Array) {
+        console.log("Omo e");
+      } else obj = [obj];
 
-      const objId = obj.id;
-      if (!objId) {
-        console.warn("Attempted to delete object without ID");
-        return;
-      }
-
-      // Skip if already processing
-      if (processingQueue.current.has(objId)) {
-        return;
-      }
-
-      try {
-        // Mark as processing
-        processingQueue.current.add(objId);
-        isLocal.current = true;
-
-        console.log(`Sync: Deleting YJS object ${objId}`);
-
-        // Handle selection objects specially - we only delete the group, not its contents
-        if (
-          (obj instanceof fabric.ActiveSelection ||
-            obj instanceof fabric.Group) &&
-          obj.getObjects()
-        ) {
-          console.log("Omo ee")
-          // When deleting a selection/group, we need to delete each member object as well
-          if (obj.type === "activeSelection") {
-            // For active selection, delete each member
-            obj.getObjects().forEach((childObj: any) => {
-              if (childObj.id) {
-                yDoc.current!.transact(() => {
-                  objectsMapRef.current!.delete(childObj.id);
-                }, LOCAL_ORIGIN);
-              }
-            });
-          }
+      obj.forEach((o: any) => {
+        const oId = o.id;
+        if (!oId) {
+          console.warn("Attempted to delete object without ID");
+          return;
         }
+        // Skip if already processing
+        if (processingQueue.current.has(oId)) {
+          return;
+        }
+        try {
+          // Mark as processing
+          processingQueue.current.add(oId);
+          isLocal.current = true;
 
-        // Delete from YJS map
-        yDoc.current.transact(() => {
-          objectsMapRef.current!.delete(objId);
-        }, LOCAL_ORIGIN);
-      } finally {
-        // Reset flag and remove from processing queue
-        setTimeout(() => {
-          isLocal.current = false;
-          processingQueue.current.delete(objId);
-        }, 0);
-      }
+          console.log(`Sync: Deleting YJS object ${oId}`);
+
+          // Handle selection objects specially - we only delete the group, not its contents
+          if (
+            (o instanceof fabric.ActiveSelection ||
+              o instanceof fabric.Group) &&
+            o.getObjects()
+          ) {
+            console.log("Omo ee");
+            // When deleting a selection/group, we need to delete each member object as well
+            if (o.type === "activeSelection") {
+              // For active selection, delete each member
+              o.getObjects().forEach((childObj: any) => {
+                if (childObj.id) {
+                  yDoc.current!.transact(() => {
+                    objectsMapRef.current!.delete(childObj.id);
+                  }, LOCAL_ORIGIN);
+                }
+              });
+            }
+          }
+
+          // Delete from YJS map
+          yDoc.current.transact(() => {
+            objectsMapRef.current!.delete(oId);
+          }, LOCAL_ORIGIN);
+        } finally {
+          // Reset flag and remove from processing queue
+          setTimeout(() => {
+            isLocal.current = false;
+            processingQueue.current.delete(oId);
+          }, 0);
+        }
+      });
     },
     [yDoc]
   );

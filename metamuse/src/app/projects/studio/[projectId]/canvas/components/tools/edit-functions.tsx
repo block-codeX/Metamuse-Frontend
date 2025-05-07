@@ -119,26 +119,8 @@ const useEditFunctions = () => {
     if (!canvas) return;
     
     const activeObjects = canvas.getActiveObjects();
-    
-    // If multiple objects are selected
-    if (activeObjects.length > 1) {
-      // Get the active selection object
-      const selection = canvas.getActiveObject();
-      
-      // First delete the selection group itself if it has an ID
-      if (selection && selection.id) {
-        deleteYjsObject(selection);
-      }
-      
-      // Then delete each individual object
-      activeObjects.forEach(obj => {
-        deleteYjsObject(obj);
-      });
-    } else if (activeObjects.length === 1) {
-      // Single object deletion
-      deleteYjsObject(activeObjects[0]);
-    }
-    
+
+    deleteYjsObject(activeObjects);
     // Update local canvas view
     canvas.remove(...activeObjects);
     canvas.discardActiveObject();
