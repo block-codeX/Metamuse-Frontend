@@ -258,8 +258,9 @@ export const CanvasSyncProvider = ({
         if (
           (obj instanceof fabric.ActiveSelection ||
             obj instanceof fabric.Group) &&
-          obj.getObjects
+          obj.getObjects()
         ) {
+          console.log("Omo ee")
           // When deleting a selection/group, we need to delete each member object as well
           if (obj.type === "activeSelection") {
             // For active selection, delete each member
@@ -691,8 +692,10 @@ export const CanvasSyncProvider = ({
     };
 
     // Handle object removal
+
     const handleRemove = (e: any) => {
       if (isLocal.current || !e.target) return;
+      console.log("to be deleted", e.target);
       deleteYjsObject(e.target);
     };
 

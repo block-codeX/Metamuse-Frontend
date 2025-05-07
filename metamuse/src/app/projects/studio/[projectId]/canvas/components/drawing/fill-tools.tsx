@@ -505,8 +505,6 @@ const getPatternUrl = async (patternName: string, foreColor: string) => {
       const img = await fabric.util.loadImage(patternUrl);
 
       // Get object dimensions
-      const objectWidth = activeObject.width || 100;
-      const objectHeight = activeObject.height || 100;
 
       // Create a pattern scaled to match object dimensions
       const patternFill: any = new fabric.Pattern({

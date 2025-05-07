@@ -117,27 +117,41 @@ const useEditFunctions = () => {
   // };
   const deleteObj = () => {
     if (!canvas) return;
-    const active = canvas.getActiveObjects();
-    if (!active || active.length === 0) return;
-
-    // Clone the array to avoid mutation during iteration
-    const toDelete = [...active];
-        console.log(active);
-    toDelete.forEach((obj) => {
-      console.log("To delete", obj);
-      canvas.remove(obj);
-      deleteYjsObject(obj )
-    });
+    
+    const activeObjects = canvas.getActiveObjects();
+    
+    // If multiple objects are selected
+    if (activeObjects.length > 1) {
+      // Get the active selection object
+      const selection = canvas.getActiveObject();
+      
+      // First delete the selection group itself if it has an ID
+      if (selection && selection.id) {
+        deleteYjsObject(selection);
+      }
+      
+      // Then delete each individual object
+      activeObjects.forEach(obj => {
+        deleteYjsObject(obj);
+      });
+    } else if (activeObjects.length === 1) {
+      // Single object deletion
+      deleteYjsObject(activeObjects[0]);
+    }
+    
+    // Update local canvas view
+    canvas.remove(...activeObjects);
     canvas.discardActiveObject();
     canvas.requestRenderAll();
   };
+    
 
   const group = () => {
     if (!canvas) return;
-    const group = new fabric.Group(canvas.getActiveObject()?.removeAll());
+    const group = new fabric.Group(canvas.getActiveObjects()?.removeAll());
     canvas.add(group);
     canvas.setActiveObject(group);
-    canvas.requestRenderAll();
+    canvas.renderAll();
   };
   const ungroup = () => {
     if (!canvas) return;
