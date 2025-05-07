@@ -25,7 +25,7 @@ export function preserveCustomPatternProps(
 const useEditFunctions = () => {
   const [clipboard, setClipboard] = useState<any>(null);
   const { canvas, undoStack, redoStack } = useCanvas();
-  const { updateYjsObject, deleteYjsObject } = useCanvasSync();
+  const { updateYjsObject, deleteYjsObject, yDoc } = useCanvasSync();
 
   const copy = () => {
     canvas
@@ -107,38 +107,12 @@ const useEditFunctions = () => {
         canvas.requestRenderAll();
       });
   };
-  // const deleteObj = () => {
-  //   if (!canvas) return;
-  //   const obj = canvas.getActiveObject();
-  //   if (obj) {
-  //     canvas.remove(obj);
-  //     canvas.renderAll();
-  //   }
-  // };
   const deleteObj = () => {
     if (!canvas) return;
     
     const activeObjects = canvas.getActiveObjects();
-    
-    // If multiple objects are selected
-    if (activeObjects.length > 1) {
-      // Get the active selection object
-      const selection = canvas.getActiveObject();
-      
-      // First delete the selection group itself if it has an ID
-      if (selection && selection.id) {
-        deleteYjsObject(selection);
-      }
-      
-      // Then delete each individual object
-      activeObjects.forEach(obj => {
-        deleteYjsObject(obj);
-      });
-    } else if (activeObjects.length === 1) {
-      // Single object deletion
-      deleteYjsObject(activeObjects[0]);
-    }
-    
+
+    deleteYjsObject(activeObjects);
     // Update local canvas view
     canvas.remove(...activeObjects);
     canvas.discardActiveObject();
@@ -148,7 +122,7 @@ const useEditFunctions = () => {
 
   const group = () => {
     if (!canvas) return;
-    const group = new fabric.Group(canvas.getActiveObjects()?.removeAll());
+    const group = new fabric.Group(canvas.getActiveObjects());
     canvas.add(group);
     canvas.setActiveObject(group);
     canvas.renderAll();
