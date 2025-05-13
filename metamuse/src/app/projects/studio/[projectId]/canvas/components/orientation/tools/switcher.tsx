@@ -99,16 +99,6 @@ export const CanvasOrientationSwitcher = () => {
           />
         </Label>
       </div>
-      {/* <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">{unit.toUpperCase()}</Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => setUnit("px")}>PX</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setUnit("in")}>IN</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setUnit("cm")}>CM</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu> */}
     </div>
   );
 };

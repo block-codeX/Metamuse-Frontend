@@ -34,7 +34,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { set } from "lodash";
-import FancyProjectCard from "@/components/fancy-card";
+import FancyProjectCard from "@/components/ui/fancy-card";
 // Types
 
 // Helper to get initials from name

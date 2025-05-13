@@ -296,7 +296,7 @@ export default function ChatComponent() {
         variants={chatButtonVariants}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="fixed right-16 bottom-16  z-50"
+        className="fixed right-16 bottom-16  z-80"
       >
         <Button
           onClick={toggleChat}
@@ -317,7 +317,7 @@ export default function ChatComponent() {
         animate="visible"
         exit="exit"
         variants={chatPanelVariants}
-        className="fixed bottom-4 right-4 z-50 w-80 h-120 shadow-lg"
+        className="fixed bottom-4 right-4 z-80 w-80 h-120 shadow-lg"
       >
         <Card className="px-2 h-full w-full">
           <CardHeader className="flex flex-row items-center justify-between">
