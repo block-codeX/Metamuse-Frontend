@@ -34,6 +34,6 @@ export function WaveDots() {
 // src/components/ui/spinner.tsx
 export function Spinner({ className = "" }: { className?: string }) {
   return (
-    <div className={`animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full ${className}`} />
+    <span className={`animate-spin h-4 w-4 border-2 border-t-transparent border-white rounded-full ${className}`}></span>
   );
 }
