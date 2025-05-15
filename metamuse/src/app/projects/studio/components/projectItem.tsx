@@ -8,7 +8,7 @@ import {
   getColorsFromId,
   getInitials,
 } from "@/lib/utils";
-import FancyProjectCard from "@/components/fancy-card";
+import FancyProjectCard from "@/components/ui/fancy-card";
 export default function ProjectItem({ project }: { project: any }) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useCanvas } from "../contexts/canvas-context";
 import * as fabric from "fabric";
 import { useCanvasSync } from "../contexts/canvas-sync-context";
+import { v4 as uuidv4 } from "uuid";
 export function preserveCustomPatternProps(
   sourceObj: fabric.Object,
   targetObj: fabric.Object
@@ -25,7 +26,7 @@ export function preserveCustomPatternProps(
 const useEditFunctions = () => {
   const [clipboard, setClipboard] = useState<any>(null);
   const { canvas, undoStack, redoStack } = useCanvas();
-  const { updateYjsObject, deleteYjsObject, yDoc } = useCanvasSync();
+  const { updateYjsObject, deleteYjsObject, sendCommand } = useCanvasSync();
 
   const copy = () => {
     canvas
@@ -122,10 +123,21 @@ const useEditFunctions = () => {
 
   const group = () => {
     if (!canvas) return;
-    const group = new fabric.Group(canvas.getActiveObjects());
-    canvas.add(group);
-    canvas.setActiveObject(group);
-    canvas.renderAll();
+    
+    const activeObjects = canvas.getActiveObjects();
+    if (!activeObjects || activeObjects.length < 2) return;
+    
+    try {      
+      const group = new fabric.Group(activeObjects);
+      group.id = uuidv4();
+      canvas.add(group);
+      canvas.setActiveObject(group);
+      updateYjsObject(group);
+      deleteYjsObject(activeObjects);
+      canvas.renderAll();
+    } catch (error) {
+      console.error("Error creating group:", error);
+    }
   };
   const ungroup = () => {
     if (!canvas) return;
@@ -133,11 +145,29 @@ const useEditFunctions = () => {
     if (!group || group.type !== "group") {
       return;
     }
-    canvas.remove(group);
-    var sel = new fabric.ActiveSelection(group.removeAll(), {
+    
+    // First, delete the group from YJS
+    deleteYjsObject(group);
+    
+    // Create a selection with the ungrouped objects
+    const items = group.getObjects();
+    const sel = new fabric.ActiveSelection(group.removeAll(), {
       canvas: canvas,
     });
+    
+    // Remove the group from canvas
+    canvas.remove(group);
     canvas.setActiveObject(sel);
+    
+    // Now add each ungrouped object to YJS
+    items.forEach(obj => {
+      // Ensure each object has an ID
+      if (!obj.id) {
+        obj.id = uuidv4();
+      }
+      updateYjsObject(obj);
+    });
+    
     canvas.requestRenderAll();
   };
   const sendToFront = () => {

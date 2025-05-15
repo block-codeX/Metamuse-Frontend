@@ -332,7 +332,7 @@ export default function CanvasComponent() {
       </div>
 
       {/* Zoom Controls - Adjust positioning if needed due to rulers */}
-       <div className="absolute bottom-4 right-4 bg-white bg-opacity-75 p-2 rounded-md shadow-md flex gap-2 z-20">
+       <div className="absolute bottom-0 right-10 bg-white bg-opacity-75 p-2 rounded-0 shadow-md flex gap-2 z-20">
             {/* Zoom buttons */}
             <button
                 onClick={() => {

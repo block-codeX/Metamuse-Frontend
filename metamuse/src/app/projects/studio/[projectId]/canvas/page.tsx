@@ -58,7 +58,6 @@ export default function Home() {
               <div className="w-20 h-full ">
                 <RightSideTools />
               </div>
-              {/* Popover tools that expand functionality*/}
             </div>
           </div>
         </CanvasSyncProvider>

@@ -5,8 +5,6 @@ import {
   SquarePen,
   Waves,
   Palette,
-  Image as ImageIcon,
-  Copy,
 } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 import { useCanvasSync } from "../contexts/canvas-sync-context";
