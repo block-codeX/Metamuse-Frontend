@@ -58,7 +58,7 @@ const ConversationItem: FC = ({ conversation, onClick }) => {
         </p>
       </div>
       {conversation.unreadCount > 0 && (
-        <div className="ml-2 bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs">
+        <div className="ml-2 bg-primary text-text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs">
           {conversation.unreadCount}
         </div>
       )}
@@ -299,8 +299,9 @@ export default function ChatComponent() {
         className="fixed right-16 bottom-16  z-80"
       >
         <Button
+        variant={"default"}
           onClick={toggleChat}
-          className="rounded-full w-12 h-12 flex items-center cursor-pointer justify-center shadow-lg bg-primary text-primary-foreground"
+          className="rounded-full w-12 h-12 flex items-center cursor-pointer justify-center shadow-lg bg-surface text-text-primary hover:bg-surface"
           aria-label="Open chat"
         >
           <MessageSquare size={24} />
@@ -338,7 +339,6 @@ export default function ChatComponent() {
                   <UserPlus
                     size={24}
                     strokeWidth={2}
-                    color="var(--btn-primary)"
                     onClick={() => setShowConversationList("users")}
                     className=" h-full w-full p-2 hover:bg-background rounded-md cursor-pointer hover:bg-accent active:scale-95 transition-all duration-300"
                   />

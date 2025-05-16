@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -45,6 +44,59 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  --color-primary: var(--aqua-blue);
+  --color-ink-blue: var(--ink-blue);
+  --color-sunset-orange: var(--sunset-orange);
+  --color-aqua-blue: var(--aqua-blue);
+  --color-off-white: var(--off-white);
+  --color-deep-teal: var(--deep-teal);
+
+  /* Alternate colors */
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
+  /* Light mode (default) */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border: var(--border);
+
+  /* Semantic colors */
+  --color-primary: var(--ink-blue);
+  --color-on-primary: var(--deep-teal);
+  --color-secondary: var(--sunset-orange);
+  --color-on-secondary: var(--on-secondary);
+  --color-tertiary: var(--ink-blue);
+  --color-on-tertiary: var(--off-white);
+
+  /* Font contrasts */
+  --color-text-on-secondary: var(--on-secondary);
+  --color-text-on-tertiary: var(--on-tertiary);
+  --color-text-on-primary: var(--on-primary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+
+  /* Font families */
+  --font-syne: var(--font-syne);
+  --font-source-sans-3: var(--font-source-sans-3);
+  --font-plus-jakarta-sans: var(--font-plus-jakarta-sans);
+  --font-rubik-mono-one: var(--font-rubik-mono-one);
+  --font-space-grotesk: var(--font-space-grotesk);
+
+  /* Local fonts */
+  --font-clash-display: var(--font-clash-display);
+  --font-satoshi: var(--font-satoshi);
+
+  /* Functional typographic classes */
+  --font-heading: var(--font-clash-display), sans-serif;
+  --font-body: var(--font-satoshi), sans-serif;
+  --font-section-header: var(--font-syne), sans-serif;
+  --font-alt-heading: var(--font-space-grotesk), sans-serif;
+  --font-alt-text: var(--font-source-sans-3), sans-serif;
 }
 
 :root {
@@ -78,19 +130,43 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
-  --background: #F7FAFC;
-  --foreground: #191a1a;
-  --text-pri: #191a1a;
-  --text-alt: #F7FAFC;
-  --btn-primary: #9E090F;
+
+  /* Branding colors*/
+  --ink-blue: #0d2c56;
+  --sunset-orange: #ff8b2c;
+  --aqua-blue: #00d7e0;
+  --off-white: #faf8f4; /*  */
+  --deep-teal: #06272c;
+
+  /* Alternate colors */
+  --success: #4caf50;
+  --error: #e53935;
+  --warning: #fb8c00;
+  --info: #2196f3;
+
+  /* Light mode (default) */
+  --background: var(--off-white);
+  --surface: #ffffff;
+  --text-primary: var(--ink-blue);
+  --text-secondary: #4a4a4a;
+  --border: #dadada;
+
+  /* Semantic colors */
+  --primary: var(--ink-blue);
+  --on-primary: var(--deep-teal);
+  --secondary: var(--sunset-orange);
+  --on-secondary: var(--surface);
+  --tertiary: var(--ink-blue);
+  --on-tertiary: var(--off-white);
 }
 
 .dark {
-  --background: #191a1a;
-  --foreground: #F7FAFC;
-  --text-pri: #F7FAFC;
-  --text-alt: #191a1a;
-  --btn-primary: #935153;
+  --background: var(--deep-teal);
+  --surface: var(--ink-blue);
+  --text-primary: var(--off-white);
+  --text-secondary: #c1c1c1;
+  --border: #1f3b4d;
+
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
@@ -123,16 +199,77 @@
 }
 
 @layer base {
-  * {
+    * {
     @apply border-border outline-ring/50;
   }
+  h1 {
+    @apply font-heading text-4xl md:text-xl font-normal text-text-primary;
+  }
+  h2 {
+    @apply font-heading text-3xl md:text-4xl font-semibold text-text-primary;
+  }
+  h3 {
+    @apply font-section-header text-2xl md:text-3xl font-medium text-text-primary;
+  }
+  h4 {
+    @apply font-alt-heading text-xl md:text-2xl font-medium text-text-primary;
+  }
+  p {
+    @apply font-body text-base text-text-primary;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-text-primary;
   }
 }
 
+@layer components {
+  .title-xl {
+    @apply font-heading text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-text-primary;
+  }
+
+  .subtitle {
+    @apply font-alt-heading text-lg md:text-xl font-medium text-text-secondary;
+  }
+
+  .section-title {
+    @apply font-section-header text-2xl md:text-3xl font-semibold uppercase tracking-wide text-text-primary;
+  }
+
+  .body-large {
+    @apply font-body text-lg leading-relaxed text-text-primary;
+  }
+
+  .caption {
+    @apply font-alt-text text-sm text-text-secondary;
+  }
+  .btn-primary {
+    @apply bg-primary text-on-primary px-4 py-2 rounded-md font-medium;
+  }
+  .btn-tertiary {
+    @apply bg-tertiary text-on-tertiary px-4 py-2 rounded-md font-medium;
+  }
+  .btn-success {
+    @apply bg-success text-white px-4 py-2 rounded-md font-medium;
+  }
+  .btn-error {
+    @apply bg-error text-white px-4 py-2 rounded-md font-medium;
+  }
+
+  .btn-warning {
+    @apply bg-warning text-white px-4 py-2 rounded-md font-medium;
+  }
+  .btn-info {
+    @apply bg-info text-white px-4 py-2 rounded-md font-medium;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary  text-on-secondary px-4 py-2 rounded-md font-medium;
+  }
+}
 .truncate-text {
-  white-space: nowrap;    /* Prevents text from wrapping */
-  overflow: hidden;       /* Hides the overflowing text */
-  text-overflow: ellipsis; /* Shows the ellipsis (...) */
+  white-space: nowrap; /* Prevents text from wrapping */
+  overflow: hidden; /* Hides the overflowing text */
+  text-overflow: ellipsis; 
+  
 }

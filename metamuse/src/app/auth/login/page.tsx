@@ -18,7 +18,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { useUserStore } from "@/lib/stores/user-store";
 import { useAuthStore } from "@/lib/stores/auth.store";
 
@@ -74,21 +74,13 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="w-full h-[500px] p-4 m-4 bg-background dark:bg-background text-text-pri dark:text-text-pri">
+    <Card className="w-full h-[500px] p-4 m-4 bg-surface text-text-primary ">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl my-8 font-bold text-center">
+        <CardTitle className="text-2xl my-8  font-bold text-center">
           Login to your Account
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        {submitStatus === "success" && (
-          <Alert className="mb-4 bg-green-50 text-green-800">
-            <AlertDescription>
-              Login successful! Check the console for form data.
-            </AlertDescription>
-          </Alert>
-        )}
-
+      <CardContent >
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -145,28 +137,27 @@ export default function LoginPage() {
             <Button
               size="lg"
               type="submit"
-              className="bg-btn-primary text-white w-full p-3 text-[16px]"
+              className="bg-secondary text-on-tertiary w-full p-3 text-[16px]"
             >
               Sign In
             </Button>
           </form>
         </Form>
         <div className="text-center mt-4">
-          <a href="#" className="text-link">
+          <Button variant={"ghost"} className="cursor-pointer active:scale-95 transition-all duration-300">
             Forgot your password?
-          </a>
+          </Button>
           <div>
-            New to the platform?{" "}
+            New to the platform?{" "} 
             <span
               onClick={() => router.push("/auth/signup")}
-              className="text-btn-primary dark:text-btn-primary font-bold cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-300"
+              className="font-syne font-bold cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
             >
               Sign up
             </span>
           </div>
         </div>
       </CardContent>
-      <Toaster richColors/>
     </Card>
   );
 }

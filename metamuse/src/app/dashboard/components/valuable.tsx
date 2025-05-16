@@ -78,7 +78,7 @@ function AssetCard({ title, asset, type }) {
             </motion.div>
             <div className="flex-1">
               <h3 className="font-bold">{asset.name}</h3>
-              <p className="text-2xl font-bold text-primary">{asset.value} SUI</p>
+              <p className="text-2xl font-bold text-text-primary dark:text-aqua-blue">{asset.value} SUI</p>
               {type === 'nft' ? (
                 <p className="text-xs text-muted-foreground">Created by {asset.creator}</p>
               ) : (
@@ -88,7 +88,7 @@ function AssetCard({ title, asset, type }) {
               )}
               <Link 
                 href={type === 'nft' ? `/marketplace/${asset.id}` : `/projects/studio/${asset.id}/view`}
-                className="mt-2 inline-flex items-center text-xs text-primary hover:underline"
+                className="mt-2 inline-flex items-center text-xs text-text-primary hover:underline"
               >
                 View details <ArrowUpRight className="ml-1 h-3 w-3" />
               </Link>

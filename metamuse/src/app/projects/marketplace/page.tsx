@@ -94,7 +94,7 @@ export default function MarketPlace() {
     <>
       <div className="w-full bg-background dark:bg-background text-text-pri dark:text-text-alt sticky top-0 z-10 py-4 px-6 border-b border-gray-200 dark:border-gray-800">
         <div className="flex flex-row flex-wrap items-center justify-start gap-3 ">
-          <h1 className="font-bold text-2xl">Browse Stunning Artworks</h1>
+          <h1 className="text-2xl">Browse Stunning Artworks</h1>
           <div className="max-w-[400px] w-full relative">
             <div className="flex items-center">
               <div className="relative">
@@ -126,14 +126,12 @@ export default function MarketPlace() {
             {artCategories.map((category) => (
               <Button
                 key={category}
-                variant={
-                  selectedCategories.includes(category) ? "default" : "outline"
-                }
+                variant={"outline"}
                 size="sm"
-                className={`rounded-full whitespace-nowrap ${
+                className={`rounded-full border-border p-1 whitespace-nowrap cursor-pointer text-text-primary bg-background  ${
                   selectedCategories.includes(category)
-                    ? "bg-btn-primary dark:bg-btn-primary"
-                    : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                    ? "bg-secondary dark:bg-secondary"
+                    : "hover:bg-secondary/10"
                 }`}
                 onClick={() => handleCategorySelect(category)}
               >

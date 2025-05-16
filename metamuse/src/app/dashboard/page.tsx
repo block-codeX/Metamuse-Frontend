@@ -163,14 +163,16 @@ export default function Dashboard() {
       <motion.div variants={itemVariants}>
         <Tabs defaultValue="assets" className="w-full">
           <TabsList className="mb-4">
-            <TabsTrigger value="assets">Most Valuable Assets</TabsTrigger>
-            <TabsTrigger value="activity">Recent Activity</TabsTrigger>
-            <TabsTrigger value="collaborations">
+                
+
+            <TabsTrigger value="assets" className="data-[state=active]:bg-secondary data-[state=active]:dark:bg-secondary data-[state=active]:text-text-primary">Most Valuable Assets</TabsTrigger>
+            <TabsTrigger value="activity" className="data-[state=active]:bg-secondary data-[state=active]:dark:bg-secondary data-[state=active]:text-text-primary">Recent Activity</TabsTrigger>
+            <TabsTrigger value="collaborations" className="data-[state=active]:bg-secondary data-[state=active]:dark:bg-secondary data-[state=active]:text-text-primary">
               Active Collaborations
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="assets" className="border p-5 bg-white rounded-md">
+          <TabsContent value="assets" className="border p-5 bg-surface/90 rounded-md">
             <ValuableAssets topAssets={topAssets} />
           </TabsContent>
 
@@ -213,13 +215,13 @@ export default function Dashboard() {
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span>Your stake: 25%</span>
-                        <span className="text-primary">2.5 SUI earned</span>
+                        <span className="text-text-primary dark:text-aqua-blue">2.5 SUI earned</span>
                       </div>
                       <div className="mt-2 flex justify-between">
                         <span className="text-xs text-muted-foreground">
                           Last updated: 2 days ago
                         </span>
-                        <span className="text-xs text-primary hover:underline cursor-pointer">
+                        <span className="text-xs text-text-primary hover:underline cursor-pointer">
                           View details
                         </span>
                       </div>
