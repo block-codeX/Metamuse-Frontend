@@ -138,8 +138,8 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
   return (
     <>
       <motion.div
-        className={`flex-col items-center justify-start  pb-10 top-0 left-0 h-full bg-background text-primary dark:bg-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-width duration-300 ease-in-out border ${
-          isCollapsed ? "w-20" : "w-64 fixed md:relative "
+        className={`flex-col items-center justify-start  pb-10 top-0 left-0 h-full bg-background text-text-primary dark:bg-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-width duration-300 ease-in-out border ${
+          isCollapsed ? "w-20" : "w-60 fixed md:relative "
         }`}
         initial={{ x: -300 }}
         animate={{ x: 0 }}
@@ -150,16 +150,17 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
             <span
               className={`${
                 isCollapsed ? "hidden" : "block"
-              } text-lg text-primary font-space-grotesk font-bold`}
+              } text-lg text-text-primary font-clash-display font-bold`}
             >
-              Metamuse
+              <span className="text-text-primary">Meta</span>
+              <span className="text-secondary">muse</span>
             </span>
             <Button
               variant="ghost"
               onClick={toggleCollapse}
               className="text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white p-1 cursor-pointer"
             >
-              <Sidebar className="text-primary" size={40} />
+              <Sidebar className="text-secondary" size={40} />
             </Button>
           </div>
 
@@ -183,9 +184,9 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
                         variant={"ghost"}
                         className={`w-full flex items-center ${
                           isCollapsed ? "justify-center" : "justify-start"
-                        } py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
+                        } py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700  transition-colors duration-200 ${
                           pathname.startsWith(item.path)
-                            ? "bg-primary dark:bg-gray-700 font-medium text-surface"
+                            ? "bg-secondary font-medium"
                             : ""
                         }`}
                         onClick={() => navigateTo(item.path)}
@@ -199,46 +200,42 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
               </ul>
             </nav>
             {/* User Section at bottom */}
-            <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-700 ">
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                className={`w-full flex items-center ${
+                  isCollapsed ? "justify-center" : "justify-between"
+                } py-2 px-4 rounded-md overflow-hidden  hover:bg-gray-100 dark:hover:bg-gray-700  cursor-pointer h-auto transition-colors duration-200 ${
+                  pathname === "/me" && isCollapsed
+                    ? "bg-btn-primary dark:bg-gray-700 font-medium text-text-alt"
+                    : ""
+                }`}
+                onClick={goToSettings}
               >
-                <Button
-                  variant="ghost"
-                  className={`w-full flex items-center ${
-                    isCollapsed ? "justify-center" : "justify-between"
-                  } py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 h-auto transition-colors duration-200 ${
-                    pathname === "/me" && isCollapsed
-                      ? "bg-btn-primary dark:bg-gray-700 font-medium text-text-alt"
-                      : ""
-                  }`}
-                  onClick={goToSettings}
-                >
-                  <div className="flex items-center">
-                    <User className="mr-3" size={20} />
-                    {!isCollapsed && (
-                      <div className="flex flex-col items-start">
-                        {user?.status !== "active" && (
-                          <motion.p
-                            className="self-end px-1 py-[3px] w-fit rounded-md text-[12px] bg-red-300 text-red-800 dark:text-red-400"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                          >
-                            {user?.status}
-                          </motion.p>
-                        )}
-                        <h3 className="font-medium">{`${
-                          user?.firstName || ""
-                        } ${user?.lastName || ""}`}</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {user?.email || "user@example.com"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </Button>
+                <div className="flex items-center">
+                  <User className="mr-3" size={20} />
+                  {!isCollapsed && (
+                    <div className="flex flex-col items-start">
+                      {user?.status !== "active" && (
+                        <motion.p
+                          className="self-end px-1 py-[3px] w-fit rounded-md text-[12px] bg-error text-text-primary"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          {user?.status}
+                        </motion.p>
+                      )}
+                      <p className="font-medium">{`${user?.firstName || ""} ${
+                        user?.lastName || ""
+                      }`}</p>
+                      <p className=" w-full text-sm text-gray-500 dark:text-gray-400 truncate-text">
+                        {user?.email || "user@example.com"}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </motion.div>
 
               <motion.div
@@ -248,7 +245,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
               >
                 <Button
                   variant="ghost"
-                  className="w-full flex items-center justify-start py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-red-500 hover:text-red-600 transition-colors duration-200"
+                  className="w-full flex items-center justify-start py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-secondary transition-colors duration-200"
                   onClick={logout}
                 >
                   <LogOut size={20} className="mr-3" />

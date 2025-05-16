@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -202,7 +203,7 @@
     @apply border-border outline-ring/50;
   }
   h1 {
-    @apply font-heading text-4xl md:text-5xl font-normal text-text-primary;
+    @apply font-heading text-4xl md:text-xl font-normal text-text-primary;
   }
   h2 {
     @apply font-heading text-3xl md:text-4xl font-semibold text-text-primary;
@@ -269,5 +270,6 @@
 .truncate-text {
   white-space: nowrap; /* Prevents text from wrapping */
   overflow: hidden; /* Hides the overflowing text */
-  text-overflow: ellipsis; /* Shows the ellipsis (...) */
+  text-overflow: ellipsis; 
+  
 }
