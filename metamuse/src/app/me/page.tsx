@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { Eye, EyeOff, ChevronRight, Sun, Moon } from "lucide-react";
+import { DarkModeSwitch } from 'react-toggle-dark-mode';
 import {
   Card,
   CardContent,
@@ -24,13 +25,15 @@ import {
   SecureTransactionProvider,
 } from "./components/useSecureTransaction";
 import TransactionButton from "./components/transaction-btn";
+import { useTheme } from "../components/theme";
+import DarkModeToggle from "@/components/ui/dark-mode-toggle";
 
 export default function UserProfilePage() {
   const { user } = useUserStore();
   const [showWalletAddress, setShowWalletAddress] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [authTarget, setAuthTarget] = useState(null); // "password" or "wallet"
-  const [isDarkMode, setIsDarkMode] = useState(false); // Dark mode state
+  const { isDark, toggleTheme } = useTheme();
   const [transactionId, setTransactionId] = useState(null)
   const toggleWalletVisibility = () => {
     setShowWalletAddress(!showWalletAddress);
@@ -60,17 +63,11 @@ export default function UserProfilePage() {
         <div className="sticky flex top-0 bg-background items-center px-6 pt-6 justify-between">
           <h1 className="text-3xl font-bold">{user?.firstName}</h1>
           <div className="flex items-center space-x-2">
-            <span className="text-sm">
-              {isDarkMode ? "Dark Mode" : "Light Mode"}
-            </span>
-            <Switch
-              checked={isDarkMode}
-              onCheckedChange={() => setIsDarkMode(!isDarkMode)}
-            >
-              <span className="mr-2">
-                {isDarkMode ? <Moon size={16} /> : <Sun size={16} />}
-              </span>
-            </Switch>
+            <DarkModeToggle
+              isDark={isDark}
+              toggleDark={toggleTheme}
+              size={30}
+              />
           </div>
         </div>
         <Card className="shadow-sm max-w-4xl mx-6">

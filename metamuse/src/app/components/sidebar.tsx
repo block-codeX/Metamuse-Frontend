@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 import { useUserStore } from "@/lib/stores/user-store";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/utils";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import ChatComponent from "../projects/studio/[projectId]/components/chat-component";
 
 interface MySidebarProps {
@@ -29,7 +29,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const router = useRouter();
- const { setUser, setUserId} = useUserStore()
+  const { setUser, setUserId } = useUserStore();
   // Notify parent component when sidebar state changes
   const toggleCollapse = () => {
     const newState = !isCollapsed;
@@ -108,37 +108,38 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
   };
 
   const logout = async () => {
-      try {
-        const apiInstance = api(true);
-        console.log("API URL:", apiInstance.defaults.baseURL);
-        const response = await api(true).post("/auth/logout");
-        if (response.status === 201) {
-          setUserId(null);
-          setUser(null);
-          toast.success("Logout Successful");
-          router.push('/auth/login')
-          return true;
-        }
-        return false;
-      } catch (error: any) {
-        console.error(error)
-        toast.error(error?.response?.data?.message?.message || "Something went wrong!");
-        router.push('/auth/login')
-        return false;
+    try {
+      const apiInstance = api(true);
+      console.log("API URL:", apiInstance.defaults.baseURL);
+      const response = await api(true).post("/auth/logout");
+      if (response.status === 201) {
+        setUserId(null);
+        setUser(null);
+        toast.success("Logout Successful");
+        router.push("/auth/login");
+        return true;
       }
-  }
+      return false;
+    } catch (error: any) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message?.message || "Something went wrong!"
+      );
+      router.push("/auth/login");
+      return false;
+    }
+  };
 
   // Hide sidebar on "/auth/" pages
   if (pathname.startsWith("/auth/") || pathname === "/") {
-    return null;  
+    return null;
   }
 
   return (
     <>
-      <Toaster position="top-center" richColors/>
       <motion.div
-        className={`flex-col items-center justify-start  pb-10 top-0 left-0 h-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-width duration-300 ease-in-out border ${
-          isCollapsed ? "w-20 bg-red-500" : "w-64 fixed md:relative "
+        className={`flex-col items-center justify-start  pb-10 top-0 left-0 h-full bg-background text-primary dark:bg-gray-800 text-gray-800 dark:text-white shadow-md z-40 transition-width duration-300 ease-in-out border ${
+          isCollapsed ? "w-20" : "w-64 fixed md:relative "
         }`}
         initial={{ x: -300 }}
         animate={{ x: 0 }}
@@ -149,7 +150,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
             <span
               className={`${
                 isCollapsed ? "hidden" : "block"
-              } text-lg text-btn-primary font-lato font-bold`}
+              } text-lg text-primary font-space-grotesk font-bold`}
             >
               Metamuse
             </span>
@@ -158,7 +159,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
               onClick={toggleCollapse}
               className="text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white p-1 cursor-pointer"
             >
-              <Sidebar color="var(--btn-primary)" size={40} />
+              <Sidebar className="text-primary" size={40} />
             </Button>
           </div>
 
@@ -184,7 +185,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
                           isCollapsed ? "justify-center" : "justify-start"
                         } py-2 px-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
                           pathname.startsWith(item.path)
-                            ? "bg-btn-primary dark:bg-gray-700 font-medium text-text-alt"
+                            ? "bg-primary dark:bg-gray-700 font-medium text-surface"
                             : ""
                         }`}
                         onClick={() => navigateTo(item.path)}
@@ -265,7 +266,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
           onClick={toggleCollapse}
         ></div>
       )}
-      <ChatComponent/>
+      <ChatComponent />
     </>
   );
 };

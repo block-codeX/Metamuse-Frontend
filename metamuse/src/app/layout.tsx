@@ -1,18 +1,57 @@
 import type { Metadata } from "next";
-// import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import localFont from "next/font/local";
+import {
+  Syne,
+  Source_Sans_3,
+  Plus_Jakarta_Sans,
+  Rubik_Mono_One,
+  Space_Grotesk,
+} from "next/font/google";
 import Content from "./components/content";
+import ThemeProvider from "./components/theme";
+export const syne = Syne({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-syne",
+});
 
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
+export const sourceSans3 = Source_Sans_3({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-source-sans-3",
+});
 
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
+export const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-plus-jakarta-sans",
+});
 
+export const rubikMonoOne = Rubik_Mono_One({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-rubik-mono-one",
+});
+
+export const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+});
+
+// Load local fonts
+export const clashDisplay = localFont({
+  src: "./fonts/clash-display.woff2",
+  variable: "--font-clash-display",
+  display: "swap",
+});
+
+export const satoshi = localFont({
+  src: "./fonts/satoshi.woff2",
+  variable: "--font-satoshi",
+  display: "swap",
+});
 export const metadata: Metadata = {
   title: "Metamuse",
   description: "Collaborative NFT design tool and marketplace",
@@ -22,8 +61,7 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>){
-
+}>) {
   return (
     <html lang="en">
       <head>
@@ -39,9 +77,21 @@ export default function RootLayout({
         ></link>
       </head>
       <body
-        // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`
+        ${syne.variable} 
+        ${sourceSans3.variable} 
+        ${plusJakartaSans.variable} 
+        ${rubikMonoOne.variable} 
+        ${spaceGrotesk.variable}
+        ${clashDisplay.variable}
+        ${satoshi.variable}
+        antialiased
+      `}
       >
-        <Content children={children}/>
+        <ThemeProvider>
+                    <Content children={children} />
+
+        </ThemeProvider>
       </body>
     </html>
   );

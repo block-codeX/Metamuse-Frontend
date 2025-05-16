@@ -86,7 +86,7 @@ export default function SignupPage() {
   }
 
   return (
-    <Card className="w-full min-h-[500px] p-4 m-4 bg-background dark:bg-background text-text-pri dark:text-text-alt">
+    <Card className="w-full min-h-[500px] p-4 m-4 bg-surface">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl my-3 font-bold text-center">
           Signup
@@ -178,7 +178,7 @@ export default function SignupPage() {
             <Button
               size="lg"
               type="submit"
-              className="bg-btn-primary text-white w-full p-3 text-[16px]"
+              className="bg-secondary text-on-tertiary hover:bg-secondary/90 w-full p-3 text-[16px]"
             >
               Sign Up
             </Button>
@@ -189,7 +189,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <span
               onClick={() => router.push("/auth/login")}
-              className="text-btn-primary dark:text-btn-primary font-bold cursor-pointer hover:scale-105 active:scale-95 transition-ease-300"
+              className="font-syne font-bold cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
             >
               Log in
             </span>
