@@ -92,42 +92,42 @@ export default function TextFormatting() {
           onClick={() => setIsBold(!isBold)}
           strokeWidth={isBold ? 4 : 1.5}
           size={16}
-          color="var(--btn-primary)"
+          color="var(--secondary)"
           className="cursor-pointer"
         />
         <Italic
           onClick={() => setIsItalic(!isItalic)}
           strokeWidth={isItalic ? 4 : 1.5}
           size={16}
-          color="var(--btn-primary)"
+          color="var(--secondary)"
           className="cursor-pointer"
         />
         <Underline
           onClick={() => setIsUnderline(!isUnderline)}
           strokeWidth={isUnderline ? 4 : 1.5}
           size={16}
-          color="var(--btn-primary)"
+          color="var(--secondary)"
           className="cursor-pointer"
         />
         <Strikethrough
           onClick={() => setIsStrikethrough(!isStrikethrough)}
           strokeWidth={isStrikethrough ? 4 : 1.5}
           size={16}
-          color="var(--btn-primary)"
+          color="var(--secondary)"
           className="cursor-pointer"
         />
         <Superscript
           onClick={() => setIsSuperscript(!isSuperscript)}
           strokeWidth={isSuperscript ? 4 : 1.5}
           size={16}
-          color="var(--btn-primary)"
+          color="var(--secondary)"
           className="cursor-pointer"
         />
         <Subscript
           onClick={() => setIsSubscript(!isSubscript)}
           strokeWidth={isSubscript ? 4 : 1.5}
           size={16}
-          color="var(--btn-primary)"
+          color="var(--secondary)"
           className="cursor-pointer"
         />
       </div>

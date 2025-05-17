@@ -50,19 +50,19 @@ export default function CanvasContextMenu({ children }: { children: React.ReactN
           <Scissors
             strokeWidth={2}
             size={18}
-            className="text-btn-primary hover:scale-95 transition-all transition-200 cursor-pointer"
+            className="text-secondary hover:scale-95 transition-all transition-200 cursor-pointer"
             onClick={cut}
           />
           <Copy
             strokeWidth={2}
             size={18}
-            className="text-btn-primary active:scale-95 cursor-pointer"
+            className="text-secondary active:scale-95 cursor-pointer"
             onClick={copy}
           />
           <Clipboard
             strokeWidth={2}
             size={18}
-            className="text-btn-primary active:scale-95 cursor-pointer"
+            className="text-secondary active:scale-95 cursor-pointer"
             onClick={paste}
           />
           <Trash2

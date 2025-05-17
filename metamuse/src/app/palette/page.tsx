@@ -72,7 +72,7 @@ const ColorPaletteDemo = () => {
           <div className="p-6 bg-surface rounded-lg shadow-sm">
             <h3 className="mb-4">Theme Buttons</h3>
             <div className="flex flex-wrap gap-3">
-              <button className="btn-primary">Primary</button>
+              <button className="secondary">Primary</button>
               <button className="btn-secondary">Secondary</button>
               <button className="btn-tertiary">Tertiary</button>
             </div>

@@ -106,7 +106,7 @@ const PictureFormatting: React.FC = () => {
           onClick={() => applyFilter("None")}
           className={`w-13 h-13 border flex flex-row items-center justify-center border rounded cursor-pointer active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
             selectedFilter === "None"
-              ? "shadow-sm transform ring-1 ring-btn-primary"
+              ? "shadow-sm transform ring-1 ring-secondary"
               : "bg-gray-50"
           }`}
         >
@@ -119,7 +119,7 @@ const PictureFormatting: React.FC = () => {
               onClick={() => applyFilter(filter.name)}
               className={`relative w-18 h-18 p-1 mb-2 overflow-hidden border rounded cursor-pointer active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
                 selectedFilter === filter.name
-                  ? "shadow-sm transform ring-1 ring-btn-primary"
+                  ? "shadow-sm transform ring-1 ring-secondary"
                   : "bg-gray-50"
               }`}
             >
@@ -143,7 +143,7 @@ const PictureFormatting: React.FC = () => {
           onClick={() => applyBlendMode("None")}
           className={`w-13 h-13 border flex flex-row items-center justify-center border rounded cursor-pointer active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
             selectedBlendMode === "None"
-              ? "shadow-sm transform ring-1 ring-btn-primary"
+              ? "shadow-sm transform ring-1 ring-secondary"
               : "bg-gray-50"
           }`}
         >
@@ -156,7 +156,7 @@ const PictureFormatting: React.FC = () => {
               onClick={() => applyBlendMode(mode.name)}
               className={`flex flex-col items-center p-2 border rounded cursor-pointer  active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
                 selectedBlendMode === mode.name
-                  ? "shadow-sm transform ring-1 ring-btn-primary"
+                  ? "shadow-sm transform ring-1 ring-secondary"
                   : "bg-gray-50"
               }`}
             >

@@ -33,7 +33,7 @@ export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
                 <Badge
                   key={idx}
                   variant={"outline"}
-                  className="mr-2 border-btn-primary text-btn-primary"
+                  className="mr-2 border-secondary text-secondary"
                 >
                   {tag}
                 </Badge>
@@ -59,11 +59,11 @@ export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
           <Button
             variant="outline"
             onClick={onClose}
-            className="border border-btn-primary text-btn-primary font-semibold cursor-pointer"
+            className="border border-secondary text-secondary font-semibold cursor-pointer"
           >
             Cancel
           </Button>
-          <Button className=" bg-btn-primary font-semibold cursor-pointer" onClick={onMint}>
+          <Button className=" bg-secondary font-semibold cursor-pointer" onClick={onMint}>
             Mint
           </Button>
         </AlertDialogFooter>

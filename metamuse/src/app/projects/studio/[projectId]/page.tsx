@@ -69,7 +69,7 @@ export default function ProjectView() {
   }, [project, loading]);
   return (
     <>
-      <div className="px-3 sticky top-0 w-full h-12 bg-background border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex items-center justify-between px-4 py-2">
+      <div className="px-3  sticky top-0 w-full h-12 bg-background border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex items-center justify-between px-4 py-2">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -77,7 +77,7 @@ export default function ProjectView() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{project?.title}</BreadcrumbPage>
+              <BreadcrumbPage className="font-semibold">{project?.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -204,7 +204,7 @@ export default function ProjectView() {
                       </TabsContent>
                       <TabsContent value="collaborators" className="mt-4  max-h-[300px] overflow-y-auto rounded-md">
                         <Card>
-                          <CardHeader className="pb-3 flex flex-row justify-between items-center sticky top-0 bg-white py-2 z-10">
+                          <CardHeader className="pb-3 flex flex-row justify-between items-center sticky top-0 bg-inherit py-2 z-10">
                             <h3 className="text-lg font-medium">
                               Collaborators
                             </h3>

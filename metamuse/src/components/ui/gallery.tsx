@@ -133,7 +133,7 @@ export default function StaggeredGallery({
                         {/* <Heart size={16} className="text-rose-500" /> */}
                         <span className="text-sm"> $13.33</span>
                         <Button
-                          className="bg-btn-primary dark:bg-btn-primary text-white cursor-pointer active:scale-95"
+                          className="bg-secondary dark:bg-secondary text-white cursor-pointer active:scale-95"
                           onClick={() => {
                             setBuying(item._id);
                             setModal(true);

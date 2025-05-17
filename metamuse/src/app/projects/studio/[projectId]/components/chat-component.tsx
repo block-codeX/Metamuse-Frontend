@@ -445,7 +445,7 @@ export default function ChatComponent() {
                   onChange={(e) => setContent(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type your message..."
-                  className="resize-none bottom-0 rounded-md border border-btn-primary bg-background px-3 py-2 text-sm ring-offset-background pr-14"
+                  className="resize-none bottom-0 rounded-md border border-secondary bg-background px-3 py-2 text-sm ring-offset-background pr-14"
                 ></Textarea>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -455,7 +455,7 @@ export default function ChatComponent() {
                   <Button
                     variant={"outline"}
                     onClick={sendToServer}
-                    className="rounded-md text-btn-primary border-btn-primary"
+                    className="rounded-md text-secondary border-secondary"
                   >
                     <SendHorizonal strokeWidth={1.5} />
                   </Button>
