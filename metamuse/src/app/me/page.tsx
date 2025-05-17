@@ -73,12 +73,12 @@ export default function UserProfilePage() {
         <Card className="shadow-sm max-w-4xl mx-6">
           <CardHeader>
             <CardTitle className="flex items-end justify-between">
-              <span>Personal Information</span>
+              <h3>Personal Information</h3>
               <span
-                className={`self-end px-1 py-[3px] w-fit rounded-md text-[12px] ${
+                className={`self-end px-1 py-[3px] w-fit rounded-md text-[12px] font-normal ${
                   user?.status !== "active"
-                    ? "bg-red-300 text-red-800 dark:text-red-400"
-                    : "bg-green-300 text-green-800 dark:text-green-400"
+                    ? "bg-error text-red-900"
+                    : " bg-success text-primary"
                 }`}
               >
                 {user?.status || "active"}
@@ -130,7 +130,7 @@ export default function UserProfilePage() {
         <WalletsSection openAuthFlow={setTransactionId} transactionId={transactionId}  />
         <Card className="shadow-sm max-w-4xl mx-6">
           <CardHeader>
-            <CardTitle>Security Settings</CardTitle>
+            <CardTitle><h3>Security Settings</h3></CardTitle>
             <CardDescription>
               Manage your account security and preferences
             </CardDescription>
@@ -139,15 +139,14 @@ export default function UserProfilePage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">Account Deactivation</h3>
+                  <h4 className="font-medium text-medium">Account Deactivation</h4>
                   <p className="text-sm text-gray-500">
                     Permanently remove your account and all associated data
                   </p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
               </div>
               <Separator />
-              <Alert className="bg-amber-50 border-amber-200">
+              <Alert className="bg-warning/10 border-warning/90 text-text-primary">
                 <AlertDescription>
                   To deactivate your account, please send an email to{" "}
                   <span className="font-medium">support@metamuse.online</span>{" "}
@@ -157,7 +156,6 @@ export default function UserProfilePage() {
             </div>
           </CardContent>
         </Card>
-        {/* Auth Flow Modal */}
         <OTPGuardFlow tId={transactionId} />
       </div>
     </SecureTransactionProvider>

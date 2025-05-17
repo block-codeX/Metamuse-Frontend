@@ -168,7 +168,7 @@ export default function MarketPlace() {
         <div className="w-full flex flex-row items-center justify-between flex-wrap dark:bg-background text-text-pri dark:text-text-alt sticky top-0 z-10 py-4 px-6 border-b border-gray-200 dark:border-gray-800">
           <div className="flex flex-col overflow-x-auto">
           <div className="w-full flex flex-row items-center justify-start gap-3">
-            <h1 className="font-bold text-2xl">Your Art Projects</h1>
+            <h1 className="text-2xl">Your Art Projects</h1>
             <div className=" relative">
               <div className="flex items-center">
                 <div className="relative">
@@ -199,17 +199,13 @@ export default function MarketPlace() {
               {artCategories.map((category) => (
                 <Button
                   key={category}
-                  variant={
-                    selectedCategories.includes(category)
-                      ? "default"
-                      : "outline"
-                  }
-                  size="sm"
-                  className={`rounded-full whitespace-nowrap ${
-                    selectedCategories.includes(category)
-                      ? "bg-btn-primary dark:bg-btn-primary"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
+                variant={"outline"}
+                size="sm"
+                className={`rounded-full border-border p-1 whitespace-nowrap cursor-pointer text-text-primary bg-background hover:bg-secondary/80  ${
+                  selectedCategories.includes(category)
+                    ? "bg-secondary dark:bg-secondary hover:bg-secondary/80"
+                    : "hover:bg-secondary/10"
+                }`}
                   onClick={() => handleCategorySelect(category)}
                 >
                   {category}
@@ -219,7 +215,7 @@ export default function MarketPlace() {
           </div>
           </div>
           <AlertDialog>
-            <AlertDialogTrigger className="bg-background dark:bg-background shadow-md rounded-sm h-[45px] w-[45px] active:scale-95 transition-all-300 text-text-alt  bg-btn-primary dark:bg-btn-primary flex items-center justify-center p-3 cursor-pointer ">
+            <AlertDialogTrigger className="bg-surface shadow-md rounded-sm h-[45px] w-[45px] active:scale-95 transition-all-300 text-text-alt flex items-center justify-center p-3 cursor-pointer ">
               <Plus size={26} />
             </AlertDialogTrigger>
             <AlertDialogContent>

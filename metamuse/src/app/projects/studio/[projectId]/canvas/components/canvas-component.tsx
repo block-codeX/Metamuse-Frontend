@@ -332,7 +332,7 @@ export default function CanvasComponent() {
       </div>
 
       {/* Zoom Controls - Adjust positioning if needed due to rulers */}
-       <div className="absolute bottom-0 right-10 bg-white bg-opacity-75 p-2 rounded-0 shadow-md flex gap-2 z-20">
+       <div className="absolute bottom-0 right-10 bg-background p-2 rounded-0 shadow-md flex gap-2 z-20">
             {/* Zoom buttons */}
             <button
                 onClick={() => {
@@ -348,7 +348,7 @@ export default function CanvasComponent() {
                      setScale(newScale);
                      setPosition({ x: newX, y: newY });
                 }}
-                className="p-1 w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300" title="Zoom In"
+                className="p-1 w-6 h-6 flex items-center justify-center bg-surface rounded hover:bg-surface/90  border-border" title="Zoom In"
             >+</button>
             <button
                  onClick={() => {
@@ -364,7 +364,7 @@ export default function CanvasComponent() {
                       setScale(newScale);
                       setPosition({ x: newX, y: newY });
                  }}
-                 className="p-1 w-6 h-6 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300" title="Zoom Out"
+                 className="p-1 w-6 h-6 flex items-center justify-center  bg-surface rounded hover:bg-surface/90  border-border" title="Zoom Out"
             >-</button>
              <button
                 onClick={() => { // Reset View
@@ -372,9 +372,9 @@ export default function CanvasComponent() {
                   setScale(newScale);
                   centerCanvas(newScale);
                 }}
-                 className="p-1 px-2 text-xs bg-gray-200 rounded hover:bg-gray-300" title="Reset View"
+                 className="p-1 px-2 text-xs  bg-surface rounded hover:bg-surface/90  border-border" title="Reset View"
              >Reset</button>
-             <span className="p-1 text-xs flex items-center">
+             <span className="p-1 text-xs flex items-center bg-surface border-border">
                  {Math.round(scale * 100)}%
              </span>
         </div>

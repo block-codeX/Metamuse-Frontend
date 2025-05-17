@@ -1,11 +1,4 @@
 "use client";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -25,11 +18,11 @@ export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
   const tags = ["Watercolor", "Illustration"];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-auto w-auto">
-        <DialogHeader>
-          <DialogTitle>Sunrise through the bird's eye view</DialogTitle>
-        </DialogHeader>
+    <AlertDialog open={isOpen} onOpenChange={onClose}>
+      <AlertDialogContent className="sm:max-w-auto w-auto">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Sunrise through the bird's eye view</AlertDialogTitle>
+        </AlertDialogHeader>
         <div className="flex flex-col sm:flex-row gap-6 w-full">
           {/* Left section: Image and tags */}
           <div className="flex flex-col items-center gap-4 sm:w-1/2">
@@ -37,8 +30,8 @@ export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
               {tags.map((tag, idx) => (
                 <Badge
                   key={idx}
-                  variant="outline"
-                  className="border-btn-primary text-btn-primary"
+                  variant={"outline"}
+                  className="mr-2 border-secondary text-secondary"
                 >
                   {tag}
                 </Badge>
@@ -66,18 +59,20 @@ export default function MintModal({ isOpen, onClose, onMint, canvas }: any) {
         </div>
   
         {/* Footer Buttons */}
-        <DialogFooter className="w-full flex flex-col sm:flex-row sm:justify-between items-center gap-4">
+        <AlertDialogFooter className="w-full flex flex-col sm:flex-row sm:justify-between items-center gap-4">
           <Button
             variant="outline"
             onClick={onClose}
-            className="border border-btn-primary text-btn-primary font-semibold cursor-pointer w-full sm:w-auto"
+            className="border border-secondary text-secondary font-semibold cursor-pointer"
           >
             Cancel
           </Button>
-         
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <Button className=" bg-secondary font-semibold cursor-pointer" onClick={onMint}>
+            Mint
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
   
 }

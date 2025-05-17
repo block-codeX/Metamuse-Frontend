@@ -57,7 +57,7 @@ export const CanvasOrientationSwitcher = () => {
               <DropdownMenuItem
                 key={preset.name}
                 onClick={() => applyPreset(preset)}
-                style={{ backgroundColor: currentPreset.name == preset.name? "gray-100": "inherit" }}
+                className={`${ preset.name == currentPreset.name ? "bg-gray-200 dark:bg-gray-600" : "bg-inherit"} hover:bg-background/90 cursor-pointer`}
               >
                 {preset.name}
               </DropdownMenuItem>

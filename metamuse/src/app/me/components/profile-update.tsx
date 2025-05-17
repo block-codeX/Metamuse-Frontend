@@ -100,7 +100,7 @@ export const ChangePassword: FC<{ transactionId: string }> = ({
         disabled={
           !formData.password || !formData.confirmPassword || isSubmitting
         }
-        className="w-full"
+        className="w-full bg-secondary hover:bg-secondary/80 text-primary cursor-pointer font-syne font-semibold"
       >
         {isSubmitting ? (
           <>

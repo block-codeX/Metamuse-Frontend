@@ -208,7 +208,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
                   isCollapsed ? "justify-center" : "justify-between"
                 } py-2 px-4 rounded-md overflow-hidden  hover:bg-gray-100 dark:hover:bg-gray-700  cursor-pointer h-auto transition-colors duration-200 ${
                   pathname === "/me" && isCollapsed
-                    ? "bg-btn-primary dark:bg-gray-700 font-medium text-text-alt"
+                    ? "bg-secondary dark:bg-gray-700 font-medium text-text-alt"
                     : ""
                 }`}
                 onClick={goToSettings}

@@ -78,7 +78,7 @@ export default function Strokes() {
                 <button
                   key={size}
                   className={`p-2 rounded-md text-left ${
-                    size === pencilWidth ? "bg-gray-200" : "hover:bg-gray-100"
+                    size === pencilWidth ? "bg-gray-200 dark:bg-gray-600" : "hover:bg-background/90"
                   }`}
                   onClick={() => setPencilWidth(size)}
                 >
@@ -103,7 +103,7 @@ export default function Strokes() {
                 <button
                   key={size}
                   className={`p-2 rounded-md text-left ${
-                    size === eraserWidth ? "bg-gray-200" : "hover:bg-gray-100"
+                    size === eraserWidth ? "bg-gray-200 dark:bg-gray-600" : "hover:bg-background/90"
                   }`}
                   onClick={() => setEraserWidth(size)}
                 >
@@ -161,7 +161,7 @@ export default function Strokes() {
                   variant={"ghost"}
                   key={key}
                   className={`p-2 justify-start rounded-md text-left ${
-                    brushType == key ? "bg-gray-200" : "hover:bg-gray-100"
+                    brushType == key ?  "bg-gray-200 dark:bg-gray-600" : "hover:bg-background/90"
                   } active:scale-95 cursor-pointer`}
                   onClick={() => setBrushType(key)}
                 >

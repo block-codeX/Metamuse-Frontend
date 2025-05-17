@@ -14,6 +14,7 @@ const config: Config = {
     },
     extend: {
       colors: {
+        
         // Base brand colors
         "ink-blue": "var(--ink-blue)",
         "sunset-orange": "var(--sunset-orange)",

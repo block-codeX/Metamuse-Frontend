@@ -23,9 +23,9 @@ const EarningsSummary = ({
 
   // Data for pie chart
   const data = [
-    { name: 'Bought Assets', value: boughtAssetsEarnings, color: '#4f46e5' },
-    { name: 'Resold Assets', value: resoldAssetsEarnings, color: '#8b5cf6' },
-    { name: 'Minted Projects', value: mintedProjectsEarnings, color: '#6366f1' },
+    { name: 'Bought Assets', value: boughtAssetsEarnings, color: '#ff8b2c' },
+    { name: 'Resold Assets', value: resoldAssetsEarnings, color: '#ed730e' },
+    { name: 'Minted Projects', value: mintedProjectsEarnings, color: '#f09e5b' },
   ];
 
   const cardVariants = {
@@ -52,7 +52,7 @@ const EarningsSummary = ({
         variants={cardVariants} 
         className="col-span-1 md:col-span-1"
       >
-        <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white h-full">
+        <Card className="bg-gradient-to-br from-secondary/10 to-secondary text-white h-full">
           <CardContent className="p-6 flex flex-col justify-between h-full">
             <div className="font-medium text-sm opacity-80">Grand Total</div>
             <div className="text-3xl font-bold mt-2">{formatCurrency(grandTotal)}</div>

@@ -71,7 +71,7 @@ export const OTPGuardFlow: FC<{tId: string}> = ({ tId }) => {
   }, [countdown, isCounting]);  
   return (
     <AlertDialog open={isAuthModalOpen} onOpenChange={cancelTransaction}>
-      <AlertDialogContent className="sm:max-w-md">
+      <AlertDialogContent className="sm:max-w-md  text-text-primary">
         <AlertDialogHeader>
           <AlertDialogTitle>
             {step === "otp"
@@ -103,9 +103,9 @@ export const OTPGuardFlow: FC<{tId: string}> = ({ tId }) => {
               </InputOTPGroup>
             </InputOTP>
             <Button
-              //   onClick={handleOtpSubmit}
-              //   disabled={otp.length !== 6 || isSubmitting}
-              className="w-full"
+            variant={'default'}
+
+              className="w-full bg-secondary hover:bg-secondary/80 text-text-primary cursor-pointer font-syne font-semibold"
             >
               {isSubmitting ? (
                 <>
@@ -117,11 +117,11 @@ export const OTPGuardFlow: FC<{tId: string}> = ({ tId }) => {
               )}
             </Button>
             {isCounting ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 font-syne font-semibold">
                 Resend OTP in {countdown} seconds
               </p>
             ) : (
-              <Button variant="ghost" onClick={handleResend}>
+              <Button variant="ghost" className="font-syne font-semibold cursor-pointer" onClick={handleResend}>
                 Resend OTP
               </Button>
             )}
@@ -130,7 +130,7 @@ export const OTPGuardFlow: FC<{tId: string}> = ({ tId }) => {
             transactionType && React.createElement(presets[transactionType].element, { transactionId: tId })
         )}
         <AlertDialogFooter className="sm:justify-start">
-          <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel className="btn-info text-text-primary font-syne font-semibold" disabled={isSubmitting}>Cancel</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

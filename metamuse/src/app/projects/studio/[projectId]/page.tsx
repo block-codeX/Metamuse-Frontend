@@ -24,7 +24,10 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import AddUserModal from "./components/add-collab";
-import { CollaboratorItem, PendingCollaboratorItem } from "./components/collaborator";
+import {
+  CollaboratorItem,
+  PendingCollaboratorItem,
+} from "./components/collaborator";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -53,15 +56,16 @@ export default function ProjectView() {
   const getPendingInvite = async () => {
     try {
       const res = await api(true).get("/projects/invites/all", {
-        params: { projectId: project?._id }},)
+        params: { projectId: project?._id },
+      });
       if (res.status === 200) {
         console.log(res.data);
-        setPendingInvite(res.data.docs)
+        setPendingInvite(res.data.docs);
       }
     } catch (error) {
       console.error("Error fetching pending invites:", error);
     }
-  }
+  };
   useEffect(() => {
     if (project) {
       getPendingInvite();
@@ -69,7 +73,7 @@ export default function ProjectView() {
   }, [project, loading]);
   return (
     <>
-      <div className="px-3 sticky top-0 w-full h-12 bg-background border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex items-center justify-between px-4 py-2">
+      <div className="px-3  sticky top-0 w-full h-12 bg-background border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 flex items-center justify-between px-4 py-2">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -77,7 +81,9 @@ export default function ProjectView() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{project?.title}</BreadcrumbPage>
+              <BreadcrumbPage className="font-semibold">
+                {project?.title}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -138,11 +144,11 @@ export default function ProjectView() {
                 <div className="flex flex-row items-stretch h-90">
                   <div className="mr-5 py-2 shadow-md flex flex-row items-center relative aspect-video w-full overflow-hidden justify-center rounded-md mb-4">
                     <div className="w-60 h-full">
-                    <FancyProjectCard
-                      title={project.title}
-                      _id={project._id}/>
+                      <FancyProjectCard
+                        title={project.title}
+                        _id={project._id}
+                      />
                     </div>
-
                   </div>
                   <div className="">
                     <Tabs defaultValue="details" className="w-60">
@@ -202,13 +208,19 @@ export default function ProjectView() {
                           </CardContent>
                         </Card>
                       </TabsContent>
-                      <TabsContent value="collaborators" className="mt-4  max-h-[300px] overflow-y-auto rounded-md">
+                      <TabsContent
+                        value="collaborators"
+                        className="mt-4  max-h-[300px] overflow-y-auto rounded-md"
+                      >
                         <Card>
-                          <CardHeader className="pb-3 flex flex-row justify-between items-center sticky top-0 bg-white py-2 z-10">
+                          <CardHeader className="pb-3 flex flex-row justify-between items-center sticky top-0 bg-inherit py-2 z-10">
                             <h3 className="text-lg font-medium">
                               Collaborators
                             </h3>
-                            <Button onClick={() => setShowAddUser(true)}>
+                            <Button
+                              className="bg-secondary text-on-tertiary hover:bg-secondary/90 "
+                              onClick={() => setShowAddUser(true)}
+                            >
                               <Plus />
                             </Button>
                           </CardHeader>
@@ -228,7 +240,6 @@ export default function ProjectView() {
                                   setReload={setLoading}
                                 />
                               ))}
-
                             </div>
                           </CardContent>
                         </Card>

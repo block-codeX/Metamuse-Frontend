@@ -12,7 +12,7 @@ export interface Collaborator {
   email: string;
 }
 
-export interface Message {
+export interface Message {  
   id: string;
   sender: Collaborator;
   content: string;

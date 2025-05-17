@@ -104,10 +104,10 @@ const PictureFormatting: React.FC = () => {
       <TabsContent value="filters">
         <div
           onClick={() => applyFilter("None")}
-          className={`w-13 h-13 border flex flex-row items-center justify-center border rounded cursor-pointer active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
+          className={`w-13 h-13 border flex flex-row items-center justify-center border rounded cursor-pointer active:scale-95 bg-background/10 transition-all duration-200 hover:bg-background/90 ${
             selectedFilter === "None"
-              ? "shadow-sm transform ring-1 ring-btn-primary"
-              : "bg-gray-50"
+              ? "shadow-sm transform ring-1 ring-secondary"
+              : "bg-background/10"
           }`}
         >
           <X size={72} strokeWidth={1} />
@@ -117,10 +117,10 @@ const PictureFormatting: React.FC = () => {
             <div
               key={filter.name}
               onClick={() => applyFilter(filter.name)}
-              className={`relative w-18 h-18 p-1 mb-2 overflow-hidden border rounded cursor-pointer active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
+              className={`relative w-18 h-18 p-1 mb-2 overflow-hidden border rounded cursor-pointer active:scale-95 bg-background/10 transition-all duration-200 hover:bg-background/90 ${
                 selectedFilter === filter.name
-                  ? "shadow-sm transform ring-1 ring-btn-primary"
-                  : "bg-gray-50"
+                  ? "shadow-sm transform ring-1 ring-secondary"
+              : "bg-background/10"
               }`}
             >
               {/* Preview thumbnail with filter applied */}
@@ -129,7 +129,7 @@ const PictureFormatting: React.FC = () => {
                 style={{ filter: filter.preview }}
               >
                 <Camera size={32} className="text-gray-700" />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300" >
                   {filter.name}
                 </span>
               </div>
@@ -141,10 +141,10 @@ const PictureFormatting: React.FC = () => {
       <TabsContent value="blendModes">
       <div
           onClick={() => applyBlendMode("None")}
-          className={`w-13 h-13 border flex flex-row items-center justify-center border rounded cursor-pointer active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
+          className={`w-13 h-13 border flex flex-row items-center justify-center border rounded cursor-pointer active:scale-95 bg-background/10 transition-all duration-200 hover:bg-background/90 ${
             selectedBlendMode === "None"
-              ? "shadow-sm transform ring-1 ring-btn-primary"
-              : "bg-gray-50"
+              ? "shadow-sm transform ring-1 ring-secondary"
+              : "bg-background/10"
           }`}
         >
           <X size={72} strokeWidth={1} />
@@ -154,15 +154,15 @@ const PictureFormatting: React.FC = () => {
             <div
               key={mode.name}
               onClick={() => applyBlendMode(mode.name)}
-              className={`flex flex-col items-center p-2 border rounded cursor-pointer  active:scale-95 transition-all duration-200 hover:bg-gray-50 ${
+              className={`flex flex-col items-center p-2 border rounded cursor-pointer  active:scale-95 bg-background/10 transition-all duration-200 hover:bg-background/90 ${
                 selectedBlendMode === mode.name
-                  ? "shadow-sm transform ring-1 ring-btn-primary"
-                  : "bg-gray-50"
+                  ? "shadow-sm transform ring-1 ring-secondary"
+              : "bg-background/10"
               }`}
             >
               <div className="relative w-10 h-10 mb-2 overflow-hidden bg-white rounded border">
                 {/* Preview thumbnail with blend mode applied */}
-                <div className="absolute inset-0 bg-gray-200"></div>
+                <div className="absolute inset-0 bg-background/90"></div>
                 <div
                   className="absolute inset-0 flex items-center justify-center bg-[#f0e0e1] opacity-70"
                   style={{ mixBlendMode: mode.preview as any }}
@@ -170,7 +170,7 @@ const PictureFormatting: React.FC = () => {
                   <Camera size={32} className="text-gray-700" />
                 </div>
               </div>
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-text-primary">
                 {mode.name}
               </span>
             </div>
