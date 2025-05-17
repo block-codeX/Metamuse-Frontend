@@ -221,6 +221,9 @@
   body {
     @apply bg-background text-text-primary;
   }
+  btn {
+    @apply font-syne;
+  }
 }
 
 @layer components {
@@ -244,7 +247,7 @@
     @apply font-alt-text text-sm text-text-secondary;
   }
   .btn-primary {
-    @apply bg-primary text-on-primary px-4 py-2 rounded-md font-medium;
+    @apply bg-primary text-on-primary px-4 py-2 rounded-md font-medium font-satoshi;
   }
   .btn-tertiary {
     @apply bg-tertiary text-on-tertiary px-4 py-2 rounded-md font-medium;

@@ -30,7 +30,7 @@ const TransactionButton = ({ transactionType, transactionData, buttonText, setId
     <Button
         variant={variant || 'default'}
       onClick={handleClick}
-      className={`transition-all transition-200 active:scale-95 ${classes}`}
+      className={` font-syne font-semibold transition-all transition-200 active:scale-95 ${classes}`}
     >
       {icon && React.createElement(icon)}
       {buttonText || 'Start Transaction'}

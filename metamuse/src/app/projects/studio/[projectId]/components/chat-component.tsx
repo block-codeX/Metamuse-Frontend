@@ -408,12 +408,12 @@ export default function ChatComponent() {
                   </div>
                 )}
                 {showConversationList == "users" && (
-                  <div className="h-full space-y-4 p-1 overflow-x-hidden overflow-y-auto border-red-500">
+                  <div className="h-full space-y-4 p-1 overflow-x-hidden overflow-y-auto">
                     <Input
-                      placeholder="Search users..."
+                      placeholder="Connect with Artists..."
                       value={search}
                       onChange={handleSearch}
-                      className="w-full sticky top-0  "
+                      className="w-full sticky top-0 bg-surface "
                     />
                     {users.map(
                       (user) =>

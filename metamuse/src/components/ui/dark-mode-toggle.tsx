@@ -29,7 +29,7 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
           scale: isDark ? 0.5 : 1
         }}
         transition={{ 
-          duration: 0.5,
+          duration: 0.3,
           ease: "easeInOut"
         }}
         style={{ 
