@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Bitcoin, ImageDown, Save } from "lucide-react";
+import { Bitcoin, Coins, ImageDown, Save } from "lucide-react";
 import MintModal from "./mint-modal";
 import { useState } from "react";
 import { useCanvas } from "../contexts/canvas-context";
@@ -118,9 +118,9 @@ export default function Commands() {
     },
 
     {
-      icon: Bitcoin,
+      icon: Coins,
       name: "Mint",
-      size: "lg row-span-2 row-start-1 h-[70px] w-full  col-start-2 text-white bg-secondary dark:bg-secondary flex flex-col gap-1 justify-center align-center",
+      size: "lg row-span-2 row-start-1 h-[70px] hover:bg-secondary/80 dark:hover:bg-secondary/80 w-full  col-start-2 text-white bg-secondary dark:bg-secondary flex flex-col gap-1 justify-center align-center",
       action: () => {
         setGuidelinesVisible(canvas, false); // Hide guidelines before minting
         setIsMintModalOpen(true); // Open Mint Modal

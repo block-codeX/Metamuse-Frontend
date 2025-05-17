@@ -123,7 +123,7 @@ export default function ToolOption({
               "border-l-[5px]",
               "border-b-[5px]",
               current === group
-                ? "border-b-white border-r-white"
+                ? "border-b-text-primary border-r-text-primary"
                 : "border-b-secondary border-r-secondary",
               "border-r-[5px]",
               // Set adjacent borders transparent, the other two colored

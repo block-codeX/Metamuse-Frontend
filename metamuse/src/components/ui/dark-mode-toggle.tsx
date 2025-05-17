@@ -38,7 +38,7 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
           left: 0
         }}
       >
-        <Sun size={size} strokeWidth={1.5} className='text-secondary' />
+        <Sun size={size} fill='orange' color='orange' strokeWidth={1.5} />
       </motion.div>
       
       <motion.div
@@ -58,7 +58,7 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
           left: 0
         }}
       >
-        <Moon size={size}  strokeWidth={1.5} />
+        <Moon size={size} fill='white' color='white'  strokeWidth={1.5} />
       </motion.div>
     </motion.div>
   );
