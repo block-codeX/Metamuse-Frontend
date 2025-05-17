@@ -46,7 +46,7 @@ const PatternFormatting: React.FC = () => {
                 WebkitMaskImage: `url(/patterns/${ptn}.svg)`,
                 maskRepeat: "repeat",
                 WebkitMaskRepeat: "repeat",
-                backgroundColor: foregroundColor,
+                backgroundColor: "white", 
                 background: `linear-gradient(${backgroundColor}, ${foregroundColor})`,
               }}
               className="w-full h-16"

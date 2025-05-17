@@ -20,7 +20,7 @@ const FloatingTools = () => {
     <div className="absolute top-41 right-20 z-50 flex items-start">
       <Button
         onClick={toggleExpand}
-        className="h-auto w-5 text-black relative z-5 cursor-pointer bg-background rounded-none shadow-md p-1 border border-gray-300 border-t-transparent border-r-transparent transition-all duration-200 hover:bg-gray-100"
+        className="h-auto w-5 relative z-5 cursor-pointer bg-background hover:bg-background/90 text-text-primary rounded-none shadow-md p-1 border border-gray-300 border-t-transparent border-r-transparent transition-all duration-200"
       >
         {isExpanded ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </Button>

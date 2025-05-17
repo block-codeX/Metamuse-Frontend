@@ -19,16 +19,23 @@ import { Input } from "@/components/ui/input";
 export default function TextFormatting() {
   const myFonts = [
     "Arial",
+    "Clash Display",
     "Courier New",
     "Georgia",
-    "Times New Roman",
-    "Verdana",
-    "Roboto",
     "Lato",
     "Montserrat",
-    "Poppins",
     "Open Sans",
+    "Plus Jakarta Sans",
+    "Poppins",
     "Raleway",
+    "Roboto",
+    "Rubik Mono One",
+    "Satoshi",
+    "Source Sans 3",
+    "Space Grotesk",
+    "Syne",
+    "Times New Roman",
+    "Verdana",
   ];
   const {
     fontStyle,
@@ -92,42 +99,42 @@ export default function TextFormatting() {
           onClick={() => setIsBold(!isBold)}
           strokeWidth={isBold ? 4 : 1.5}
           size={16}
-          color="var(--secondary)"
+          color="var(--sunset-orange)"
           className="cursor-pointer"
         />
         <Italic
           onClick={() => setIsItalic(!isItalic)}
           strokeWidth={isItalic ? 4 : 1.5}
           size={16}
-          color="var(--secondary)"
+          color="var(--sunset-orange)"
           className="cursor-pointer"
         />
         <Underline
           onClick={() => setIsUnderline(!isUnderline)}
           strokeWidth={isUnderline ? 4 : 1.5}
           size={16}
-          color="var(--secondary)"
-          className="cursor-pointer"
+          color="var(--sunset-orange)"
+          className="cursor-pointer dark:text-secondary"
         />
         <Strikethrough
           onClick={() => setIsStrikethrough(!isStrikethrough)}
           strokeWidth={isStrikethrough ? 4 : 1.5}
           size={16}
-          color="var(--secondary)"
+          color="var(--sunset-orange)"
           className="cursor-pointer"
         />
         <Superscript
           onClick={() => setIsSuperscript(!isSuperscript)}
           strokeWidth={isSuperscript ? 4 : 1.5}
           size={16}
-          color="var(--secondary)"
+          color="var(--sunset-orange)"
           className="cursor-pointer"
         />
         <Subscript
           onClick={() => setIsSubscript(!isSubscript)}
           strokeWidth={isSubscript ? 4 : 1.5}
           size={16}
-          color="var(--secondary)"
+          color="var(--sunset-orange)"
           className="cursor-pointer"
         />
       </div>
