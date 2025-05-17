@@ -137,7 +137,7 @@ export default function LoginPage() {
             <Button
               size="lg"
               type="submit"
-              className="bg-secondary text-on-tertiary w-full p-3 text-[16px]"
+              className="bg-secondary text-on-tertiary hover:bg-secondary/90 w-full p-3 text-[16px]"
             >
               Sign In
             </Button>

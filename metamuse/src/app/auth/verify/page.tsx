@@ -103,10 +103,10 @@ const OTPComponent = () => {
   return (
     <div className="flex flex-col h-20 items-center">
 
-          <Card className="w-full  p-4 m-4 bg-background dark:bg-background text-text-pri dark:text-text-alt">
+          <Card className="w-full  p-4 m-4 bg-surface text-text-primary">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl my-3 font-bold text-center flex flex-col items-center space-y-4">
-          <span>Verify your account</span>
+          <h3>Verify your account</h3>
           <p className="font-normal text-sm">Enter the otp that was sent to your email</p>
         </CardTitle>
       </CardHeader>

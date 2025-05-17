@@ -14,6 +14,7 @@ import { useProject } from "../components/project-context";
 export default function Home() {
   const { projectId } = useParams();
   const {project} = useProject();
+  console.log("My project", project)
   return (
     <MinimumWidthGuard minWidth={768}>
       <CanvasProvider>

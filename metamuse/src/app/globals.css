@@ -101,9 +101,9 @@
 :root {
   --radius: 0.625rem;
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface);
+  --popover-foreground: var(--text-primary);
   --primary: oklch(0.21 0.006 285.885);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.967 0.001 286.375);
@@ -143,6 +143,10 @@
   --warning: #fb8c00;
   --info: #2196f3;
 
+  --toaster-success-color: hsl(143, 52%, 13%);
+  --toaster-error-color: hsl(345, 57%, 18%);
+  --toaster-info-color: hsl(221, 70%, 11%);
+  --toaster-warning-color: hsl(37, 88%, 9%);
   /* Light mode (default) */
   --background: var(--off-white);
   --surface: #ffffff;
@@ -198,7 +202,7 @@
 }
 
 @layer base {
-    * {
+  * {
     @apply border-border outline-ring/50 font-body text-text-primary;
   }
   h1 {
@@ -272,6 +276,5 @@
 .truncate-text {
   white-space: nowrap; /* Prevents text from wrapping */
   overflow: hidden; /* Hides the overflowing text */
-  text-overflow: ellipsis; 
-  
+  text-overflow: ellipsis;
 }

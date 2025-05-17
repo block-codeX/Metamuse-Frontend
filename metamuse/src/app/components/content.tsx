@@ -26,7 +26,10 @@ const Content: React.FC<ContentProps> = ({ children }) => {
         <ChatProvider>
           <div className="flex flex-row items-center justify-between gap-0 h-screen w-screen dark:bg-gray-900 overflow-hidden p-0 m-0">
             {/* Sidebar */}
-            <Toaster position="top-center" richColors />
+            <Toaster
+              position="top-center"
+              richColors={true}
+            />
 
             <MySidebar onToggle={handleSidebarToggle} />
 
