@@ -94,7 +94,7 @@ export default function MarketPlace() {
     <>
       <div className="w-full bg-background dark:bg-background text-text-pri dark:text-text-alt sticky top-0 z-10 py-4 px-6 border-b border-gray-200 dark:border-gray-800">
         <div className="flex flex-row flex-wrap items-center justify-start gap-3 ">
-          <h1 className="text-2xl">Browse Stunning Artworks</h1>
+          <h1 className="font-bold text-2xl">Browse Stunning Artworks</h1>
           <div className="max-w-[400px] w-full relative">
             <div className="flex items-center">
               <div className="relative">
@@ -126,12 +126,14 @@ export default function MarketPlace() {
             {artCategories.map((category) => (
               <Button
                 key={category}
-                variant={"outline"}
+                variant={
+                  selectedCategories.includes(category) ? "default" : "outline"
+                }
                 size="sm"
-                className={`rounded-full border-border p-1 whitespace-nowrap cursor-pointer text-text-primary bg-background  ${
+                className={`rounded-full whitespace-nowrap ${
                   selectedCategories.includes(category)
-                    ? "bg-secondary dark:bg-secondary"
-                    : "hover:bg-secondary/10"
+                    ? "bg-btn-primary dark:bg-btn-primary"
+                    : "hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}
                 onClick={() => handleCategorySelect(category)}
               >
@@ -150,20 +152,42 @@ export default function MarketPlace() {
           setModal={setModal}
         />
       </div>
-      <AlertDialog open={isModal} onOpenChange={() => setModal(false)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{project?.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {project?.description}. Are you sure you want to buy this project?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction>Continue</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {isModal && project && (
+  <AlertDialog open={isModal} onOpenChange={() => setModal(false)}>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Purchase NFT: {project.title}</AlertDialogTitle>
+        <AlertDialogDescription>
+          How many NFTs would you like to purchase?
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+
+      {/* Quantity Input */}
+      <div className="flex flex-col gap-4">
+        <input
+          type="number"
+          min="1"
+          placeholder="Enter quantity"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-gray-400"
+        />
+      </div>
+
+      {/* Purchase Actions */}
+      <AlertDialogFooter className="mt-4 flex flex-col sm:flex-row gap-4">
+        <AlertDialogCancel className="w-full sm:w-auto border border-gray-500 text-gray-700 font-semibold">
+          Cancel
+        </AlertDialogCancel>
+        <AlertDialogAction
+  className="w-full sm:w-auto bg-[#F68C1F] text-white font-semibold hover:bg-[#D97A1D]"
+  onClick={() => alert(`🎉 Congratulations! You've successfully purchased ${project.title}.`)}
+>
+  Buy Now
+</AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+)}
+
     </>
   );
 }
