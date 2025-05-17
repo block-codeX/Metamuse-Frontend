@@ -86,8 +86,9 @@ const AssetsList = ({ assets, type, onSellAsset }) => {
             <div className="mt-4">
               <Button 
                 onClick={() => handleSellClick(asset)} 
-                className="w-full"
+                className="w-full bg-secondary hover:bg-secondary/90 h-10 cursor-pointer"
                 size="sm"
+
               >
                 <Tag className="w-4 h-4 mr-2" />
                 Sell Asset
@@ -315,11 +316,11 @@ const AssetsList = ({ assets, type, onSellAsset }) => {
                 </div>
               </div>
 
-              <DialogFooter>
+              <DialogFooter className='flex flex-row items-center justify-between gap-4'>
                 <Button variant="outline" onClick={() => setSellDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleSellConfirm}>
+                <Button onClick={handleSellConfirm} className='bg-secondary hover:bg-secondary/90 cursor-pointer'>
                   List for Sale
                 </Button>
               </DialogFooter>
