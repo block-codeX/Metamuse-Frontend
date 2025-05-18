@@ -58,7 +58,7 @@ const ConversationItem: FC = ({ conversation, onClick }) => {
         </p>
       </div>
       {conversation.unreadCount > 0 && (
-        <div className="ml-2 bg-primary text-text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs">
+        <div className="ml-2 bg-surface border border-border text-text-primary rounded-full h-5 w-5 flex items-center justify-center text-xs">
           {conversation.unreadCount}
         </div>
       )}

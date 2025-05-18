@@ -172,7 +172,7 @@ const useEditFunctions = () => {
   };
   const sendToFront = () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject();
+    const obj = canvas.getActiveObject() || targetObject;
     if (obj) {
       canvas.bringObjectForward(obj);
       canvas.renderAll();
@@ -180,11 +180,12 @@ const useEditFunctions = () => {
   };
   const bringToBack = () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject();
+    const obj = canvas.getActiveObject() || targetObject;
     if (obj) {
       canvas.sendObjectBackwards(obj);
       canvas.renderAll();
     }
+          setTargetObject(null);
   };
 
   const undo = () => {
@@ -211,13 +212,14 @@ const useEditFunctions = () => {
   };
   const lock = () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject();
+    const obj = canvas.getActiveObject() || targetObject;
     if (obj) {
       obj.selectable = false;
       // obj.evented = false;
       updateYjsObject(obj);
       canvas.renderAll();
     }
+    setTargetObject(null);
   };
   const unlock = () => {
     if (!canvas || !targetObject) return;
@@ -228,7 +230,7 @@ const useEditFunctions = () => {
       targetObject.hoverCursor = "move";
       targetObject.evented = true;
       updateYjsObject(targetObject);
-      // Only rendering the specific object is more efficient
+      setTargetObject(null);
       canvas.requestRenderAll();
     }
   };
@@ -247,7 +249,7 @@ const useEditFunctions = () => {
     lock,
     unlock,
     cut,
-    setTargetObject
+    setTargetObject,
   };
 };
 export default useEditFunctions;

@@ -38,7 +38,7 @@ function TooltipContent({
   className,
   sideOffset = 0,
   children,
-  fill,
+  fill = "",
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
   fill = fill || "secondary"
@@ -54,7 +54,7 @@ function TooltipContent({
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className={`bg-${fill} fill-${fill}  z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]`} />
+        <TooltipPrimitive.Arrow className={`bg-secondary fill-secondary  z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]`} />
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )

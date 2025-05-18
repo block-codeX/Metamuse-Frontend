@@ -27,6 +27,7 @@ export default function CanvasContextMenu({
   const { canvas } = useCanvas();
   const {
     cut,
+    duplicate,
     deleteObj,
     copy,
     paste,
@@ -55,36 +56,92 @@ export default function CanvasContextMenu({
       <ContextMenuContent>
         <div className="flex flex-row items-center justify-evenly gap-3 py-2 px-2">
           <Scissors
-            strokeWidth={2}
+            strokeWidth={3}
             size={18}
-            className="text-secondary hover:scale-95 transition-all transition-200 cursor-pointer"
+            color={"#ff8b2c"}
+            className="active:scale-95 transition-all transition-200 cursor-pointer"
             onClick={cut}
           />
           <Copy
-            strokeWidth={2}
+            strokeWidth={3}
             size={18}
-            className="text-secondary active:scale-95 cursor-pointer"
+            color={"#ff8b2c"}
+            className="active:scale-95  transition-all transition-200 cursor-pointer"
             onClick={copy}
           />
           <Clipboard
-            strokeWidth={2}
+            strokeWidth={3}
             size={18}
-            className="text-secondary active:scale-95 cursor-pointer"
+            color={"#ff8b2c"}
+            className="active:scale-95 transition-all transition-200 cursor-pointer"
             onClick={paste}
           />
           <Trash2
-            strokeWidth={2}
+            strokeWidth={3}
             size={18}
-            className="text-red-500 active:scale-95 cursor-pointer"
+            color={"#ff8b2c"}
+            className="active:scale-95 transition-all transition-200 cursor-pointer"
             onClick={deleteObj}
           />
         </div>
-        <ContextMenuItem onClick={group}>Group</ContextMenuItem>
-        <ContextMenuItem onClick={ungroup}>Ungroup</ContextMenuItem>
-        <ContextMenuItem onClick={sendToFront}>Send to Front</ContextMenuItem>
-        <ContextMenuItem onClick={bringToBack}>Send to Back</ContextMenuItem>
-        <ContextMenuItem onClick={lock}>Lock</ContextMenuItem>
-        <ContextMenuItem onClick={unlock}>
+                <ContextMenuItem
+          className="flex flex-row items-center justify-between gap-4"
+          onClick={duplicate}
+        >
+          Duplicate
+          <span className="font-satoshi font-semibold text-xs text-text-primary/50">
+            Ctrl D
+          </span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          className="flex flex-row items-center justify-between gap-4"
+          onClick={group}
+        >
+          Group
+          <span className="font-satoshi font-semibold text-xs text-text-primary/50">
+            Ctrl G
+          </span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          className="flex flex-row items-center justify-between gap-4"
+          onClick={ungroup}
+        >
+          Ungroup
+                    <span className="font-satoshi font-semibold text-xs text-text-primary/50">
+            Ctrl Shift G
+          </span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          className="flex flex-row items-center justify-between gap-4"
+          onClick={sendToFront}
+        >
+          Send to Front
+            <span className="font-satoshi font-semibold text-xs text-text-primary/50">
+            Ctrl &#93;
+            </span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          className="flex flex-row items-center justify-between gap-4"
+          onClick={bringToBack}
+        >
+          Send to Back
+            <span className="font-satoshi font-semibold text-xs text-text-primary/50">
+            Ctrl &#91;
+            </span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          className="flex flex-row items-center justify-between gap-4"
+          onClick={lock}
+        >
+          Lock
+          <span className="font-satoshi font-semibold text-xs text-text-primary/50">
+            Ctrl L
+          </span>
+        </ContextMenuItem>
+        <ContextMenuItem
+          className="flex flex-row items-center justify-between"
+          onClick={unlock}
+        >
           Unlock
         </ContextMenuItem>
       </ContextMenuContent>
