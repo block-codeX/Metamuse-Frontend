@@ -25,6 +25,7 @@ export function preserveCustomPatternProps(
 
 const useEditFunctions = () => {
   const [clipboard, setClipboard] = useState<any>(null);
+  const [targetObject, setTargetObject] = useState<any>(null);
   const { canvas, undoStack, redoStack } = useCanvas();
   const { updateYjsObject, deleteYjsObject, sendCommand } = useCanvasSync();
 
@@ -110,7 +111,7 @@ const useEditFunctions = () => {
   };
   const deleteObj = () => {
     if (!canvas) return;
-    
+
     const activeObjects = canvas.getActiveObjects();
 
     deleteYjsObject(activeObjects);
@@ -119,15 +120,14 @@ const useEditFunctions = () => {
     canvas.discardActiveObject();
     canvas.requestRenderAll();
   };
-    
 
   const group = () => {
     if (!canvas) return;
-    
+
     const activeObjects = canvas.getActiveObjects();
     if (!activeObjects || activeObjects.length < 2) return;
-    
-    try {      
+
+    try {
       const group = new fabric.Group(activeObjects);
       group.id = uuidv4();
       canvas.add(group);
@@ -145,29 +145,29 @@ const useEditFunctions = () => {
     if (!group || group.type !== "group") {
       return;
     }
-    
+
     // First, delete the group from YJS
     deleteYjsObject(group);
-    
+
     // Create a selection with the ungrouped objects
     const items = group.getObjects();
     const sel = new fabric.ActiveSelection(group.removeAll(), {
       canvas: canvas,
     });
-    
+
     // Remove the group from canvas
     canvas.remove(group);
     canvas.setActiveObject(sel);
-    
+
     // Now add each ungrouped object to YJS
-    items.forEach(obj => {
+    items.forEach((obj) => {
       // Ensure each object has an ID
       if (!obj.id) {
         obj.id = uuidv4();
       }
       updateYjsObject(obj);
     });
-    
+
     canvas.requestRenderAll();
   };
   const sendToFront = () => {
@@ -214,23 +214,20 @@ const useEditFunctions = () => {
     const obj = canvas.getActiveObject();
     if (obj) {
       obj.selectable = false;
-      obj.currentLock = `lock ${obj.getX()} ${obj.getY()}`;
-      obj.evented = false;
+      // obj.evented = false;
+      updateYjsObject(obj);
       canvas.renderAll();
     }
   };
-  const unlock = (e) => {
-    if (!canvas) return;
-    // Get pointer coordinates relative to canvas
-    // const pointer = canvas.getScenePoint(e.e);
-    // // Find object under pointer
-
-    const targetObject = canvas.findTarget(e.e);
+  const unlock = () => {
+    if (!canvas || !targetObject) return;
+    console.log("Unlocking object", targetObject);
     // Only unlock if we found an object and it's locked
     if (targetObject && targetObject.selectable === false) {
       targetObject.selectable = true;
       targetObject.hoverCursor = "move";
       targetObject.evented = true;
+      updateYjsObject(targetObject);
       // Only rendering the specific object is more efficient
       canvas.requestRenderAll();
     }
@@ -250,6 +247,7 @@ const useEditFunctions = () => {
     lock,
     unlock,
     cut,
+    setTargetObject
   };
 };
 export default useEditFunctions;

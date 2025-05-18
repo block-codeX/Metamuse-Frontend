@@ -1,4 +1,5 @@
 import { useCanvas } from "./contexts/canvas-context";
+import { useState } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -17,8 +18,12 @@ import {
   Trash2,
   Undo,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-export default function CanvasContextMenu({ children }: { children: React.ReactNode }) {
+
+export default function CanvasContextMenu({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { canvas } = useCanvas();
   const {
     cut,
@@ -31,20 +36,22 @@ export default function CanvasContextMenu({ children }: { children: React.ReactN
     sendToFront,
     lock,
     unlock,
+    setTargetObject,
   } = useEditFunctions();
 
-  const handleSendToBack = () => {
+  // Store the right-clicked object
+  const handleContextMenuOpen = (event: React.MouseEvent) => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject();
-    if (obj) {
-      canvas.sendToBack(obj);
-      canvas.renderAll();
-    }
+    const targetObject = canvas.findTarget(event.nativeEvent);
+    console.log("Right-clicked object:", targetObject);
+    setTargetObject(targetObject as any);
   };
 
   return (
-    <ContextMenu>
-      <ContextMenuTrigger>{children}</ContextMenuTrigger>
+    <ContextMenu onOpenChange={(open) => !open && setTargetObject(null)}>
+      <ContextMenuTrigger onContextMenu={handleContextMenuOpen}>
+        {children}
+      </ContextMenuTrigger>
       <ContextMenuContent>
         <div className="flex flex-row items-center justify-evenly gap-3 py-2 px-2">
           <Scissors
@@ -77,7 +84,9 @@ export default function CanvasContextMenu({ children }: { children: React.ReactN
         <ContextMenuItem onClick={sendToFront}>Send to Front</ContextMenuItem>
         <ContextMenuItem onClick={bringToBack}>Send to Back</ContextMenuItem>
         <ContextMenuItem onClick={lock}>Lock</ContextMenuItem>
-        <ContextMenuItem onClick={unlock}>Unlock</ContextMenuItem>
+        <ContextMenuItem onClick={unlock}>
+          Unlock
+        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );
