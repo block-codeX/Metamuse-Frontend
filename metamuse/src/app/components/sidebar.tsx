@@ -20,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import ChatComponent from "../projects/studio/[projectId]/components/chat-component";
+import { useTheme } from "./theme";
+import Link from "next/link";
 
 interface MySidebarProps {
   onToggle?: (collapsed: boolean) => void;
@@ -30,6 +32,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const router = useRouter();
   const { setUser, setUserId } = useUserStore();
+  const { theme } = useTheme();
   // Notify parent component when sidebar state changes
   const toggleCollapse = () => {
     const newState = !isCollapsed;
@@ -67,32 +70,6 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
         duration: 0.2,
       },
     }),
-  };
-
-  const dropdownVariants = {
-    hidden: {
-      opacity: 0,
-      y: -10,
-      scale: 0.95,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: "spring",
-        stiffness: 400,
-        damping: 25,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -5,
-      scale: 0.95,
-      transition: {
-        duration: 0.2,
-      },
-    },
   };
 
   // Ref for handling clicks outside dropdown
@@ -146,15 +123,14 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
         transition={{ type: "spring", stiffness: 100, damping: 25 }}
       >
         <div className="flex flex-col h-full w-full">
-          <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700">
-            <span
-              className={`${
-                isCollapsed ? "hidden" : "block"
-              } text-lg text-text-primary font-clash-display font-bold`}
-            >
-              <span className="text-text-primary">Meta</span>
-              <span className="text-secondary">muse</span>
-            </span>
+          <div className="flex items-center justify-between p-4 border-b border-border dark:border-gray-700 w-full">
+            <Link href={"/"}>
+              <img
+                src={`/logo-text-${theme}.png`}
+                alt="Logo"
+                className={` w-32 ${isCollapsed ? "hidden" : "block"}`}
+              />
+            </Link>
             <Button
               variant="ghost"
               onClick={toggleCollapse}
@@ -165,8 +141,8 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
           </div>
 
           {/* Navigation Section */}
-          <div className="p-4 flex flex-col justify-between h-full">
-            <nav className="flex-grow">
+          <div className="flex flex-col justify-between h-full w-full">
+            <nav className="flex-grow p-4 w-full">
               <ul className="space-y-2">
                 {navItems.map((item, index) => (
                   <motion.li
@@ -191,7 +167,7 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
                         }`}
                         onClick={() => navigateTo(item.path)}
                       >
-                        <span className="mr-3">{item.icon}</span>
+                        {item.icon}
                         {!isCollapsed && <span>{item.name}</span>}
                       </Button>
                     </motion.div>
@@ -200,26 +176,27 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
               </ul>
             </nav>
             {/* User Section at bottom */}
-            <div className="pt-4 border-t border-gray-100 dark:border-gray-700 ">
+            <div className="pt-4 border-t border-border p-4">
               <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`w-full flex items-center ${
                   isCollapsed ? "justify-center" : "justify-between"
-                } py-2 px-4 rounded-md overflow-hidden  hover:bg-gray-100 dark:hover:bg-gray-700  cursor-pointer h-auto transition-colors duration-200 ${
+                } py-2 px-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700  cursor-pointer h-auto transition-colors duration-200 ${
                   pathname === "/me" && isCollapsed
                     ? "bg-secondary dark:bg-gray-700 font-medium text-text-alt"
                     : ""
                 }`}
                 onClick={goToSettings}
               >
-                <div className="flex items-center">
-                  <User className="mr-3" size={20} />
+                <div className={`flex  items-center gap-3
+                  ${isCollapsed? "justify-center" : "justify-start"}`}>
+                  <User size={20} />
                   {!isCollapsed && (
-                    <div className="flex flex-col items-start">
-                      {user?.status !== "active" && (
+                    <div className="flex flex-col items-start w-40">
+                      {user?.status && user.status !== "active" && (
                         <motion.p
-                          className="self-end px-1 py-[3px] w-fit rounded-md text-[12px] bg-error text-text-primary"
+                          className="self-end px-1 py-[3px] w-fit rounded-md text-[12px] bg-error/50 text-toaster-error-color"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.2 }}
@@ -227,11 +204,11 @@ const MySidebar: React.FC<MySidebarProps> = ({ onToggle }) => {
                           {user?.status}
                         </motion.p>
                       )}
-                      <p className="font-medium">{`${user?.firstName || ""} ${
+                      <p className="font-medium truncate-text w-full">{`${user?.firstName || ""} ${
                         user?.lastName || ""
                       }`}</p>
-                      <p className=" w-full text-sm text-gray-500 dark:text-gray-400 truncate-text">
-                        {user?.email || "user@example.com"}
+                      <p className=" text-sm text-gray-500 dark:text-gray-400 truncate-text w-full">
+                        {user?.email || "Currently logged out"}
                       </p>
                     </div>
                   )}
