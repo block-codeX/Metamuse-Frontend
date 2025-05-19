@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { useCanvas } from "../contexts/canvas-context";
 import * as fabric from "fabric";
 import useEditFunctions from "./edit-functions";
+import { useCanvasSync } from "../contexts/canvas-sync-context";
 
 export function useKeyBindingTools() {
   const { canvas } = useCanvas();
+  const [prevFore, setPrevFore] = useState("");
+  const [prevBack, setPrevBack] = useState("");
   const {
     copy,
     paste,
-    undo,
-    redo,
     deleteObj,
     duplicate,
     group,
@@ -20,6 +21,7 @@ export function useKeyBindingTools() {
     unlock,
     cut,
   } = useEditFunctions();
+  const { updateYjsObject } = useCanvasSync();
 
   // States for tracking active object properties
   const {
@@ -64,27 +66,6 @@ export function useKeyBindingTools() {
       if ((event.ctrlKey || event.metaKey) && event.key === "d") {
         event.preventDefault();
         duplicate();
-      }
-
-      // Undo (Ctrl/Cmd + Z)
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key === "z" &&
-        !event.shiftKey
-      ) {
-        event.preventDefault();
-        undo();
-      }
-
-      // Redo (Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y)
-      if (
-        ((event.ctrlKey || event.metaKey) &&
-          event.shiftKey &&
-          event.key === "z") ||
-        ((event.ctrlKey || event.metaKey) && event.key === "y")
-      ) {
-        event.preventDefault();
-        redo();
       }
 
       // Group (Ctrl/Cmd + G)
@@ -138,26 +119,10 @@ export function useKeyBindingTools() {
         event.preventDefault();
         lock();
       }
-
-      // Unlock (Ctrl/Cmd + Shift + L) - unlocks currently active object
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.shiftKey &&
-        event.key === "l"
-      ) {
-        event.preventDefault();
-        const activeObj = canvas.getActiveObject();
-        if (activeObj && !activeObj.selectable) {
-          activeObj.selectable = true;
-          activeObj.hoverCursor = "move";
-          activeObj.evented = true;
-          canvas.requestRenderAll();
-        }
-      }
     };
 
     // Handle object selection to update state
-    const handleObjectSelected = (e: fabric.IEvent) => {
+    const handleObjectSelected = (e: any) => {
       const activeObj = e.selected[0];
 
       if (activeObj) {
@@ -174,35 +139,23 @@ export function useKeyBindingTools() {
       setActiveObjDimensions({ width: 0, height: 0, objType: "" });
     };
 
-    // Mouse down handler for unlocking objects
-    const handleMouseDown = (e: fabric.IEvent) => {
-      // Call the unlock function from useEditFunctions
-      if (e.e && e.e instanceof MouseEvent) {
-        unlock(e);
-      }
-    };
-
     // Apply event listeners
     document.addEventListener("keydown", handleKeyDown);
     canvas.on("selection:created", handleObjectSelected);
     canvas.on("selection:updated", handleObjectSelected);
     canvas.on("selection:cleared", handleSelectionCleared);
-    canvas.on("mouse:down", handleMouseDown);
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       canvas.off("selection:created", handleObjectSelected);
       canvas.off("selection:updated", handleObjectSelected);
       canvas.off("selection:cleared", handleSelectionCleared);
-      canvas.off("mouse:down", handleMouseDown);
     };
   }, [
     canvas,
     copy,
     paste,
     cut,
-    undo,
-    redo,
     deleteObj,
     duplicate,
     group,
@@ -219,14 +172,11 @@ export function useKeyBindingTools() {
     if (!canvas) return;
     const activeObjects = canvas.getActiveObjects();
     if (activeObjects.length > 1) return;
-    const activeObject = activeObjects[0]
+    const activeObject = activeObjects[0];
     if (
       activeObject &&
       (activeObjDimensions.width > 0 || activeObjDimensions.height > 0)
     ) {
-      const currentWidth = activeObject.getScaledWidth();
-      const currentHeight = activeObject.getScaledHeight();
-
       // Only update if values actually changed to prevent infinite loops
       if (
         activeObject &&
@@ -244,6 +194,7 @@ export function useKeyBindingTools() {
           scaleX: scaleX,
           scaleY: scaleY,
         });
+        updateYjsObject(activeObject);
         canvas.requestRenderAll();
       }
     }
@@ -261,16 +212,21 @@ export function useKeyBindingTools() {
       )
     ) {
       // Check if the object has stroke property and update it
-      if ("stroke" in activeObject && activeObject.stroke !== undefined) {
+      if ("stroke" in activeObject && activeObject.stroke !== undefined && prevFore !== foregroundColor) {
+        setPrevFore(foregroundColor)
         activeObject.set({ stroke: foregroundColor });
+        updateYjsObject(activeObject);
       }
 
       // Check if the object has fill property and update it
-      if ("fill" in activeObject && activeObject.fill !== undefined) {
+      if ("fill" in activeObject && activeObject.fill !== undefined && prevBack !== backgroundColor) {
+        setPrevBack(backgroundColor)
         activeObject.set({ fill: backgroundColor });
+        updateYjsObject(activeObject);
       }
 
       canvas.requestRenderAll();
+      updateYjsObject(activeObject);
     }
   }, [canvas, foregroundColor, backgroundColor]);
   return {

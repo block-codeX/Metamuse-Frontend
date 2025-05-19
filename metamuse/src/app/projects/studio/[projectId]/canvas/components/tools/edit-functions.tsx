@@ -4,6 +4,7 @@ import { useCanvas } from "../contexts/canvas-context";
 import * as fabric from "fabric";
 import { useCanvasSync } from "../contexts/canvas-sync-context";
 import { v4 as uuidv4 } from "uuid";
+
 export function preserveCustomPatternProps(
   sourceObj: fabric.Object,
   targetObj: fabric.Object
@@ -25,6 +26,7 @@ export function preserveCustomPatternProps(
 
 const useEditFunctions = () => {
   const [clipboard, setClipboard] = useState<any>(null);
+  const [targetObject, setTargetObject] = useState<any>(null);
   const { canvas, undoStack, redoStack } = useCanvas();
   const { updateYjsObject, deleteYjsObject, sendCommand } = useCanvasSync();
 
@@ -36,6 +38,7 @@ const useEditFunctions = () => {
         setClipboard(cloned as any);
       });
   };
+
   const cut = async () => {
     if (!canvas) return;
     const obj = canvas.getActiveObject();
@@ -45,11 +48,10 @@ const useEditFunctions = () => {
     canvas.remove(obj);
     canvas.renderAll();
   };
+
   const paste = async () => {
     if (!canvas || !clipboard) return;
     const clonedObj = await clipboard.clone();
-    console.log("Clipboard", clipboard);
-    console.log(clonedObj);
     preserveCustomPatternProps(clipboard, clonedObj);
     canvas.discardActiveObject();
     clonedObj.set({
@@ -75,13 +77,14 @@ const useEditFunctions = () => {
     canvas.setActiveObject(clonedObj);
     canvas.requestRenderAll();
   };
+
   const duplicate = async () => {
     canvas
       ?.getActiveObject()
       ?.clone()
       .then(async (cloned) => {
         const clonedObj = await cloned.clone();
-        preserveCustomPatternProps(cloned, clonedObj); // 👈 this line
+        preserveCustomPatternProps(cloned, clonedObj);
         canvas.discardActiveObject();
         clonedObj.set({
           left: clonedObj.left + 10,
@@ -108,82 +111,117 @@ const useEditFunctions = () => {
         canvas.requestRenderAll();
       });
   };
+
   const deleteObj = () => {
     if (!canvas) return;
-    
     const activeObjects = canvas.getActiveObjects();
-
     deleteYjsObject(activeObjects);
     // Update local canvas view
     canvas.remove(...activeObjects);
     canvas.discardActiveObject();
     canvas.requestRenderAll();
   };
-    
 
   const group = () => {
     if (!canvas) return;
-    
     const activeObjects = canvas.getActiveObjects();
     if (!activeObjects || activeObjects.length < 2) return;
-    
-    try {      
+
+    try {
+      // Create a unique ID for the group
+      const groupId = uuidv4();
+      
+      // Create the group locally
       const group = new fabric.Group(activeObjects);
-      group.id = uuidv4();
+      group.id = groupId;
+      
+      // Add it to canvas and make it active
       canvas.add(group);
       canvas.setActiveObject(group);
+      
+      // Update Yjs with the group object
       updateYjsObject(group);
+      
+      // Remove original objects from Yjs
       deleteYjsObject(activeObjects);
+      
+      // Send group command to sync with other clients
+      sendCommand("group", {
+        groupId: groupId,
+        objectIds: activeObjects.map((obj: any) => obj.id)
+      });
+      
       canvas.renderAll();
     } catch (error) {
       console.error("Error creating group:", error);
     }
   };
+
   const ungroup = () => {
     if (!canvas) return;
     const group = canvas.getActiveObject();
     if (!group || group.type !== "group") {
       return;
     }
-    
+
     // First, delete the group from YJS
     deleteYjsObject(group);
-    
-    // Create a selection with the ungrouped objects
+
+    // Create a selection with the ungrouped objects and track their IDs
     const items = group.getObjects();
+    const objectIds: string[] = [];
+    
     const sel = new fabric.ActiveSelection(group.removeAll(), {
       canvas: canvas,
     });
-    
+
     // Remove the group from canvas
     canvas.remove(group);
     canvas.setActiveObject(sel);
-    
+
     // Now add each ungrouped object to YJS
-    items.forEach(obj => {
+    items.forEach((obj) => {
       // Ensure each object has an ID
       if (!obj.id) {
         obj.id = uuidv4();
       }
+      objectIds.push(obj.id);
       updateYjsObject(obj);
     });
     
+    // Send ungroup command to sync with other clients
+    sendCommand("ungroup", {
+      groupId: group.id,
+      objectIds: objectIds
+    });
+
     canvas.requestRenderAll();
   };
+
   const sendToFront = () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject();
+    const obj = canvas.getActiveObject() || targetObject;
     if (obj) {
       canvas.bringObjectForward(obj);
       canvas.renderAll();
+      sendCommand("bringToFront", {
+        objectId: obj.id
+      });
+      setTargetObject(null);
     }
   };
+
   const bringToBack = () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject();
+    const obj = canvas.getActiveObject() || targetObject;
     if (obj) {
       canvas.sendObjectBackwards(obj);
-      canvas.renderAll();
+      canvas.renderAll();      
+      sendCommand("sendToBack", {
+        objectId: obj.id
+      });
+      
+      setTargetObject(null);
     }
   };
 
@@ -209,29 +247,44 @@ const useEditFunctions = () => {
       canvas.renderAll.bind(canvas)
     );
   };
+
   const lock = () => {
     if (!canvas) return;
-    const obj = canvas.getActiveObject();
+    const obj = canvas.getActiveObject() || targetObject;
     if (obj) {
       obj.selectable = false;
-      obj.currentLock = `lock ${obj.getX()} ${obj.getY()}`;
-      obj.evented = false;
+      
+      // Update Yjs with the locked state
+      updateYjsObject(obj);
+      
+      // Also send lock command for others
+      sendCommand("lock", {
+        objectId: obj.id
+      });
+      
       canvas.renderAll();
     }
+    setTargetObject(null);
   };
-  const unlock = (e) => {
-    if (!canvas) return;
-    // Get pointer coordinates relative to canvas
-    // const pointer = canvas.getScenePoint(e.e);
-    // // Find object under pointer
 
-    const targetObject = canvas.findTarget(e.e);
+  const unlock = () => {
+    if (!canvas || !targetObject) return;
+    
     // Only unlock if we found an object and it's locked
     if (targetObject && targetObject.selectable === false) {
       targetObject.selectable = true;
       targetObject.hoverCursor = "move";
       targetObject.evented = true;
-      // Only rendering the specific object is more efficient
+      
+      // Update Yjs with the unlocked state
+      updateYjsObject(targetObject);
+      
+      // Also send unlock command for others
+      sendCommand("unlock", {
+        objectId: targetObject.id
+      });
+      
+      setTargetObject(null);
       canvas.requestRenderAll();
     }
   };
@@ -250,6 +303,8 @@ const useEditFunctions = () => {
     lock,
     unlock,
     cut,
+    setTargetObject,
   };
 };
+
 export default useEditFunctions;

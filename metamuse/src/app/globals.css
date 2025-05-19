@@ -57,6 +57,11 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
 
+  --color-toaster-success-color: var(--toaster-success-color);
+  --color-toaster-error-color: var(--toaster-error-color);
+  --color-toaster-info-color: var(--toaster-info-color);
+  --color-toaster-warning-color: var(--toaster-warning-color);
+
   /* Light mode (default) */
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -170,6 +175,11 @@
   --text-secondary: #c1c1c1;
   --border: #1f3b4d;
 
+  --toaster-success-color: hsl(143, 52%, 13%);
+  --toaster-error-color: hsl(345, 57%, 18%);
+  --toaster-info-color: hsl(221, 70%, 11%);
+  --toaster-warning-color: hsl(37, 88%, 9%);
+
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
@@ -203,7 +213,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50 font-body text-text-primary;
+    @apply border-border outline-ring/50 font-body;
   }
   h1 {
     @apply font-heading text-4xl md:text-xl font-normal text-text-primary;
@@ -222,7 +232,7 @@
   }
 
   body {
-    @apply bg-background text-text-primary;
+    @apply bg-background text-text-primary ;
   }
   button {
     @apply font-syne;

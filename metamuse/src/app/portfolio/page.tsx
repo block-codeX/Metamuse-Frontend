@@ -24,15 +24,15 @@ const mockData = {
   resoldAssets: {
     totalEarnings: 2100,
     assets: [
-      { id: 4, name: 'Neon Genesis', boughtPrice: 500, soldPrice: 1200, profit: 700, imageUrl: '/api/placeholder/300/300', date: '2025-03-18' },
-      { id: 5, name: 'Cyberpunk City', boughtPrice: 800, soldPrice: 2200, profit: 1400, imageUrl: '/api/placeholder/300/300', date: '2025-04-10' },
+      { id: 7, name: 'Neon Genesis', boughtPrice: 500, soldPrice: 1200, profit: 700, imageUrl: '/api/placeholder/300/300', date: '2025-03-18' },
+      { id: 8, name: 'Cyberpunk City', boughtPrice: 800, soldPrice: 2200, profit: 1400, imageUrl: '/api/placeholder/300/300', date: '2025-04-10' },
     ]
   },
   mintedProjects: {
     totalEarnings: 5600,
     assets: [
-      { id: 6, name: 'Ethereal Collection', price: 3000, units: 5, imageUrl: '/api/placeholder/300/300', date: '2025-02-28' },
-      { id: 7, name: 'Void Walkers', price: 2600, units: 2, imageUrl: '/api/placeholder/300/300', date: '2025-03-25' },
+      { id: 9, name: 'Ethereal Collection', price: 3000, units: 5, imageUrl: '/api/placeholder/300/300', date: '2025-02-28' },
+      { id: 10, name: 'Void Walkers', price: 2600, units: 2, imageUrl: '/api/placeholder/300/300', date: '2025-03-25' },
     ]
   }
 };

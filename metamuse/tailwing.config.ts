@@ -47,6 +47,10 @@ const config: Config = {
         error: "var(--error)",
         warning: "var(--warning)",
         info: "var(--info)",
+        "toaster-success-color": "var(--toaster-success-color)",
+        "toaster-error-color": "var(--toaster-error-color)",
+        "toaster-info-color": "var(--toaster-info-color)",
+        "toaster-warning-color": "var(--toaster-warning-color)",
       },
       // Make border colors use the default color when no color is specified
       borderColor: {

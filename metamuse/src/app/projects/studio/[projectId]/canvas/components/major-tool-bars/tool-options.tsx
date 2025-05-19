@@ -161,7 +161,7 @@ export default function ToolOption({
                       {tool.icon}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" fill="secondary" className="bg-secondary text-text-primary">
+                  <TooltipContent side="bottom" className="bg-secondary text-text-primary">
                     <p>{tool.toolName}</p>
                   </TooltipContent>
                 </Tooltip>
