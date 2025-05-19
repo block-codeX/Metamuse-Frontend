@@ -1,127 +1,116 @@
-"use client";
-import * as fabric from "fabric";
-export function preserveCustomPatternProps(
-  sourceObj: fabric.Object,
-  targetObj: fabric.Object
-) {
-  const srcFill = sourceObj.fill as any;
-  const tgtFill = targetObj.fill as any;
-
-  if (
-    srcFill &&
-    srcFill.source &&
-    typeof srcFill === "object" &&
-    tgtFill &&
-    tgtFill.source
-  ) {
-    if (srcFill.name) tgtFill.name = srcFill.name;
-    if (srcFill.color) tgtFill.color = srcFill.color;
-  }
-}
-export const findObjects = (canvas: fabric.Canvas, isMulti=false, ...ids: string[]) => {
-    if (!canvas || ids.length === 0) return [];
-    const pool =  canvas.getObjects().filter((obj: any) => ids.includes(obj.id));
-    if (isMulti) {
-        return pool;
-    } else {
-        return pool[0] || null;
-    }
-
-};
-export const group = (canvas: fabric.Canvas, objects: any[], recipient) => {
-  if (!canvas) return;
-  if (objects.length === 0) return;
-  const group = new fabric.Group(objects);
-  if (recipient) {
-    group.id = recipient;
-    group.commanded = true
-}
-  canvas.add(group);
-  canvas.setActiveObject(group);
-  canvas.renderAll();
-};
-export const ungroup = (canvas: fabric.Canvas, group: any) => {
-  if (!canvas) return;
-  if (!group || group.type !== "group") {
-    return;
-  }
-  const sel = new fabric.ActiveSelection(group.removeAll(), {
-    canvas: canvas,
-  });
-  canvas.remove(group);
-  canvas.setActiveObject(sel);
-  canvas.requestRenderAll();
-};
-export const sendToFront = (canvas: fabric.Canvas, obj: any) => {
-  if (!canvas) return;
-  if (obj) {
-    canvas.bringObjectForward(obj);
-    canvas.renderAll();
-  }
-};
-export const bringToBack = (canvas: fabric.Canvas, obj: any) => {
-  if (!canvas) return;
-  if (obj) {
-    canvas.sendObjectBackwards(obj);
-    canvas.renderAll();
-  }
-};
-
-export const lock = (canvas: fabric.Canvas, obj) => {
-  if (!canvas) return;
+const handleLockCommand = (canvas: any, payload: any) => {
+  const { objectId } = payload;
+  const obj = canvas.getObjects().find((o: any) => o.id === objectId);
   if (obj) {
     obj.selectable = false;
-    obj.currentLock = `lock ${obj.getX()} ${obj.getY()}`;
-    obj.evented = false;
-    canvas.renderAll();
-  }
-};
-export const unlock = (canvas: fabric.Canvas, targetObject: any) => {
-  if (!canvas) return;
-  // Only unlock if we found an object and it's locked
-  if (targetObject && targetObject.selectable === false) {
-    targetObject.selectable = true;
-    targetObject.hoverCursor = "move";
-    targetObject.evented = true;
-    // Only rendering the specific object is more efficient
     canvas.requestRenderAll();
   }
 };
 
-const handleCommands = (command: string, target: any, canvas: fabric.Canvas, recipient = null) => {
-    switch (command) {
-        case "group": {
-            const objects = findObjects(canvas, true, ...(target as string[]));
-            group(canvas, (objects as any[]), recipient);
-            break;
-        }
-        case "ungroup": {
-            const object = findObjects(canvas, target)
-            ungroup(canvas, object);
-            break;
-        }
-        case "lock": {
-            const object = findObjects(canvas, target)
-            lock(canvas, object);
-            break;
-        }
-        case "unlock": {
-            const object = findObjects(canvas, target)
-            unlock(canvas, object);
-            break;
-        }
-        case "sendToBack": {
-            const object = findObjects(canvas, target)
-            bringToBack(canvas, object);
-            break;
-        }
-        case "sendToFront": {
-            const object = findObjects(canvas, target)
-            sendToFront(canvas, object);
-            break;
-        }
+const handleUnlockCommand = (canvas: any, payload: any) => {
+  const { objectId } = payload;
+  const obj = canvas.getObjects().find((o: any) => o.id === objectId);
+  if (obj) {
+    obj.selectable = true;
+    obj.hoverCursor = "move";
+    obj.evented = true;
 
-    }
+    canvas.requestRenderAll();
+  }
+};
 
-}
-export default handleCommands
+const handleBringToFrontCommand = (canvas: any, payload: any) => {
+  const { objectId } = payload;
+  const obj = canvas.getObjects().find((o: any) => o.id === objectId);
+  if (obj) {
+    canvas.bringObjectForward(obj);
+    canvas.requestRenderAll();
+  }
+};
+
+const handleSendToBackCommand = (canvas: any, payload: any) => {
+  const { objectId } = payload;
+  const obj = canvas.getObjects().find((o: any) => o.id === objectId);
+  if (obj) {
+    canvas.sendObjectBackwards(obj);
+    canvas.requestRenderAll();
+  }
+};
+
+const handleGroupCommand = async (canvas: any, payload: any) => {
+  const { objectIds, groupId } = payload;
+  const objectsToGroup = canvas
+    .getObjects()
+    .filter((o: any) => objectIds.includes(o.id));
+
+  if (objectsToGroup.length < 2) return;
+
+  // Create the group
+  try {
+    const group = new fabric.Group(objectsToGroup);
+    group.id = groupId;
+
+    // Remove original objects from canvas
+    objectsToGroup.forEach((obj) => canvas.remove(obj));
+
+    // Add the group
+    canvas.add(group);
+    canvas.requestRenderAll();
+  } catch (error) {
+    console.error("Error creating group during sync:", error);
+  }
+};
+
+const handleUngroupCommand = async (canvas: any, payload: any) => {
+  const { groupId, objectIds } = payload;
+  const group = canvas.getObjects().find((o: any) => o.id === groupId);
+
+  if (!group || group.type !== "group") return;
+
+  try {
+    // Get objects from the group
+    const items = group.getObjects();
+
+    // Remove the group
+    canvas.remove(group);
+
+    // Add individual objects back to canvas
+    items.forEach((obj, index) => {
+      // Ensure IDs match what was sent
+      if (objectIds[index]) {
+        obj.id = objectIds[index];
+      }
+      canvas.add(obj);
+    });
+
+    canvas.requestRenderAll();
+  } catch (error) {
+    console.error("Error ungrouping during sync:", error);
+  }
+};
+
+const handleCommands = async (canvas: any, commandData: any) => {
+  switch (commandData.command) {
+    case "group":
+      await handleGroupCommand(canvas, commandData.payload);
+      break;
+    case "ungroup":
+      await handleUngroupCommand(canvas, commandData.payload);
+      break;
+    case "lock":
+      handleLockCommand(canvas, commandData.payload);
+      break;
+    case "unlock":
+      handleUnlockCommand(canvas, commandData.payload);
+      break;
+    case "bringToFront":
+      handleBringToFrontCommand(canvas, commandData.payload);
+      break;
+    case "sendToBack":
+      handleSendToBackCommand(canvas, commandData.payload);
+      break;
+    default:
+      console.warn("Unknown command:", commandData.command);
+  }
+};
+export default handleCommands;
