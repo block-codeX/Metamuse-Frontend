@@ -19,10 +19,12 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import { useUserStore } from "@/lib/stores/user-store";
+import useLocalStorage from "../context/useLocalstorage";
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { setUserId } = useUserStore();
+  const [otpData, setOtpData] = useLocalStorage("otp", {})
   
   // Define the form schema with Zod
   const signupSchema = z.object({
@@ -69,7 +71,7 @@ export default function SignupPage() {
       });
       if (response.status == 201) {
         console.log(response.data)
-        localStorage.setItem("otp", JSON.stringify({ otpId: response.data.otp.otpId, email}))
+        setOtpData({ otpId: response.data.otp.otpId, email})
       }
     } catch (error) {
       console.error(error)
