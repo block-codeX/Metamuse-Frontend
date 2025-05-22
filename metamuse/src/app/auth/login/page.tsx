@@ -23,7 +23,6 @@ import { useUserStore } from "@/lib/stores/user-store";
 import { useAuthStore } from "@/lib/stores/auth.store";
 
 export default function LoginPage() {
-  const [submitStatus, setSubmitStatus] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { setUserId } = useUserStore();
