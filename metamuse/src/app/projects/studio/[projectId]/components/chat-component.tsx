@@ -162,7 +162,7 @@ export default function ChatComponent() {
   useEffect(() => {
     fetchConversations();
     fetchUsers();
-  }, []);
+  }, [showConversationList]);
 
   useEffect(() => {
     const handleMessages = ({ data }) => {

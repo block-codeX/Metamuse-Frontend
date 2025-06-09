@@ -19,6 +19,7 @@ export interface CanvasSyncContextType {
   updateYjsCanvasSettings: (settings: Partial<CanvasSettings>) => void;
   deleteYjsObject: (obj: any) => void;
   yDoc: RefObject<Y.Doc | null>;
+  initialized: boolean;
   processingQueue: RefObject<Set<string> | null>;
   objectsMapRef: RefObject<Y.Map<any> | null>;
   sendCommand: (command: string, payload: any) => void;
@@ -84,7 +85,7 @@ export const CanvasSyncProvider = ({
   // --- Helper Functions for Complex Object Types ---
 
   // Serialize a gradient object for YJS storage
-  const serializeGradient = (gradient: fabric.Gradient) => {
+  const serializeGradient = (gradient: any) => {
     if (!gradient) return null;
 
     return {
@@ -814,6 +815,7 @@ export const CanvasSyncProvider = ({
     updateYjsCanvasSettings,
     deleteYjsObject,
     yDoc,
+    initialized,
     processingQueue,
     objectsMapRef,
     sendCommand,

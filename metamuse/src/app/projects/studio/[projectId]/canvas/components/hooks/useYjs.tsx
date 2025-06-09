@@ -5,7 +5,6 @@ import { YJS_URL } from "@/lib/config";
 import { useAuthStore } from "@/lib/stores/auth.store";
 
 const useYjs = (projectId: string) => {
-  const [project, setProject] = useState<any>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const providerRef = useRef<WebsocketProvider | null>(null);
   const yDocRef = useRef<Y.Doc | null>(null); // Add this ref to track the current yDoc
@@ -20,7 +19,6 @@ const useYjs = (projectId: string) => {
 
     const initializeYjs = async () => {
       const jwtToken = await getAccessToken();
-      const token = `Bearer ${jwtToken}`;
 
       // Create a new Yjs document first
       yDocRef.current = new Y.Doc(); // Store in ref for immediate access
@@ -40,10 +38,10 @@ const useYjs = (projectId: string) => {
         console.log("WebSocket status:", event.status);
         if (event.status === "connected") {
           console.log("Reconnected, waiting for sync...");
-          setIsInitialized(true);
         }
       });
       providerRef.current.on("sync", (synced: boolean) => {
+          setIsInitialized(true);
         console.log("Sync status:", synced);
         console.log("Yjs initialized", yDocRef.current?.getMap("objects").size);
       });
@@ -72,7 +70,6 @@ const useYjs = (projectId: string) => {
   return {
     yDoc: yDocRef,
     provider: providerRef,
-    project,
     isInitialized,
     isApplyingRemoteRef,
   };
