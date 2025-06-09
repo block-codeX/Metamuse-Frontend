@@ -15,7 +15,7 @@ export default function TopSideTools() {
   // useE
   return (
     <div className="flex flex-row items-center justify-start bg-background space-y-2 border h-full overflow-x-auto overflow-y-hidden">
-      <div className="w-8 h-8 mx-4 self-start mt-3 flex flex-col items-start border border-red-500">
+      <div className="w-8 h-8 mx-4 self-start mt-3 flex flex-col items-start">
         <div
           className={`w-4 h-4 rounded-full ${
             loaded === true ? "bg-success" : "bg-error"
