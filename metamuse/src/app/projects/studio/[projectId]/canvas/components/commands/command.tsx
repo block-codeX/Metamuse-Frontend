@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Bitcoin, Camera, Gavel, ImageDown, ImageUp, Save } from "lucide-react";
+import { Bitcoin, Coins, ImageDown, Save } from "lucide-react";
 import MintModal from "./mint-modal";
 import { useState } from "react";
 import { useCanvas } from "../contexts/canvas-context";
@@ -111,16 +111,16 @@ export default function Commands() {
       action: handleSave,
     },
     {
-      icon: ImageUp,
+      icon: ImageDown,
       name: "Import Image",
       size: "sm col-start-1 row-start-2 row-span-1 flex flex-row items-center text-xs justify-start",
       action: handleImportImage,
     },
 
     {
-      icon: Bitcoin,
+      icon: Coins,
       name: "Mint",
-      size: "lg row-span-2 row-start-1 h-[70px] w-full  col-start-2 text-white bg-btn-primary dark:bg-btn-primary flex flex-col gap-1 justify-center align-center",
+      size: "lg row-span-2 row-start-1 h-[70px] hover:bg-secondary/80 dark:hover:bg-secondary/80 w-full  col-start-2 text-white bg-secondary dark:bg-secondary flex flex-col gap-1 justify-center align-center",
       action: () => {
         setGuidelinesVisible(canvas, false); // Hide guidelines before minting
         setIsMintModalOpen(true); // Open Mint Modal
@@ -167,13 +167,13 @@ export default function Commands() {
     return 28;
   };
   return (
-    <div className="my-2 px-5 h-full border-r m-0">
+    <div className="my-2 px-5 h-full border-r m-0 sticky left-0 bg-background">
       <div className="grid grid-rows-[auto_auto] grid-cols-[auto_50px] h-full gap-x-3 gap-y-1 py-1 items-center">
         {commandOptions.map(({ icon: Icon, name, size, action }, index) => (
           <Button
             variant={"default"}
             key={index}
-            className={`bg-white text-btn-primary p-0 active:scale-95 active:text-btn-primary cursor-pointer dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm hover:bg-gray-50 hover:text-btn-primary dark:hover:bg-gray-700 transition-colors  ${size}`}
+            className={`bg-white text-secondary p-0 active:scale-95 active:text-secondary cursor-pointer dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm hover:bg-gray-50 hover:text-secondary dark:hover:bg-gray-700 transition-colors  ${size}`}
             onClick={action}
           >
             <Icon strokeWidth={1.5} size={getIconSize(size)} />

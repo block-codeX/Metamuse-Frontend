@@ -19,11 +19,12 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import { useUserStore } from "@/lib/stores/user-store";
+import useLocalStorage from "../context/useLocalstorage";
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [showWalletAddr, setWalletAddr] = useState(false);
   const router = useRouter();
   const { setUserId } = useUserStore();
+  const [otpData, setOtpData] = useLocalStorage("otp", {})
   
   // Define the form schema with Zod
   const signupSchema = z.object({
@@ -31,10 +32,7 @@ export default function SignupPage() {
     lastName: z.string().nonempty("Please enter your last name"),
     email: z.string().email("Please enter a valid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    walletAddress: z
-      .string().optional()
-      // .min(10, "Wallet address must be at least 42 characters"),
-  });
+  })
 
   // Define the form type based on the schema
   type SignupFormValues = z.infer<typeof signupSchema>;
@@ -55,39 +53,42 @@ export default function SignupPage() {
       const response = await api(true).post("/auth/signup", data);
       if (response.status === 201) {
         setUserId(response.data.userId);
-        toast("Signup Successful");
+        toast.success("Signup Successful");
         return true;
       }
       return false;
     } catch (error: any) {
-      toast(error?.response?.data?.message?.message || "Something went wrong!");
+      toast.error(error?.response?.data?.message?.message || "Something went wrong!");
       return false;
     }
   };
   const requestOtp = async (email: string) => {
     try {
-      await api(true).post("/auth/otp/request", {
+      const response = await api().post("/auth/otp/request", {
         email,
         otpType: "EMAIL",
         multiUse: false,
       });
-      toast("Check your email for the OTP and very your account from there");
-    } catch (error) {}
+      if (response.status == 201) {
+        console.log(response.data)
+        setOtpData({ otpId: response.data.otp.otpId, email})
+      }
+    } catch (error) {
+      console.error(error)
+    }
   };
   // Handle form submission
   async function onSubmit(values: SignupFormValues) {
     console.log("Form submission successful:", values);
-    const { walletAddress, ...rest } = values;
-    const success = await signup(rest);
+    const success = await signup(values);
     if (success) {
-      // await requestOtp(values.email);
-      // Navigate to otp page
-      router.push("/auth/login");
+      await requestOtp(values.email);
+      router.push('/auth/verify')
     }
   }
 
   return (
-    <Card className="w-full min-h-[500px] p-4 m-4 bg-background dark:bg-background text-text-pri dark:text-text-alt">
+    <Card className="w-full min-h-[500px] p-4 m-4 bg-surface">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl my-3 font-bold text-center">
           Signup
@@ -174,40 +175,12 @@ export default function SignupPage() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="walletAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Wallet Address</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input
-                        placeholder="0x0••••••••"
-                        type={showWalletAddr ? "text" : "password"}
-                        {...field}
-                      />
-                      <div
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                        onClick={() => setWalletAddr(!showWalletAddr)}
-                      >
-                        {showWalletAddr ? (
-                          <EyeOff size={20} />
-                        ) : (
-                          <Eye size={20} />
-                        )}
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <Button
               size="lg"
               type="submit"
-              className="bg-btn-primary text-white w-full p-3 text-[16px]"
+              className="bg-secondary text-on-tertiary hover:bg-secondary/90 w-full p-3 text-[16px]"
             >
               Sign Up
             </Button>
@@ -218,7 +191,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <span
               onClick={() => router.push("/auth/login")}
-              className="text-btn-primary dark:text-btn-primary font-bold cursor-pointer hover:scale-105 active:scale-95 transition-ease-300"
+              className="font-syne font-bold cursor-pointer hover:scale-105 active:scale-95 transition-all duration-300"
             >
               Log in
             </span>

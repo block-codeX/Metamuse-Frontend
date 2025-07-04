@@ -7,6 +7,7 @@ import TextFormatting from "../drawing/formatting/text";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 const FloatingTools = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -16,13 +17,13 @@ const FloatingTools = () => {
   };
 
   return (
-    <div className="absolute top-30 right-20 z-50 flex items-start">
-      <button
+    <div className="absolute top-41 right-20 z-50 flex items-start">
+      <Button
         onClick={toggleExpand}
-        className="relative z-10 cursor-pointer bg-background rounded-full shadow-md p-1 border border-gray-300 transition-all duration-200 hover:bg-gray-100"
+        className="h-auto w-5 relative z-5 cursor-pointer bg-background hover:bg-background/90 text-text-primary rounded-none shadow-md p-1 border border-gray-300 border-t-transparent border-r-transparent transition-all duration-200"
       >
         {isExpanded ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-      </button>
+      </Button>
       
       <AnimatePresence>
         {isExpanded && (
@@ -48,7 +49,7 @@ const FloatingTools = () => {
                 </TabsList>
               </motion.div>
               
-              <div className="p-3 pt-0 h-90 overflow-auto">
+              <div className="p-3 pt-0 h-80 overflow-auto">
                 <TabsContent value="text" className="mt-2">
                   <TextFormatting />
                 </TabsContent>

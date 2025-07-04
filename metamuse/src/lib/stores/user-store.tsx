@@ -11,6 +11,7 @@ type User = {
   email: string;
   status: string;
   createdAt: string;
+  walletAddress: string | null;
 };
 type UserState = {
   user: User | null;
@@ -36,7 +37,7 @@ export const useUserStore = create<UserState>()(
           const response = await api().get(`/users/${userId}`);
           set({ user: response.data });
         } catch (error: any) {
-          toast(
+          toast.error(
             error?.response?.data?.message?.message || "Something went wrong!"
           );
         }

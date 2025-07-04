@@ -84,7 +84,7 @@ export default function ToolOption({
         "relative w-8 h-8 shadow-md p-0", // Group styling like a single unit
         // Apply active group highlight to the container
         group === current
-          ? "bg-btn-primary dark:bg-btn-primary text-white"
+          ? "bg-secondary dark:bg-secondary text-white"
           : "bg-background",
         "overflow-hidden" // Ensures border-radius clips internal elements properly
       )}
@@ -96,7 +96,7 @@ export default function ToolOption({
           "flex items-center rounded-none justify-center w-full h-full m-0 p-0", // Adjust padding as needed
           // Different hover style based on whether the group is active
           group === current
-            ? "hover:bg-btn-primary/90 hover:text-white"
+            ? "hover:bg-secondary/90 hover:text-white"
             : "hover:bg-accent"
         )}
         onClick={() => {
@@ -123,8 +123,8 @@ export default function ToolOption({
               "border-l-[5px]",
               "border-b-[5px]",
               current === group
-                ? "border-b-white border-r-white"
-                : "border-b-btn-primary border-r-btn-primary",
+                ? "border-b-text-primary border-r-text-primary"
+                : "border-b-secondary border-r-secondary",
               "border-r-[5px]",
               // Set adjacent borders transparent, the other two colored
               "border-t-transparent", // Top border is transparent
@@ -161,7 +161,7 @@ export default function ToolOption({
                       {tool.icon}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom">
+                  <TooltipContent side="bottom" className="bg-secondary text-text-primary">
                     <p>{tool.toolName}</p>
                   </TooltipContent>
                 </Tooltip>

@@ -16,7 +16,6 @@ import { Loader, X } from "lucide-react";
 import { api } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Toaster } from "@/components/ui/sonner";
 
 // Define validation schema using Zod
 const newProjectSchema = z.object({
@@ -88,12 +87,12 @@ export default function NewProject() {
     try {
       const response = await api(true).post("/projects/new", data);
       if (response.status === 201) {
-        toast("Project created successfully");
+        toast,success("Project created successfully");
         router.push("studio/" + response.data._id);
         return true;
       }
     } catch (error: any) {
-      toast(error?.response?.data?.message?.message || "Something went wrong!");
+      toast.error(error?.response?.data?.message?.message || "Something went wrong!");
       return false;
     } finally {
       setIsLoading(false);
@@ -106,14 +105,14 @@ export default function NewProject() {
     try {
       const response = await api(true).post(`/projects/${data.token}/join`);
       if (response.status === 201) {
-        toast("You have joined the project successfully");
+        toast.success("You have joined the project successfully");
         router.push("studio/" + response.data._id);
         return true;
       }
     } catch (error: any) {
       let msg = error?.response?.data?.message?.message || "Something went wrong!"
       if (msg.startsWith("input must be")) msg = "Invalid token";
-      toast(msg);
+      toast.error(msg);
       return false;
     } finally {
       setIsLoading(false);
@@ -126,8 +125,8 @@ export default function NewProject() {
   };
 
   return (
-    <Tabs defaultValue="create" className="w-[400px]">
-      <TabsList className="grid w-full grid-cols-2">
+    <Tabs defaultValue="create" className="min-w-[300px]">
+      <TabsList className="w-full">
         <TabsTrigger value="create">Create Project</TabsTrigger>
         <TabsTrigger value="existing">Join Existing</TabsTrigger>
       </TabsList>
@@ -137,7 +136,7 @@ export default function NewProject() {
             <CardTitle>New Project</CardTitle>
             <CardDescription>Create a new project from scratch</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2  w-full ">
             <div className="space-y-1">
               <Label htmlFor="title">Title</Label>
               <Input id="title" {...register("title")} disabled={isLoading} />
@@ -206,7 +205,7 @@ export default function NewProject() {
           <CardFooter>
             <Button 
               onClick={handleSubmit(handleFormSubmit)} 
-              className="bg-btn-primary dark:bg-btn-primary"
+              className="bg-secondary text-text-primary hover:bg-secondary/80 mt-3"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -245,7 +244,7 @@ export default function NewProject() {
             <CardFooter>
               <Button 
                 type="submit"
-                className="bg-btn-primary dark:bg-btn-primary mt-3"
+                className="bg-secondary dark:bg-secondary mt-3"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -261,7 +260,6 @@ export default function NewProject() {
           </form>
         </Card>
       </TabsContent>
-      <Toaster/>
     </Tabs>
   );
 } 

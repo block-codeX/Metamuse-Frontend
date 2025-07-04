@@ -13,7 +13,7 @@ export default function ProjectDropDown({ project }: { project: any }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" className="absolute bottom-4 right-4" onClick={(e) => e.stopPropagation()}>
           <MoreVertical />
         </Button>
       </PopoverTrigger>

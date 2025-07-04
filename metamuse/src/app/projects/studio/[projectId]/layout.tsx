@@ -1,7 +1,8 @@
 "use client";
-import { ProjectProvider } from "./components/project-context";
-import { ProjectWrapper } from "./components/project-context-wrapper";
-import ChatComponent from "./components/chat-component";
+
+import { Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+
 export default function Project({
   children,
 }: Readonly<{
@@ -9,15 +10,12 @@ export default function Project({
 }>) {
   // State for dropdown visibility
   return (
-    <ProjectProvider>
-      <div className="fixed flex-row h-[calc(100%-60px)] bottom-0 w-screen justify-center">
-        <div className="flex flex-row gap-6 h-[calc(100%-3em)] w-[calc(100vw-6em)] mx-auto my-6 items-center justify-center p-0">
-            {children}
-          <ChatComponent />
+      <div className="flex-row gap-6 h-screen w-full items-center justify-center">
+        <div className="flex h-full w-full flex-col mx-auto items-center justify-center p-0">
+          {children}
         </div>
       </div>
-    </ProjectProvider>
-  );  
+  );
 }
 
 // pages/projects/[id].tsx
